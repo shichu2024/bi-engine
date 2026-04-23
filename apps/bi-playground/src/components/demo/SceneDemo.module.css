@@ -1,0 +1,96 @@
+/* -------------------------------------------------------------------------- */
+/* SceneCard                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.sceneCard {
+  transition: box-shadow 0.2s ease;
+}
+
+.sceneCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cardHeaderContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.cardDescription {
+  font-size: 13px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.previewArea {
+  min-height: 200px;
+}
+
+.bottomBar {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 8px;
+  padding-top: 4px;
+}
+
+.toggleCodeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.toggleCodeBtn:hover {
+  color: #1677ff;
+}
+
+/* -------------------------------------------------------------------------- */
+/* SceneCardList                                                              */
+/* -------------------------------------------------------------------------- */
+
+.emptyState {
+  padding: 48px 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ComponentOverview                                                          */
+/* -------------------------------------------------------------------------- */
+
+.overviewContainer {
+  margin-bottom: 24px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dark theme                                                                 */
+/* -------------------------------------------------------------------------- */
+
+:global([data-theme="dark"]) .bottomBar {
+  border-top-color: #303030;
+}
+
+:global([data-theme="dark"]) .toggleCodeBtn {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme="dark"]) .toggleCodeBtn:hover {
+  color: #4096ff;
+}

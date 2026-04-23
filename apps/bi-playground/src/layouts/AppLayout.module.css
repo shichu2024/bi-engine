@@ -1,0 +1,253 @@
+/* -------------------------------------------------------------------------- */
+/* CSS Variables                                                               */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --bg-topbar: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-main: #f5f5f5;
+  --border-color: #e0e0e0;
+  --sidebar-width: 240px;
+  --topbar-height: 64px;
+  --transition-speed: 0.25s;
+}
+
+:global([data-theme="dark"]) {
+  --bg-topbar: #16213e;
+  --bg-sidebar: #16213e;
+  --bg-main: #1a1a2e;
+  --border-color: #333;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Layout                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Top bar                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.topBar {
+  height: var(--topbar-height);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-topbar);
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.topBarDark {
+  --bg-topbar: #1f1f1f;
+  background-color: var(--bg-topbar);
+  border-bottom-color: #303030;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Body                                                                        */
+/* -------------------------------------------------------------------------- */
+
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sidebar                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-sidebar);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition:
+    width var(--transition-speed) ease,
+    background-color var(--transition-speed),
+    border-color var(--transition-speed);
+}
+
+.sidebarCollapsed {
+  width: 0;
+  border-right: none;
+  overflow: hidden;
+}
+
+.sidebarHidden {
+  display: none;
+}
+
+.sidebarDark {
+  --bg-sidebar: #141414;
+  background-color: var(--bg-sidebar);
+  border-right-color: #303030;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sidebar overlay for medium screens                                          */
+/* -------------------------------------------------------------------------- */
+
+.sidebarOverlay {
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  bottom: 0;
+  z-index: 50;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.12);
+}
+
+.sidebarOverlayDark {
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Backdrop for overlay sidebar                                                */
+/* -------------------------------------------------------------------------- */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  top: var(--topbar-height);
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 40;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main content                                                                */
+/* -------------------------------------------------------------------------- */
+
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 24px;
+  background-color: var(--bg-main);
+  transition: background-color var(--transition-speed);
+}
+
+.mainDark {
+  --bg-main: #1a1a2e;
+  background-color: var(--bg-main);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Drawer for mobile sidebar                                                   */
+/* -------------------------------------------------------------------------- */
+
+.drawerWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  z-index: 200;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.drawerWrapperVisible {
+  transform: translateX(0);
+}
+
+.drawerWrapperDark {
+  background-color: #141414;
+  border-right-color: #303030;
+}
+
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 190;
+  animation: fadeIn 0.2s ease;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hamburger button (mobile only)                                              */
+/* -------------------------------------------------------------------------- */
+
+.hamburgerButton {
+  display: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive: >= 1200px (full three-column)                                   */
+/* -------------------------------------------------------------------------- */
+
+@media (min-width: 1200px) {
+  .sidebar {
+    width: var(--sidebar-width);
+  }
+
+  .sidebarCollapsed {
+    width: 0;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive: 768px - 1199px (sidebar collapsed by default, overlay on open)  */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1199px) and (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: var(--topbar-height);
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    width: var(--sidebar-width);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.12);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebarExpanded {
+    transform: translateX(0);
+  }
+
+  .sidebarCollapsed {
+    width: 0;
+    transform: translateX(-100%);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive: < 768px (hamburger menu, drawer-style sidebar)                  */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .topBar {
+    padding: 0 12px;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    padding: 16px;
+  }
+
+  .hamburgerButton {
+    display: inline-flex;
+  }
+}

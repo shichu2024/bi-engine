@@ -1,0 +1,28 @@
+{
+  "active_feature": "FEAT-002-Playground重构",
+  "active_phase": "done",
+  "active_dispatch": {
+    "role": "pm",
+    "story": "",
+    "task": ""
+  },
+  "resume": {
+    "mode": "idle",
+    "next_role": "pm",
+    "next_action": "FEAT-002 V1.0 MVP 已验收完成(conditional_pass)。V1.1 差距项待启动。"
+  },
+  "latest_validation": {
+    "story": "ST-001~ST-005",
+    "task": "T-001~T-016",
+    "status": "DONE",
+    "decision": "conditional_pass",
+    "root_cause_type": "implementation",
+    "reroute_to": "",
+    "reroute_action": "",
+    "summary": "PM 已接受 conditional_pass。V1.0 MVP 完成，差距列入 V1.1。",
+    "report_ref": "codespec/specs/FEAT-002-Playground重构/validation-report.md",
+    "updated_at": "2026-04-23T00:00:00Z"
+  },
+  "blocked": [],
+  "last_updated": "2026-04-23T00:00:00Z"
+}

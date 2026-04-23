@@ -1,0 +1,21 @@
+{
+  "name": "bi-engine2-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "clean": "pnpm -r run clean",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish",
+    "test:visual": "pnpm --filter bi-playground test:visual",
+    "test:visual:capture": "pnpm --filter @bi-engine2/visual-regression capture",
+    "test:visual:approve": "pnpm --filter @bi-engine2/visual-regression approve"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.4",
+    "typescript": "^5.8.0"
+  }
+}

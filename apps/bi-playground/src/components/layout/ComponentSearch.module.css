@@ -1,0 +1,60 @@
+/* ---------------------------------------------------------------------------
+ * ComponentSearch styles
+ * --------------------------------------------------------------------------- */
+
+.searchWrapper {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.searchInput {
+  border-radius: 6px;
+}
+
+/* -- Light theme overrides ----------------------------------------------- */
+
+.searchInputLight {
+  background-color: #ffffff;
+}
+
+.searchInputLight::placeholder {
+  color: #bfbfbf;
+}
+
+/* -- Dark theme overrides ------------------------------------------------ */
+
+.searchWrapperDark :global(.ant-input-affix-wrapper) {
+  background-color: #1f1f1f;
+  border-color: #424242;
+  color: #e0e0e0;
+}
+
+.searchWrapperDark :global(.ant-input-affix-wrapper):hover {
+  border-color: #595959;
+}
+
+.searchWrapperDark :global(.ant-input-affix-wrapper-focused) {
+  border-color: #1668dc;
+  box-shadow: 0 0 0 2px rgba(22, 104, 220, 0.2);
+}
+
+.searchWrapperDark :global(.ant-input) {
+  background-color: transparent;
+  color: #e0e0e0;
+}
+
+.searchWrapperDark :global(.ant-input)::placeholder {
+  color: #595959;
+}
+
+.searchWrapperDark :global(.ant-input-prefix) {
+  color: #8c8c8c;
+}
+
+.searchWrapperDark :global(.ant-input-clear-icon) {
+  color: #8c8c8c;
+}
+
+.searchWrapperDark :global(.ant-input-clear-icon):hover {
+  color: #a0a0a0;
+}

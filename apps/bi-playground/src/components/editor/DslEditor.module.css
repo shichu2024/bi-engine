@@ -1,0 +1,54 @@
+/* -------------------------------------------------------------------------- */
+/* DslEditor styles                                                           */
+/* -------------------------------------------------------------------------- */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--editor-border-color, #e0e0e0);
+  background-color: var(--editor-toolbar-bg, #fafafa);
+  gap: 4px;
+}
+
+.toolbarSpacer {
+  flex: 1 1 auto;
+}
+
+.fontSizeGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.fontSizeLabel {
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--editor-font-color, #666);
+}
+
+.editorArea {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dark theme overrides                                                       */
+/* -------------------------------------------------------------------------- */
+
+:global([data-theme="dark"]) .toolbar,
+.toolbarDark {
+  --editor-border-color: #3a3a3a;
+  --editor-toolbar-bg: #1e1e1e;
+  --editor-font-color: #aaa;
+}

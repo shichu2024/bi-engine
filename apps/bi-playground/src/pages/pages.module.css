@@ -1,0 +1,62 @@
+.pageContainer {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  min-height: 100%;
+}
+
+.leftPanel {
+  flex: 1 1 300px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rightPanel {
+  flex: 2 1 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sectionLabelLight {
+  color: #666;
+}
+
+.sectionLabelDark {
+  color: #aaa;
+}
+
+.editorPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.editorPlaceholderTitle {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.editorPlaceholderSubtitle {
+  font-size: 14px;
+}
+
+.routeInfo {
+  font-size: 14px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  padding: 8px 12px;
+  border-radius: 4px;
+}

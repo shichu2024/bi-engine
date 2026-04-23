@@ -1,0 +1,11 @@
+.claude/
+node_modules/
+dist/
+coverage/
+.DS_Store
+Thumbs.db
+*.log
+.pnpm-store/
+.turbo/
+.cache/
+.vite/

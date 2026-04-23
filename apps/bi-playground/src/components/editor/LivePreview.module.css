@@ -1,0 +1,126 @@
+/* -------------------------------------------------------------------------- */
+/* LivePreview styles                                                         */
+/* -------------------------------------------------------------------------- */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ---- Toolbar ---- */
+
+.toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--preview-border-color, #e0e0e0);
+  background-color: var(--preview-toolbar-bg, #fafafa);
+  gap: 8px;
+}
+
+.toolbarSpacer {
+  flex: 1 1 auto;
+}
+
+/* ---- Render area ---- */
+
+.renderArea {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+}
+
+/* ---- Loading state ---- */
+
+.loadingCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+/* ---- Error state ---- */
+
+.errorCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+  padding: 16px;
+}
+
+/* ---- Viewport frame ---- */
+
+.viewportFrame {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  border: 1px solid var(--preview-border-color, #e0e0e0);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--preview-bg, #fff);
+}
+
+.viewportFrameConstrained {
+  max-width: var(--preview-viewport-width);
+  margin: 0 auto;
+}
+
+/* ---- Fullscreen overlay ---- */
+
+.fullscreenOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--preview-bg, #fff);
+}
+
+.fullscreenOverlay .renderArea {
+  flex: 1 1 auto;
+}
+
+/* ---- Empty state ---- */
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+  color: var(--preview-empty-color, #999);
+  font-size: 14px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dark theme overrides                                                       */
+/* -------------------------------------------------------------------------- */
+
+:global([data-theme="dark"]) .toolbar {
+  --preview-border-color: #3a3a3a;
+  --preview-toolbar-bg: #1e1e1e;
+}
+
+:global([data-theme="dark"]) .viewportFrame {
+  --preview-border-color: #444;
+  --preview-bg: #1a1a2e;
+}
+
+:global([data-theme="dark"]) .fullscreenOverlay {
+  --preview-bg: #1a1a2e;
+}
+
+:global([data-theme="dark"]) .emptyState {
+  --preview-empty-color: #666;
+}
