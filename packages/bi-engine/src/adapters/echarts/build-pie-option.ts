@@ -119,9 +119,5 @@ export function buildPieOption(model: ChartSemanticModel): EChartsOption {
     series: echartsSeries,
   };
 
-  if (model.title !== undefined) {
-    option.title = { text: model.title };
-  }
-
   return option;
 }

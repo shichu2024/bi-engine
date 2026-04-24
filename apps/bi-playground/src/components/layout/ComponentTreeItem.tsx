@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useComponentStore } from '@/stores';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './LeftSidebar.module.css';
 
 // ---------------------------------------------------------------------------
@@ -12,18 +12,18 @@ export interface ComponentTreeItemProps {
 }
 
 // ---------------------------------------------------------------------------
-// ComponentTreeItem — single category row
+// ComponentTreeItem — navigates via route, highlights active from URL
 // ---------------------------------------------------------------------------
 
 export function ComponentTreeItem({ kind, label }: ComponentTreeItemProps): React.ReactElement {
-  const selectedComponentId = useComponentStore((s) => s.selectedComponentId);
-  const selectComponent = useComponentStore((s) => s.selectComponent);
+  const navigate = useNavigate();
+  const { kind: activeKind } = useParams<{ readonly kind: string }>();
 
-  const isSelected = selectedComponentId === kind;
+  const isSelected = (activeKind ?? 'line') === kind;
 
   const handleClick = useCallback(() => {
-    selectComponent(kind);
-  }, [selectComponent, kind]);
+    navigate(`/${kind}`);
+  }, [navigate, kind]);
 
   const itemClassName = `${styles.treeItem}${isSelected ? ` ${styles.treeItemSelected}` : ''}`;
 

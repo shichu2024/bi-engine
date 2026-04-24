@@ -7,6 +7,8 @@ import React from 'react';
 import { ChartView } from '../../src/react/ChartView';
 import type { ChartViewError } from '../../src/react/ChartView';
 import type { ChartComponent } from '../../src/schema/bi-engine-models';
+import { registerBuiltinHandlers } from '../../src/platform/auto-registry';
+import { ComponentRegistry } from '../../src/platform/component-registry';
 
 // ---------------------------------------------------------------------------
 // 模拟 echarts 以避免 jsdom 中的 canvas/zrender 错误
@@ -127,6 +129,8 @@ function datasourceComponent(): ChartComponent {
 describe('ChartView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    ComponentRegistry.getInstance().clear();
+    registerBuiltinHandlers();
   });
 
   it('为合法的折线图组件渲染容器 div', () => {

@@ -117,15 +117,8 @@ describe('buildLineOption', () => {
     expect(legend.data).toEqual(['Sales', 'Profit']);
   });
 
-  it('提供标题时包含标题', () => {
+  it('title 由外部 ComponentHeader 渲染，option 不包含 title', () => {
     const model = makeLineModel({ title: 'Monthly Sales' });
-    const option = buildLineOption(model);
-
-    expect(option.title).toEqual({ text: 'Monthly Sales' });
-  });
-
-  it('标题为 undefined 时省略标题', () => {
-    const model = makeLineModel({ title: undefined });
     const option = buildLineOption(model);
 
     expect(option.title).toBeUndefined();

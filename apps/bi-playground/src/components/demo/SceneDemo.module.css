@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- */
-/* SceneCard                                                                  */
+/* SceneCard — antd token based                                                */
 /* -------------------------------------------------------------------------- */
 
 .sceneCard {
@@ -7,7 +7,7 @@
 }
 
 .sceneCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ant-box-shadow, 0 6px 16px 0 rgba(0,0,0,0.08));
 }
 
 .cardHeader {
@@ -33,6 +33,7 @@
 .cardDescription {
   font-size: 13px;
   line-height: 1.4;
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -46,7 +47,7 @@
 .bottomBar {
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--ant-color-border-secondary, #f0f0f0);
   margin-top: 8px;
   padding-top: 4px;
 }
@@ -56,11 +57,11 @@
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
 }
 
 .toggleCodeBtn:hover {
-  color: #1677ff;
+  color: var(--ant-color-primary, #1677ff);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -77,20 +78,4 @@
 
 .overviewContainer {
   margin-bottom: 24px;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Dark theme                                                                 */
-/* -------------------------------------------------------------------------- */
-
-:global([data-theme="dark"]) .bottomBar {
-  border-top-color: #303030;
-}
-
-:global([data-theme="dark"]) .toggleCodeBtn {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-:global([data-theme="dark"]) .toggleCodeBtn:hover {
-  color: #4096ff;
 }

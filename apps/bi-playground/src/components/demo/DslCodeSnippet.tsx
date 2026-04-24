@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Button, message } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
+import { useThemeStore } from '@/stores';
 import styles from './SceneDetail.module.css';
 
 // ---------------------------------------------------------------------------
@@ -9,43 +10,40 @@ import styles from './SceneDetail.module.css';
 
 interface DslCodeSnippetProps {
   readonly dsl: string;
-  readonly isDark: boolean;
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
+type TokenType = 'string' | 'number' | 'boolean' | 'null' | 'key' | 'punctuation' | 'whitespace';
+
 /**
  * Tokenize a JSON string into segments with simple syntax classification.
- * Covers: strings, numbers, booleans, null, punctuation, and keys.
+ * Covers: strings, numbers, booleans, null, punctuation, keys, and whitespace.
  */
-function tokenizeJson(raw: string): ReadonlyArray<Readonly<{ text: string; type: 'string' | 'number' | 'boolean' | 'null' | 'key' | 'punctuation' }>> {
-  const tokens: Array<{ text: string; type: 'string' | 'number' | 'boolean' | 'null' | 'key' | 'punctuation' }> = [];
+function tokenizeJson(raw: string): ReadonlyArray<Readonly<{ text: string; type: TokenType }>> {
+  const tokens: Array<{ text: string; type: TokenType }> = [];
 
-  // Regex captures JSON tokens in order
-  const regex = /("(?:[^"\\]|\\.)*")\s*:|("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|(true|false)|(null)|([{}[\]:,])/g;
+  // Regex captures JSON tokens AND whitespace in order
+  const regex = /("(?:[^"\\]|\\.)*")\s*:|("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|(true|false)|(null)|([{}[\]:,])|([ \t\r\n]+)/g;
 
   let match: RegExpExecArray | null;
   while ((match = regex.exec(raw)) !== null) {
     if (match[1] !== undefined) {
-      // Key (string followed by colon)
       tokens.push({ text: match[1], type: 'key' });
     } else if (match[2] !== undefined) {
-      // String value
       tokens.push({ text: match[2], type: 'string' });
     } else if (match[3] !== undefined) {
-      // Number
       tokens.push({ text: match[3], type: 'number' });
     } else if (match[4] !== undefined) {
-      // Boolean
       tokens.push({ text: match[4], type: 'boolean' });
     } else if (match[5] !== undefined) {
-      // Null
       tokens.push({ text: match[5], type: 'null' });
     } else if (match[6] !== undefined) {
-      // Punctuation
       tokens.push({ text: match[6], type: 'punctuation' });
+    } else if (match[7] !== undefined) {
+      tokens.push({ text: match[7], type: 'whitespace' });
     }
   }
 
@@ -53,6 +51,7 @@ function tokenizeJson(raw: string): ReadonlyArray<Readonly<{ text: string; type:
 }
 
 function getTokenClassName(type: string, isDark: boolean): string {
+  if (type === 'whitespace') return '';
   const suffix = isDark ? 'Dark' : 'Light';
   const map: Record<string, string> = {
     string: styles[`tokenString${suffix}`],
@@ -71,9 +70,10 @@ function getTokenClassName(type: string, isDark: boolean): string {
 
 export function DslCodeSnippet({
   dsl,
-  isDark,
 }: DslCodeSnippetProps): React.ReactElement {
   const [copied, setCopied] = useState(false);
+  const mode = useThemeStore((s) => s.mode);
+  const isDark = mode === 'dark';
 
   const formattedDsl = useMemo(() => {
     try {
@@ -97,7 +97,7 @@ export function DslCodeSnippet({
 
   return (
     <div
-      className={`${styles.codeSnippetContainer} ${isDark ? styles.codeSnippetContainerDark : styles.codeSnippetContainerLight}`}
+      className={styles.codeSnippetContainer}
       data-testid="dsl-code-snippet"
     >
       <div className={styles.codeSnippetHeader}>

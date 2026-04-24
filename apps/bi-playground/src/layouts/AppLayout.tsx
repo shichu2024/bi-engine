@@ -9,7 +9,6 @@ import styles from './AppLayout.module.css';
 // ---------------------------------------------------------------------------
 
 export interface AppLayoutProps {
-  readonly isDark: boolean;
   readonly topBarSlot?: ReactNode;
   readonly sidebarSlot?: ReactNode;
 }
@@ -59,7 +58,6 @@ function useScreenSize(): ScreenSize {
 // ---------------------------------------------------------------------------
 
 export function AppLayout({
-  isDark,
   topBarSlot,
   sidebarSlot,
 }: AppLayoutProps): React.ReactElement {
@@ -102,35 +100,16 @@ export function AppLayout({
   // Build sidebar class
   const sidebarClasses = [
     styles.sidebar,
-    isDark ? styles.sidebarDark : '',
     !showSidebar && !drawerOpen ? styles.sidebarCollapsed : '',
     screenSize === 'tablet' && showSidebar ? styles.sidebarOverlay : '',
-    screenSize === 'tablet' && showSidebar && isDark ? styles.sidebarOverlayDark : '',
     screenSize === 'tablet' && showSidebar ? styles.sidebarExpanded : '',
   ]
     .filter(Boolean)
     .join(' ');
 
-  const mainClasses = [
-    styles.main,
-    isDark ? styles.mainDark : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  const topBarClasses = [
-    styles.topBar,
-    isDark ? styles.topBarDark : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <div
-      className={styles.layout}
-      data-theme={isDark ? 'dark' : 'light'}
-    >
-      <div className={topBarClasses}>
+    <div className={styles.layout}>
+      <div className={styles.topBar}>
         {topBarSlot}
       </div>
       <div className={styles.body}>
@@ -168,7 +147,6 @@ export function AppLayout({
               className={[
                 styles.drawerWrapper,
                 drawerOpen ? styles.drawerWrapperVisible : '',
-                isDark ? styles.drawerWrapperDark : '',
               ].filter(Boolean).join(' ')}
             >
               {sidebarSlot}
@@ -176,7 +154,7 @@ export function AppLayout({
           </>
         )}
 
-        <div className={mainClasses}>
+        <div className={styles.main}>
           <Outlet />
         </div>
       </div>

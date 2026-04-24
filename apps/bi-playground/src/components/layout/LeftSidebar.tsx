@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppstoreOutlined } from '@ant-design/icons';
-import { useLayoutStore, useThemeStore } from '@/stores';
+import { useLayoutStore } from '@/stores';
 import { ComponentTree } from './ComponentTree';
 import styles from './LeftSidebar.module.css';
 
@@ -29,12 +29,9 @@ export function LeftSidebar({ children }: LeftSidebarProps): React.ReactElement 
   const sidebarWidth = useLayoutStore((s) => s.sidebarWidth);
   const sidebarCollapsed = useLayoutStore((s) => s.sidebarCollapsed);
   const setSidebarWidth = useLayoutStore((s) => s.setSidebarWidth);
-  const themeMode = useThemeStore((s) => s.mode);
 
   const [dragging, setDragging] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-
-  const isDark = themeMode === 'dark';
 
   const width = sidebarCollapsed ? COLLAPSED_WIDTH : sidebarWidth;
 
@@ -72,7 +69,6 @@ export function LeftSidebar({ children }: LeftSidebarProps): React.ReactElement 
 
   const sidebarClassName = [
     styles.sidebar,
-    isDark ? styles.sidebarDark : '',
     sidebarCollapsed ? styles.sidebarCollapsed : '',
   ]
     .filter(Boolean)

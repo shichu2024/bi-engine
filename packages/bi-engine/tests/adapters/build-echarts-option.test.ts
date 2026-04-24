@@ -171,7 +171,7 @@ describe('buildEChartsOption', () => {
       const model = makeLineModel();
       const option = buildEChartsOption(model);
 
-      expect(option.title).toEqual({ text: 'Line Chart' });
+      expect(option.title).toBeUndefined();
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('xAxis');
       expect(option).toHaveProperty('yAxis');
@@ -183,7 +183,7 @@ describe('buildEChartsOption', () => {
       const model = makeBarModel();
       const option = buildEChartsOption(model);
 
-      expect(option.title).toEqual({ text: 'Bar Chart' });
+      expect(option.title).toBeUndefined();
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('xAxis');
       expect(option).toHaveProperty('yAxis');
@@ -195,7 +195,7 @@ describe('buildEChartsOption', () => {
       const model = makePieModel();
       const option = buildEChartsOption(model);
 
-      expect(option.title).toEqual({ text: 'Pie Chart' });
+      expect(option.title).toBeUndefined();
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('tooltip');
       expect(option).toHaveProperty('legend');

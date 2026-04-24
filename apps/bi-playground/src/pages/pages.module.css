@@ -26,14 +26,7 @@
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.sectionLabelLight {
-  color: #666;
-}
-
-.sectionLabelDark {
-  color: #aaa;
+  color: var(--ant-color-text-secondary, rgba(0,0,0,0.65));
 }
 
 .editorPlaceholder {
@@ -52,11 +45,12 @@
 
 .editorPlaceholderSubtitle {
   font-size: 14px;
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
 }
 
 .routeInfo {
   font-size: 14px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--ant-font-family-code, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace);
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--ant-border-radius-sm, 4px);
 }

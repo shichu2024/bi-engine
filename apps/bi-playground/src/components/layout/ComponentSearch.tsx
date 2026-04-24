@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { Input } from 'antd';
 import type { InputRef } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { useComponentStore, useThemeStore } from '@/stores';
+import { useComponentStore } from '@/stores';
 import styles from './ComponentSearch.module.css';
 
 // ---------------------------------------------------------------------------
@@ -50,15 +50,12 @@ export const ComponentSearch = forwardRef<ComponentSearchRef, ComponentSearchPro
   function ComponentSearch(props, ref) {
     const { onSearch } = props;
 
-    const themeMode = useThemeStore((s) => s.mode);
     const searchKeyword = useComponentStore((s) => s.searchKeyword);
     const setSearchKeyword = useComponentStore((s) => s.setSearchKeyword);
     const components = useComponentStore((s) => s.components);
     const selectComponent = useComponentStore((s) => s.selectComponent);
 
     const inputRef = useRef<InputRef>(null);
-
-    const isDark = themeMode === 'dark';
 
     // -- Expose focus() to parent via ref ------------------------------------
 
@@ -87,22 +84,13 @@ export const ComponentSearch = forwardRef<ComponentSearchRef, ComponentSearchPro
       }
     }, [components, searchKeyword, selectComponent, onSearch]);
 
-    // -- Classes ------------------------------------------------------------
-
-    const wrapperClassName = [
-      styles.searchWrapper,
-      isDark ? styles.searchWrapperDark : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
-
     // -- Render -------------------------------------------------------------
 
     return (
-      <div className={wrapperClassName}>
+      <div className={styles.searchWrapper}>
         <Input
           ref={inputRef}
-          className={isDark ? undefined : styles.searchInputLight}
+          className={styles.searchInput}
           prefix={<SearchOutlined />}
           placeholder="搜索组件..."
           allowClear

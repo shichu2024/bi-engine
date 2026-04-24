@@ -1,20 +1,15 @@
 import { useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FIXTURE_REGISTRY } from 'bi-engine/testing';
-import { Divider } from 'antd';
 import { useComponentStore } from '@/stores';
-import { ComponentOverview } from '@/components/demo/ComponentOverview';
 import { SceneDetail } from '@/components/demo/SceneDetail';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const CATEGORY_LABELS: Record<string, string> = {
-  line: '折线图',
-  bar: '柱状图',
-  pie: '饼图',
-};
+const VALID_KINDS = new Set(['line', 'bar', 'pie']);
+const DEFAULT_KIND = 'line';
 
 // ---------------------------------------------------------------------------
 // Component
@@ -22,24 +17,32 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export function SceneDemoPage(): React.ReactElement {
   const navigate = useNavigate();
+  const { kind } = useParams<{ readonly kind: string }>();
 
   const selectedKind = useComponentStore((s) => s.selectedComponentId);
   const selectComponent = useComponentStore((s) => s.selectComponent);
 
-  // Auto-select first category on mount
+  // Resolve kind from URL, fallback to default
+  const activeKind = (kind && VALID_KINDS.has(kind)) ? kind : DEFAULT_KIND;
+
+  // Sync URL → store
   useEffect(() => {
-    if (!selectedKind) {
-      selectComponent('line');
+    if (selectedKind !== activeKind) {
+      selectComponent(activeKind);
     }
-  }, [selectedKind, selectComponent]);
+  }, [activeKind, selectedKind, selectComponent]);
 
-  // All fixtures of the selected kind
+  // Redirect "/" → "/line"
+  useEffect(() => {
+    if (!kind || !VALID_KINDS.has(kind)) {
+      navigate(`/${DEFAULT_KIND}`, { replace: true });
+    }
+  }, [kind, navigate]);
+
   const fixtures = useMemo(
-    () => FIXTURE_REGISTRY.filter((f) => f.seriesKind === selectedKind),
-    [selectedKind],
+    () => FIXTURE_REGISTRY.filter((f) => f.seriesKind === activeKind),
+    [activeKind],
   );
-
-  const categoryLabel = CATEGORY_LABELS[selectedKind ?? ''] ?? selectedKind ?? '';
 
   const handleOpenEditor = useCallback(
     (fixtureId: string) => {
@@ -48,7 +51,7 @@ export function SceneDemoPage(): React.ReactElement {
     [navigate],
   );
 
-  if (!selectedKind || fixtures.length === 0) {
+  if (fixtures.length === 0) {
     return (
       <div data-testid="scene-demo-page" style={{ textAlign: 'center', padding: 48 }}>
         Loading...
@@ -57,19 +60,8 @@ export function SceneDemoPage(): React.ReactElement {
   }
 
   return (
-    <div data-testid="scene-demo-page" style={{ padding: 24 }}>
-      {/* Category overview */}
-      <ComponentOverview
-        componentName={categoryLabel}
-        description={`${categoryLabel}相关场景演示，包含 ${fixtures.length} 个示例`}
-        version="v0.0.1"
-        tags={[categoryLabel]}
-      />
-
-      <Divider />
-
-      {/* One scene per fixture, stacked vertically */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div data-testid="scene-demo-page">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {fixtures.map((fixture) => (
           <SceneDetail
             key={fixture.id}

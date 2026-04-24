@@ -155,3 +155,91 @@ export type {
   BorderTokens,
 } from './theme/theme-tokens';
 export { DEFAULT_THEME_TOKENS } from './theme/theme-tokens';
+
+// ============================================================================
+// v2.0 — 统一组件渲染平台
+// ============================================================================
+
+// ---- 平台层 ----
+export {
+  RenderMode,
+  type ComponentType,
+  type PipelineResult,
+  type ComponentError,
+  type PipelineStage,
+  type ValidationWarning,
+  type ValidationOutput,
+  type NormalizedComponent,
+  type ResolvedData,
+  type ComponentEventHandlers,
+  type RenderContext,
+  type ComponentValidator,
+  type ComponentNormalizer,
+  type ComponentResolver,
+  type ComponentModelBuilder,
+  type ComponentRenderer,
+  type ComponentHandler,
+} from './platform/types';
+
+export {
+  ComponentRegistry,
+  registerComponentHandler,
+  getComponentHandler,
+} from './platform/component-registry';
+
+export {
+  RenderModeProvider,
+  useRenderMode,
+  useIsDesignMode,
+  type RenderModeProviderProps,
+} from './platform/render-mode';
+
+export {
+  ErrorCodes,
+  type ErrorCode,
+  createComponentError,
+  createValidationError as createPlatformValidationError,
+  createNormalizationError,
+  createResolutionError,
+  createModelBuildError,
+} from './platform/errors';
+
+export {
+  registerBuiltinHandlers,
+} from './platform/auto-registry';
+
+// ---- 管线层 ----
+export {
+  PipelineEngine,
+  defaultPipelineEngine,
+  type PipelineConfig,
+  type PipelineExecutionResult,
+} from './pipeline';
+
+// ---- 统一组件视图 ----
+export { ComponentView } from './react/ComponentView';
+export type { ComponentViewProps } from './react/ComponentView';
+
+// ---- 设计态 ----
+export {
+  SelectionProvider,
+  useSelection,
+  type SelectionProviderProps,
+} from './design/selection-context';
+
+export {
+  DesignableWrapper,
+  type DesignableWrapperProps,
+} from './react/DesignableWrapper';
+
+// ---- 适配器 ----
+export {
+  ChartAdapterRegistry,
+  type ChartAdapter,
+  type ChartAdapterHandle,
+} from './adapters/adapter-registry';
+
+export {
+  echartsAdapter,
+  EChartsAdapter,
+} from './adapters/echarts/echarts-adapter';

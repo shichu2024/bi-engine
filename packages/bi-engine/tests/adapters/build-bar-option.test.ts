@@ -101,11 +101,11 @@ describe('buildBarOption', () => {
     expect(yAxis[0].data).toEqual(['Jan', 'Feb', 'Mar']);
   });
 
-  it('提供标题时包含标题', () => {
+  it('title 由外部 ComponentHeader 渲染，option 不包含 title', () => {
     const model = makeBarModel({ title: 'Quarterly Profit' });
     const option = buildBarOption(model);
 
-    expect(option.title).toEqual({ text: 'Quarterly Profit' });
+    expect(option.title).toBeUndefined();
   });
 
   it('跳过系列数组中的非柱状系列', () => {

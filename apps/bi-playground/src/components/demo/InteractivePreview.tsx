@@ -1,8 +1,7 @@
-import { ChartThemeProvider } from 'bi-engine';
 import type { ChartComponent } from 'bi-engine';
 import { ChartPreview } from '@/components/ChartPreview';
-import { useThemeStore } from '@/stores';
 import styles from './SceneDetail.module.css';
+import type { ReactNode } from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -11,6 +10,7 @@ import styles from './SceneDetail.module.css';
 interface InteractivePreviewProps {
   readonly component: ChartComponent;
   readonly description: string;
+  readonly toolbar?: ReactNode;
 }
 
 // ---------------------------------------------------------------------------
@@ -20,18 +20,18 @@ interface InteractivePreviewProps {
 export function InteractivePreview({
   component,
   description,
+  toolbar,
 }: InteractivePreviewProps): React.ReactElement {
-  const { mode, palette } = useThemeStore();
-  const isDark = mode === 'dark';
-
   return (
     <div
-      className={`${styles.previewContainer} ${isDark ? styles.previewContainerDark : styles.previewContainerLight}`}
+      className={styles.previewContainer}
       data-testid="interactive-preview"
     >
-      <ChartThemeProvider palette={palette}>
-        <ChartPreview component={component} description={description} />
-      </ChartThemeProvider>
+      <ChartPreview
+        component={component}
+        description={description}
+        toolbar={toolbar}
+      />
     </div>
   );
 }

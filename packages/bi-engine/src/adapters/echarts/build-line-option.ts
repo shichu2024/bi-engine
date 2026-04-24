@@ -220,10 +220,6 @@ export function buildLineOption(model: ChartSemanticModel): EChartsOption {
     series: echartsSeries,
   };
 
-  if (model.title !== undefined) {
-    option.title = { text: model.title };
-  }
-
   return option;
 }
 
@@ -294,10 +290,6 @@ export function buildBarOption(model: ChartSemanticModel): EChartsOption {
     yAxis: yAxisConfig,
     series: echartsSeries,
   };
-
-  if (model.title !== undefined) {
-    option.title = { text: model.title };
-  }
 
   return option;
 }

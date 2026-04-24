@@ -43,7 +43,7 @@ export {
 } from './resolve-chart-data';
 export type {
   ResolvedData,
-  UnsupportedResult as DataUnsupportedResult,
+  DataUnsupportedResult,
 } from './resolve-chart-data';
 
 // ---- 系列数据构建 ----

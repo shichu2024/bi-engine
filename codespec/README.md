@@ -1,13 +1,11 @@
-﻿# CodeSpec
+# CodeSpec
 
 ## 概览
 
-<!-- 简要说明项目是什么，以及为什么需要在这里使用 CodeSpec。 -->
-
 - 项目：bi-engine2
 - 负责人：
-- 当前激活的功能：FEAT-002-Playground重构
-- 最后更新时间：2026-04-22T10:30:00Z
+- 当前激活的功能：FEAT-003-统一组件渲染平台
+- 最后更新时间：2026-04-23T12:00:00Z
 
 ## 术语
 
@@ -31,6 +29,21 @@
 |----|------|------|--------|------|
 | FEAT-001 | 基于权威模型的图表渲染引擎 | done | P0 | specs/FEAT-001-基于权威模型的图表渲染引擎/ |
 | FEAT-002 | Playground重构 | done | P0 | specs/FEAT-002-Playground重构/ |
+| FEAT-003 | 统一组件渲染平台 | done | P0 | specs/FEAT-003-统一组件渲染平台/ |
+| FEAT-004 | 图表处理器迁移 | done | P1 | specs/FEAT-004-图表处理器迁移/ |
+| FEAT-005 | 新组件类型支持 | done | P1 | specs/FEAT-005-新组件类型支持/ |
+| FEAT-006 | 设计态支持预留 | done | P2 | specs/FEAT-006-设计态支持预留/ |
+
+## Feature 依赖关系
+
+```
+FEAT-001 (done) ──→ FEAT-002 (done)
+
+FEAT-003 (done)
+  ├──→ FEAT-004 (done)
+  ├──→ FEAT-005 (done)
+  └──→ FEAT-006 (设计态支持预留，需设计器需求文档)
+```
 
 ## 状态说明
 
@@ -42,16 +55,16 @@
 - `implementing`：一个或多个 task 正在执行
 - `validating`：QA 正在验证结果
 - `done`：feature 已验收完成
+- `planned`：已识别但尚未启动
 - `blocked`：feature 受依赖或决策阻塞
 
 ### 运行时状态
 
-- `idle`：当前没有激活的 feature 或 task，等待初始化、恢复或下一次派发
+- `idle`：当前没有激活的 task，等待派发
 
 ## 状态流转
 
-- `idle -> proposal` 表示开始一个新 feature
-- `idle -> implementing / validating` 表示恢复已有流程
+- `planned -> proposal` 表示启动一个新 feature
 - `proposal -> stories -> planning -> implementing -> validating -> done`
 - 任意活动状态都可以进入 `blocked`
 - `blocked` 解除后回到阻塞前状态

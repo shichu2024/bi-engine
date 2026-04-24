@@ -106,11 +106,11 @@ describe('buildPieOption', () => {
     expect(legend.show).toBe(false);
   });
 
-  it('提供标题时包含标题', () => {
+  it('title 由外部 ComponentHeader 渲染，option 不包含 title', () => {
     const model = makePieModel({ title: 'Sales by Month' });
     const option = buildPieOption(model);
 
-    expect(option.title).toEqual({ text: 'Sales by Month' });
+    expect(option.title).toBeUndefined();
   });
 
   it('为 ring subType 设置 radius', () => {

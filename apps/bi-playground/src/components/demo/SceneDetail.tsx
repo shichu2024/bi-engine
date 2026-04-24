@@ -1,8 +1,12 @@
-import { useState } from 'react';
-import { Button, Space } from 'antd';
-import { CodeOutlined, DownOutlined, UpOutlined, EditOutlined } from '@ant-design/icons';
+import { useState, useCallback } from 'react';
+import { Tooltip } from 'antd';
+import {
+  EditOutlined,
+  CodeOutlined,
+  CopyOutlined,
+  ExpandOutlined,
+} from '@ant-design/icons';
 import type { ChartComponent } from 'bi-engine';
-import { useThemeStore } from '@/stores';
 import { InteractivePreview } from './InteractivePreview';
 import { DslCodeSnippet } from './DslCodeSnippet';
 import styles from './SceneDetail.module.css';
@@ -32,50 +36,60 @@ export function SceneDetail({
   componentId,
   onOpenEditor,
 }: SceneDetailProps): React.ReactElement {
-  const { mode } = useThemeStore();
-  const isDark = mode === 'dark';
   const [codeVisible, setCodeVisible] = useState(false);
 
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(dsl).catch(() => { /* ignore */ });
+  }, [dsl]);
+
   return (
-    <div
+    <section
       className={styles.sceneDetail}
+      id={`${sceneId}-${componentId}`}
       data-testid={`scene-detail-${sceneId}-${componentId}`}
     >
-      {/* Chart preview - always visible */}
-      <InteractivePreview component={component} description={description} />
-
-      {/* Bottom action bar */}
-      <div className={styles.actionBar}>
-        <Button
-          type="text"
-          size="small"
-          icon={<CodeOutlined />}
-          onClick={() => setCodeVisible((prev) => !prev)}
-        >
-          {codeVisible ? '收起代码' : '展开代码'}
-          {codeVisible ? <UpOutlined style={{ marginLeft: 4 }} /> : <DownOutlined style={{ marginLeft: 4 }} />}
-        </Button>
-
-        <div className={styles.actionBarSpacer} />
-
-        <Space size={8}>
-          <Button
-            type="primary"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={onOpenEditor}
-          >
-            在编辑器中打开
-          </Button>
-        </Space>
+      {/* Demo area */}
+      <div className={styles.demoArea}>
+        <InteractivePreview component={component} description={description} />
       </div>
 
-      {/* Code section - collapsible */}
-      {codeVisible && (
-        <div className={styles.codeSection}>
-          <DslCodeSnippet dsl={dsl} isDark={isDark} />
+      {/* Meta area */}
+      <div className={styles.metaArea}>
+        <p className={styles.descriptionText}>{description}</p>
+        <div className={styles.actionsBar}>
+          <Tooltip title="在编辑器中打开">
+            <button className={styles.actionButton} onClick={onOpenEditor} aria-label="编辑">
+              <EditOutlined />
+            </button>
+          </Tooltip>
+          <Tooltip title={codeVisible ? '收起代码' : '展开代码'}>
+            <button
+              className={styles.actionButton}
+              onClick={() => setCodeVisible((v) => !v)}
+              aria-label="代码"
+            >
+              <CodeOutlined />
+            </button>
+          </Tooltip>
+          <Tooltip title="复制 DSL">
+            <button className={styles.actionButton} onClick={handleCopy} aria-label="复制">
+              <CopyOutlined />
+            </button>
+          </Tooltip>
+          <Tooltip title="全屏预览">
+            <button className={styles.actionButton} onClick={onOpenEditor} aria-label="全屏">
+              <ExpandOutlined />
+            </button>
+          </Tooltip>
         </div>
-      )}
-    </div>
+
+        {/* Code section — expands below actions bar */}
+        {codeVisible && (
+          <div className={styles.codeSection}>
+            <DslCodeSnippet dsl={dsl} />
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

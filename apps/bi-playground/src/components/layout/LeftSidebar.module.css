@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
- * LeftSidebar styles
+ * LeftSidebar — antd token based
  * --------------------------------------------------------------------------- */
 
 .sidebar {
@@ -7,16 +7,11 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: #ffffff;
-  border-right: 1px solid #e8e8e8;
+  background-color: var(--ant-color-bg-container, #ffffff);
+  border-right: 1px solid var(--ant-color-border-secondary, #f0f0f0);
   transition: width 0.2s ease;
   display: flex;
   flex-direction: column;
-}
-
-.sidebarDark {
-  background-color: #141414;
-  border-right-color: #303030;
 }
 
 /* -- Collapsed state ----------------------------------------------------- */
@@ -42,18 +37,14 @@
   justify-content: center;
   height: 40px;
   margin: 12px 0;
-  color: #8c8c8c;
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
   font-size: 20px;
-}
-
-.sidebarDark .collapsedIcon {
-  color: #a0a0a0;
 }
 
 /* -- Search area --------------------------------------------------------- */
 
 .searchArea {
-  padding: 12px 12px 8px;
+  padding: 8px 12px;
   flex-shrink: 0;
 }
 
@@ -81,12 +72,7 @@
 
 .dragHandle:hover,
 .dragHandleActive {
-  background-color: #1677ff;
-}
-
-.sidebarDark .dragHandle:hover,
-.sidebarDark .dragHandleActive {
-  background-color: #1668dc;
+  background-color: var(--ant-color-primary, #1677ff);
 }
 
 /* -- Selection highlight ------------------------------------------------- */
@@ -98,32 +84,20 @@
   padding: 6px 12px;
   cursor: pointer;
   transition: background-color 0.15s ease;
-  border-radius: 4px;
+  border-radius: var(--ant-border-radius-sm, 4px);
   margin: 1px 8px;
 }
 
 .treeItem:hover {
-  background-color: #f5f5f5;
+  background-color: var(--ant-control-item-bg-hover, rgba(0,0,0,0.04));
 }
 
 .treeItemSelected {
-  background-color: #e6f4ff;
+  background-color: var(--ant-color-primary-bg, #e6f4ff);
 }
 
 .treeItemSelected:hover {
-  background-color: #bae0ff;
-}
-
-.sidebarDark .treeItem:hover {
-  background-color: #1f1f1f;
-}
-
-.sidebarDark .treeItemSelected {
-  background-color: #111b26;
-}
-
-.sidebarDark .treeItemSelected:hover {
-  background-color: #112a45;
+  background-color: var(--ant-color-primary-bg-hover, #bae0ff);
 }
 
 /* -- Category header ----------------------------------------------------- */
@@ -137,21 +111,12 @@
   user-select: none;
   font-weight: 500;
   font-size: 13px;
-  color: #595959;
-  border-bottom: 1px solid #f0f0f0;
+  color: var(--ant-color-text-secondary, rgba(0,0,0,0.65));
+  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
 }
 
 .categoryHeader:hover {
-  background-color: #fafafa;
-}
-
-.sidebarDark .categoryHeader {
-  color: #a0a0a0;
-  border-bottom-color: #262626;
-}
-
-.sidebarDark .categoryHeader:hover {
-  background-color: #1a1a1a;
+  background-color: var(--ant-control-item-bg-hover, rgba(0,0,0,0.04));
 }
 
 .categoryArrow {
@@ -159,7 +124,7 @@
   align-items: center;
   transition: transform 0.2s ease;
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
 }
 
 .categoryArrowExpanded {
@@ -177,29 +142,21 @@
 .itemName {
   font-size: 13px;
   font-weight: 500;
-  color: #262626;
+  color: var(--ant-color-text, rgba(0,0,0,0.88));
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sidebarDark .itemName {
-  color: #e0e0e0;
-}
-
 .itemDescription {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 1px;
-}
-
-.sidebarDark .itemDescription {
-  color: #666;
 }
 
 /* -- Status tag ---------------------------------------------------------- */
@@ -216,6 +173,6 @@
 .emptyState {
   padding: 24px 16px;
   text-align: center;
-  color: #8c8c8c;
+  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
   font-size: 13px;
 }

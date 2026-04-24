@@ -22,10 +22,9 @@ const TopNavBar: React.FC = () => {
   const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
 
   const isDark = mode === 'dark';
-  const rootClassName = isDark ? `${styles.topNavBar} ${styles.topNavBarDark}` : styles.topNavBar;
 
   return (
-    <header className={rootClassName}>
+    <header className={styles.topNavBar}>
       <Flex align="center" gap={8} className={styles.leftSection}>
         <Button
           type="text"
