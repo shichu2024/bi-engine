@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { ChartView, ChartStateView, createValidationError } from 'bi-engine';
-import type { ChartComponent, ChartViewError, ChartRenderError } from 'bi-engine';
+import { BIEngine, ChartStateView, createValidationError } from 'bi-engine';
+import type { ChartComponent, ChartRenderError } from 'bi-engine';
 import { ComponentHeader } from './ComponentHeader';
 import type { ReactNode } from 'react';
 
@@ -18,7 +18,7 @@ export function ChartPreview({
   const [chartState, setChartState] = useState<'loading' | 'empty' | 'error' | 'success'>('success');
   const [errorObj, setErrorObj] = useState<ChartRenderError | undefined>(undefined);
 
-  const handleError = useCallback((error: ChartViewError) => {
+  const handleError = useCallback((error: { code: string; message: string }) => {
     setChartState('error');
     setErrorObj(createValidationError(error.code, error.message));
   }, []);
@@ -33,8 +33,8 @@ export function ChartPreview({
       )}
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
         <ChartStateView state={chartState} error={errorForState}>
-          <ChartView
-            component={component}
+          <BIEngine
+            schema={component}
             onError={handleError}
           />
         </ChartStateView>

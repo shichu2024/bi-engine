@@ -66,7 +66,7 @@ export interface ChartThemeProviderProps {
  * import { ChartThemeProvider } from 'bi-engine/react';
  *
  * <ChartThemeProvider palette={['#a', '#b', '#c', '#d', '#e', '#f', '#g', '#h']}>
- *   <ChartView component={myChart} />
+ *   <BIEngine schema={myChart} />
  * </ChartThemeProvider>
  * ```
  *

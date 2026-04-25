@@ -8,6 +8,29 @@ import { ComponentView } from './ComponentView';
 import { RenderModeProvider, RenderMode } from '../platform/render-mode';
 import { ChartThemeProvider } from '../theme/chart-theme-context';
 import type { ComponentError } from '../platform/types';
+import { ComponentRegistry } from '../platform/component-registry';
+import { chartHandler } from '../component-handlers/chart';
+import { textHandler } from '../component-handlers/text';
+import { tableHandler } from '../component-handlers/table';
+import { createUnsupportedHandler } from '../component-handlers/unsupported-handler';
+
+// ---------------------------------------------------------------------------
+// 懒注册：首次渲染前确保 handler 已注册，避免消费方忘记调用
+// registerBuiltinHandlers 或模块实例不一致导致注册丢失。
+// ---------------------------------------------------------------------------
+
+let lazyRegistered = false;
+
+function ensureHandlersRegistered(): void {
+  if (lazyRegistered) return;
+  const registry = ComponentRegistry.getInstance();
+  if (registry.has('chart')) return;
+  registry.registerOrReplace('chart', chartHandler);
+  registry.registerOrReplace('text', textHandler);
+  registry.registerOrReplace('table', tableHandler);
+  registry.registerOrReplace('markdown', createUnsupportedHandler('markdown'));
+  lazyRegistered = true;
+}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -49,6 +72,8 @@ export function BIEngine({
   onError,
   onSelect,
 }: BIEngineProps): React.ReactElement {
+  ensureHandlersRegistered();
+
   const renderMode = mode === 'design' ? RenderMode.DESIGN : RenderMode.RUNTIME;
 
   const handleError = onError !== undefined

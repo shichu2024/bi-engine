@@ -240,21 +240,19 @@ export function buildLineOption(model: ChartSemanticModel): EChartsOption {
  * @returns 可供 ECharts 运行时使用的 `EChartsOption`。
  */
 export function buildBarOption(model: ChartSemanticModel): EChartsOption {
+  // 检测是否为水平条形图（取第一个柱状系列的 subType）
+  const firstBar = model.series.find(isBarSeries) as BarSeries | undefined;
+  const isHorizontal = firstBar?.subType === 'horizontal';
+
   const categoryData = extractCategoryData(model);
   const seriesNames: string[] = [];
   const echartsSeries: Record<string, unknown>[] = [];
-
-  let isHorizontal = false;
 
   for (let i = 0; i < model.series.length; i++) {
     const s = model.series[i];
 
     if (!isBarSeries(s)) {
       continue;
-    }
-
-    if (s.subType === 'horizontal') {
-      isHorizontal = true;
     }
 
     seriesNames.push(s.name);
@@ -270,17 +268,14 @@ export function buildBarOption(model: ChartSemanticModel): EChartsOption {
     echartsSeries.push(seriesEntry);
   }
 
-  // 对于条形图（水平柱状图），x 轴变为数值轴，y 轴变为类目轴。
-  // 相应地交换坐标轴配置。
+  // 对于条形图（水平柱状图），x 轴为数值轴，y 轴为类目轴。
+  // encode 保持语义：x = 类目，y = 数值；水平模式只交换坐标轴渲染。
   const xAxisConfig = isHorizontal
-    ? buildYAxes(model.axes)       // 条形图 x 轴使用数值轴
+    ? [{ type: 'value' as const }]
     : buildXAxes(model.axes, categoryData);
 
   const yAxisConfig = isHorizontal
-    ? buildXAxes(model.axes, categoryData).map((axis) => {
-        // 条形图的类目数据属于 y 轴
-        return { ...axis };
-      })
+    ? [{ type: 'category' as const, data: categoryData }]
     : buildYAxes(model.axes);
 
   const option: EChartsOption = {

@@ -105,10 +105,6 @@ export type {
   ValidationResult,
 } from './core/validate-chart-component';
 
-// ---- React 宿主组件 ----
-export { ChartView } from './react/ChartView';
-export type { ChartViewProps, ChartViewError } from './react/ChartView';
-
 // ---- BIEngine 统一公共入口 ----
 export { BIEngine } from './react/BIEngine';
 export type { BIEngineProps } from './react/BIEngine';
