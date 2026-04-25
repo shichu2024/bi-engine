@@ -1,5 +1,6 @@
 import type { ChartOption } from '../../schema/bi-engine-models';
 import type { EChartsOption } from './build-line-option';
+import { deepMergeOption } from './option-merge';
 
 // ---------------------------------------------------------------------------
 // 核心字段保护
@@ -23,10 +24,10 @@ const CORE_OPTION_KEYS: ReadonlySet<string> = new Set([
 // ---------------------------------------------------------------------------
 
 /**
- * 将用户提供的 `ChartOption` 合并到适配器生成的基础选项中。
+ * 将用户提供的 `ChartOption` 深度合并到适配器生成的基础选项中。
  *
  * 合并规则：
- * 1. `eChartOption` 字段浅合并到基础选项中。
+ * 1. `eChartOption` 字段深度合并到基础选项中（使用 deepMergeOption）。
  * 2. 核心字段（`series`、`xAxis`、`yAxis`、`dataset`）受保护，
  *    不能被 `eChartOption` 覆盖。如果 `eChartOption` 包含核心键，
  *    该键将被静默跳过。
@@ -38,7 +39,7 @@ const CORE_OPTION_KEYS: ReadonlySet<string> = new Set([
  *
  * @param base - 由某个适配器构建器生成的 ECharts 选项。
  * @param chartOption - 可选的用户提供的图表覆盖配置。
- * @returns 应用了受控合并的新 `EChartsOption`。
+ * @returns 应用了深度合并的新 `EChartsOption`。
  */
 export function mergeChartOption(
   base: EChartsOption,
@@ -54,19 +55,16 @@ export function mergeChartOption(
     return base;
   }
 
-  const merged: EChartsOption = { ...base };
-
+  // 过滤掉核心字段，防止覆盖图表结构
+  const safeExtension: Record<string, unknown> = {};
   const keys = Object.keys(eChartOption);
+
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-
-    // 保护核心字段不被覆盖。
-    if (CORE_OPTION_KEYS.has(key)) {
-      continue;
+    if (!CORE_OPTION_KEYS.has(key)) {
+      safeExtension[key] = eChartOption[key];
     }
-
-    merged[key] = eChartOption[key];
   }
 
-  return merged;
+  return deepMergeOption(base, safeExtension as EChartsOption, 'merge');
 }

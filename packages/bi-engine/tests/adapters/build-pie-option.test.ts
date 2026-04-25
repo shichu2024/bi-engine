@@ -123,7 +123,7 @@ describe('buildPieOption', () => {
     const option = buildPieOption(model);
     const series = option.series as Array<Record<string, unknown>>;
 
-    expect(series[0].radius).toEqual(['40%', '70%']);
+    expect(series[0].radius).toEqual(['50%', '75%']);
   });
 
   it('没有 subType 时不设置 radius', () => {
@@ -158,5 +158,59 @@ describe('buildPieOption', () => {
 
     const legend = option.legend as Record<string, unknown>;
     expect(legend.data).toEqual([]);
+  });
+
+  it('所有饼图系列都设置 center 为 [40%, 50%]', () => {
+    const model = makePieModel();
+    const option = buildPieOption(model);
+    const series = option.series as Array<Record<string, unknown>>;
+
+    expect(series[0].center).toEqual(['40%', '50%']);
+  });
+
+  it('环形图带 centerText/subCenterText 时生成 graphic 中心文本', () => {
+    const model = makePieModel({
+      series: [
+        {
+          type: 'pie',
+          name: 'Ring',
+          subType: 'ring',
+          centerText: 'Total',
+          subCenterText: '$100K',
+          encode: { name: 'month', value: 'sales' },
+        } as PieSeries,
+      ],
+    });
+
+    const option = buildPieOption(model);
+
+    const graphic = option.graphic as Record<string, unknown>[];
+    expect(graphic).toBeDefined();
+    expect(graphic.length).toBe(2);
+
+    // 主文本
+    const titleStyle = (graphic[0].style as Record<string, unknown>);
+    expect(titleStyle.text).toBe('Total');
+
+    // 副文本
+    const subtitleStyle = (graphic[1].style as Record<string, unknown>);
+    expect(subtitleStyle.text).toBe('$100K');
+
+    // graphic 定位
+    expect(graphic[0].left).toBe('40%');
+    expect(graphic[0].top).toBe('46%');
+    expect(graphic[1].left).toBe('40%');
+    expect(graphic[1].top).toBe('54%');
+  });
+
+  it('环形图无 centerText 时不生成 graphic', () => {
+    const model = makePieModel({
+      series: [
+        { type: 'pie', name: 'Ring', subType: 'ring', encode: { name: 'month', value: 'sales' } } as PieSeries,
+      ],
+    });
+
+    const option = buildPieOption(model);
+    expect(option.graphic).toBeUndefined();
   });
 });

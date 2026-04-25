@@ -7,6 +7,19 @@ import { buildRadarOption } from './build-radar-option';
 import { buildCandlestickOption } from './build-candlestick-option';
 import { buildGaugeOption } from './build-gauge-option';
 import { mergeChartOption } from './merge-chart-option';
+import { deepMergeOption } from './option-merge';
+import type { MergeMode } from './option-merge';
+import {
+  getLineOptionTemplate,
+  getBarOptionTemplate,
+  getPieOptionTemplate,
+  getScatterOptionTemplate,
+  getRadarOptionTemplate,
+  getCandlestickOptionTemplate,
+  getGaugeOptionTemplate,
+  getEmptyDataOption,
+  isDatasetEmpty,
+} from './option-templates';
 
 // 重新导出所有公共类型和函数，以便消费者可以从单一入口点导入。
 export { buildLineOption, buildBarOption } from './build-line-option';
@@ -17,6 +30,29 @@ export { buildRadarOption } from './build-radar-option';
 export { buildCandlestickOption } from './build-candlestick-option';
 export { buildGaugeOption } from './build-gauge-option';
 export { mergeChartOption } from './merge-chart-option';
+export { deepMergeOption } from './option-merge';
+export type { MergeMode } from './option-merge';
+export {
+  getBaseOption,
+  getCartesianAxisDefaults,
+  FONT_FAMILY,
+  FONT_SIZE,
+  TEXT_COLOR,
+  COLOR_PALETTE,
+  SPACING,
+  SHADOW,
+  BORDER,
+  getLineOptionTemplate,
+  getBarOptionTemplate,
+  getPieOptionTemplate,
+  getRingOptionTemplate,
+  getRadarOptionTemplate,
+  getScatterOptionTemplate,
+  getCandlestickOptionTemplate,
+  getGaugeOptionTemplate,
+  getEmptyDataOption,
+  isDatasetEmpty,
+} from './option-templates';
 
 // ---------------------------------------------------------------------------
 // 统一适配器入口
@@ -26,17 +62,21 @@ export { mergeChartOption } from './merge-chart-option';
  * 从 `ChartSemanticModel` 构建完整的 ECharts 选项。
  *
  * 这是消费者应该使用的单一入口点。它：
- * 1. 根据 `model.seriesKind` 路由到正确的构建器。
- * 2. 通过受控合并应用用户提供的 `ChartOption`。
+ * 1. 检查空数据场景，返回兜底配置。
+ * 2. 根据 `model.seriesKind` 获取标准化模板（视觉规范）。
+ * 3. 路由到对应的数据构建器（数据结构）。
+ * 4. 深度合并：模板 + 数据构建器 + 用户自定义配置。
+ *
+ * 合并优先级：用户 chartOption > 数据构建器 > 标准化模板
  *
  * 支持的 `seriesKind` 值：
- * - `'line'`        -- 委托给 `buildLineOption`（折线图和面积图）
- * - `'bar'`         -- 委托给 `buildBarOption`（柱状图和条形图）
- * - `'pie'`         -- 委托给 `buildPieOption`（饼图和环形图）
- * - `'scatter'`     -- 委托给 `buildScatterOption`（散点图）
- * - `'radar'`       -- 委托给 `buildRadarOption`（雷达图）
- * - `'candlestick'` -- 委托给 `buildCandlestickOption`（蜡烛图/K 线图）
- * - `'gauge'`       -- 委托给 `buildGaugeOption`（仪表盘）
+ * - `'line'`        -- 折线图和面积图
+ * - `'bar'`         -- 柱状图和条形图
+ * - `'pie'`         -- 饼图和环形图
+ * - `'scatter'`     -- 散点图
+ * - `'radar'`       -- 雷达图
+ * - `'candlestick'` -- 蜡烛图/K 线图
+ * - `'gauge'`       -- 仪表盘
  *
  * @param model - 完全解析的语义模型。
  * @returns 可供 ECharts 运行时使用的 `EChartsOption`。
@@ -44,8 +84,51 @@ export { mergeChartOption } from './merge-chart-option';
 export function buildEChartsOption(
   model: ChartSemanticModel,
 ): EChartsOption {
-  const baseOption = buildBaseOption(model);
-  return mergeChartOption(baseOption, model.chartOption);
+  // 空数据兜底
+  if (isDatasetEmpty(model.dataset)) {
+    return getEmptyDataOption();
+  }
+
+  // 获取标准化模板（传入 model 以检测 subType 等信息）
+  const template = getTemplate(model);
+
+  // 获取数据驱动的构建结果
+  const dataOption = buildBaseOption(model);
+
+  // 深度合并：模板 + 数据构建器
+  const mergedBase = deepMergeOption(template, dataOption, 'merge');
+
+  // 应用用户自定义配置
+  return mergeChartOption(mergedBase, model.chartOption);
+}
+
+/**
+ * 根据图表类型获取对应的标准化模板。
+ *
+ * 饼图/环形图共用同一个模板（视觉规范一致），
+ * 环形图特有的 center 文本和 radius 由 builder 层负责。
+ */
+function getTemplate(model: ChartSemanticModel): EChartsOption {
+  const kind = model.seriesKind;
+
+  switch (kind) {
+    case 'line':
+      return getLineOptionTemplate();
+    case 'bar':
+      return getBarOptionTemplate();
+    case 'pie':
+      return getPieOptionTemplate();
+    case 'scatter':
+      return getScatterOptionTemplate();
+    case 'radar':
+      return getRadarOptionTemplate();
+    case 'candlestick':
+      return getCandlestickOptionTemplate();
+    case 'gauge':
+      return getGaugeOptionTemplate();
+    default:
+      return getBarOptionTemplate();
+  }
 }
 
 /**
@@ -68,7 +151,6 @@ function buildBaseOption(model: ChartSemanticModel): EChartsOption {
     case 'gauge':
       return buildGaugeOption(model);
     default:
-      // 防御性降级 -- 校验后不应出现此情况。
       return buildBarOption(model);
   }
 }

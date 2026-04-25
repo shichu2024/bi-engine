@@ -5,7 +5,7 @@
 - 项目：bi-engine2
 - 负责人：
 - 当前激活的功能：无（全部完成）
-- 最后更新时间：2026-04-25T09:20:00Z
+- 最后更新时间：2026-04-25T21:00:00Z
 
 ## 术语
 
@@ -34,6 +34,7 @@
 | FEAT-005 | 新组件类型支持 | done | P1 | specs/FEAT-005-新组件类型支持/ |
 | FEAT-006 | 设计态支持预留 | done | P2 | specs/FEAT-006-设计态支持预留/ |
 | FEAT-007 | 新图表类型与BIEngine公共API重构 | done | P1 | specs/FEAT-007-新图表类型与BIEngine公共API重构/ |
+| FEAT-009 | ECharts标准化Option构建与扩展能力 | done | P0 | specs/FEAT-009-ECharts标准化Option构建与扩展能力/ |
 
 ## Feature 依赖关系
 
@@ -45,6 +46,8 @@ FEAT-003 (done)
   ├──→ FEAT-005 (done)
   ├──→ FEAT-006 (done)
   └──→ FEAT-007 (done)
+
+FEAT-001 (done) ──→ FEAT-009 (done)
 ```
 
 ## 状态说明

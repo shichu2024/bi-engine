@@ -1,6 +1,14 @@
 import type { PieSeries, Series } from '../../schema/bi-engine-models';
 import type { ChartSemanticModel } from '../../core/chart-semantic-model';
 import type { EChartsOption } from './build-line-option';
+import { FONT_SIZE, TEXT_COLOR, FONT_FAMILY } from './option-templates/base-option';
+
+// ---------------------------------------------------------------------------
+// 常量
+// ---------------------------------------------------------------------------
+
+/** 饼图/环形图统一 center，为右侧图例留空间 */
+const PIE_CENTER: [string, string] = ['40%', '50%'];
 
 // ---------------------------------------------------------------------------
 // 内部辅助函数
@@ -65,6 +73,59 @@ function buildPieLegend(
   };
 }
 
+/**
+ * 构建环形图中心文本 graphic 元素。
+ *
+ * 返回 ECharts 标准数组格式 `[{ type: 'text', ... }]`。
+ * 当主/副文本同时存在时，分别向上/下偏移 4% 以避免重叠。
+ */
+function buildRingGraphic(
+  centerText: string | undefined,
+  subCenterText: string | undefined,
+): Record<string, unknown>[] | undefined {
+  if (centerText === undefined && subCenterText === undefined) {
+    return undefined;
+  }
+
+  const elements: Record<string, unknown>[] = [];
+  const hasBoth = centerText !== undefined && subCenterText !== undefined;
+
+  if (centerText !== undefined) {
+    elements.push({
+      type: 'text',
+      left: PIE_CENTER[0],
+      top: hasBoth ? '46%' : PIE_CENTER[1],
+      style: {
+        text: centerText,
+        fontSize: 20,
+        fontWeight: 700,
+        fill: TEXT_COLOR.primary,
+        fontFamily: FONT_FAMILY,
+        textAlign: 'center',
+        textVerticalAlign: 'middle',
+      },
+    });
+  }
+
+  if (subCenterText !== undefined) {
+    elements.push({
+      type: 'text',
+      left: PIE_CENTER[0],
+      top: hasBoth ? '54%' : PIE_CENTER[1],
+      style: {
+        text: subCenterText,
+        fontSize: FONT_SIZE.subtitle,
+        fill: TEXT_COLOR.tertiary,
+        fontFamily: FONT_FAMILY,
+        textAlign: 'center',
+        textVerticalAlign: 'middle',
+      },
+    });
+  }
+
+  return elements;
+}
+
 // ---------------------------------------------------------------------------
 // buildPieOption
 // ---------------------------------------------------------------------------
@@ -75,10 +136,9 @@ function buildPieLegend(
  * 职责：
  * - 将饼图系列条目映射为 ECharts 系列定义。
  * - 当 `subType === 'ring'` 时设置 `radius`。
- * - 为提示框和图例提供合理的默认值。
+ * - 环形图支持中心文本（centerText / subCenterText）。
+ * - 统一设置 `center: ['40%', '50%']`，为右侧图例留空间。
  * - 饼图没有 xAxis / yAxis。
- *
- * 适配器不执行业务校验；该工作由上游校验器处理。
  *
  * @param model - 完全解析的语义模型。
  * @returns 可供 ECharts 运行时使用的 `EChartsOption`。
@@ -86,6 +146,7 @@ function buildPieLegend(
 export function buildPieOption(model: ChartSemanticModel): EChartsOption {
   const echartsSeries: Record<string, unknown>[] = [];
   let firstPieData: Array<Record<string, unknown>> = [];
+  let firstRing: PieSeries | undefined;
 
   for (let i = 0; i < model.series.length; i++) {
     const s = model.series[i];
@@ -104,10 +165,14 @@ export function buildPieOption(model: ChartSemanticModel): EChartsOption {
       type: 'pie',
       name: s.name,
       data: pieData,
+      center: PIE_CENTER,
     };
 
     if (s.subType === 'ring') {
-      seriesEntry.radius = ['40%', '70%'];
+      seriesEntry.radius = ['50%', '75%'];
+      if (firstRing === undefined) {
+        firstRing = s;
+      }
     }
 
     echartsSeries.push(seriesEntry);
@@ -118,6 +183,14 @@ export function buildPieOption(model: ChartSemanticModel): EChartsOption {
     legend: buildPieLegend(firstPieData),
     series: echartsSeries,
   };
+
+  // 环形图中心文本
+  if (firstRing !== undefined) {
+    const graphic = buildRingGraphic(firstRing.centerText, firstRing.subCenterText);
+    if (graphic !== undefined) {
+      option.graphic = graphic;
+    }
+  }
 
   return option;
 }

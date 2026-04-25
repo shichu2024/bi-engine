@@ -9,21 +9,21 @@
   "resume": {
     "mode": "idle",
     "next_role": "pm",
-    "next_action": "FEAT-008 VRT日志目录规范化已完成。等待用户新需求。"
+    "next_action": "FEAT-009 已完成。等待用户新需求。"
   },
   "latest_validation": {
-    "story": "FEAT-008",
-    "task": "vrt-log-dir-normalization",
+    "story": "FEAT-009",
+    "task": "all",
     "status": "DONE",
     "decision": "pass",
     "root_cause_type": "none",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "VRT 日志目录规范化完成。Playwright outputDir 和 HTML report 统一到 .runs/[timestamp]/ 下，.gitignore 已更新，旧产物已清理。",
-    "report_ref": "",
-    "updated_at": "2026-04-25T15:15:00Z"
+    "summary": "ECharts 标准化 Option 构建与扩展能力全部完成。416 个测试全部通过，构建成功。",
+    "report_ref": "codespec/specs/FEAT-009-ECharts标准化Option构建与扩展能力/validation-report.md",
+    "updated_at": "2026-04-25T21:00:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-25T15:15:00Z"
+  "last_updated": "2026-04-25T21:00:00Z"
 }

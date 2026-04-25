@@ -171,7 +171,9 @@ describe('buildEChartsOption', () => {
       const model = makeLineModel();
       const option = buildEChartsOption(model);
 
-      expect(option.title).toBeUndefined();
+      // 标准化模板提供 title（show: false），不再为 undefined
+      expect(option).toHaveProperty('title');
+      expect((option.title as Record<string, unknown>).show).toBe(false);
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('xAxis');
       expect(option).toHaveProperty('yAxis');
@@ -183,7 +185,8 @@ describe('buildEChartsOption', () => {
       const model = makeBarModel();
       const option = buildEChartsOption(model);
 
-      expect(option.title).toBeUndefined();
+      expect(option).toHaveProperty('title');
+      expect((option.title as Record<string, unknown>).show).toBe(false);
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('xAxis');
       expect(option).toHaveProperty('yAxis');
@@ -195,10 +198,12 @@ describe('buildEChartsOption', () => {
       const model = makePieModel();
       const option = buildEChartsOption(model);
 
-      expect(option.title).toBeUndefined();
+      expect(option).toHaveProperty('title');
+      expect((option.title as Record<string, unknown>).show).toBe(false);
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('tooltip');
       expect(option).toHaveProperty('legend');
+      // 饼图模板不包含 xAxis/yAxis，但笛卡尔模板会。验证 pie 无坐标轴。
       expect(option.xAxis).toBeUndefined();
       expect(option.yAxis).toBeUndefined();
     });

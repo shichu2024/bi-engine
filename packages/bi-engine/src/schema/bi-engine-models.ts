@@ -297,6 +297,10 @@ export interface PieSeries {
   type: 'pie';
   /** 衍生类型：环形图 */
   subType?: 'ring';
+  /** 环形图中心主文本（如 "Total"），仅 subType=ring 时生效 */
+  centerText?: string;
+  /** 环形图中心副文本（如 "$100K"），仅 subType=ring 时生效 */
+  subCenterText?: string;
   /** 数据映射 */
   encode: { name: string; value: string };
   /** 系列名称 */
