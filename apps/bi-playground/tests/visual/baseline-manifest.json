@@ -1,4 +1,491 @@
 {
   "version": 1,
-  "baselines": {}
+  "baselines": {
+    "bar-horizontal--dark--375x300": {
+      "fixtureId": "bar-horizontal",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "bar-horizontal--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.110Z",
+      "approvedBy": "manual"
+    },
+    "bar-horizontal--dark--640x480": {
+      "fixtureId": "bar-horizontal",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "bar-horizontal--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.113Z",
+      "approvedBy": "manual"
+    },
+    "bar-horizontal--dark--960x600": {
+      "fixtureId": "bar-horizontal",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "bar-horizontal--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.114Z",
+      "approvedBy": "manual"
+    },
+    "bar-horizontal--light--375x300": {
+      "fixtureId": "bar-horizontal",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "bar-horizontal--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.116Z",
+      "approvedBy": "manual"
+    },
+    "bar-horizontal--light--640x480": {
+      "fixtureId": "bar-horizontal",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "bar-horizontal--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.117Z",
+      "approvedBy": "manual"
+    },
+    "bar-horizontal--light--960x600": {
+      "fixtureId": "bar-horizontal",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "bar-horizontal--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.119Z",
+      "approvedBy": "manual"
+    },
+    "bar-multi--dark--375x300": {
+      "fixtureId": "bar-multi",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "bar-multi--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.120Z",
+      "approvedBy": "manual"
+    },
+    "bar-multi--dark--640x480": {
+      "fixtureId": "bar-multi",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "bar-multi--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.121Z",
+      "approvedBy": "manual"
+    },
+    "bar-multi--dark--960x600": {
+      "fixtureId": "bar-multi",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "bar-multi--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.122Z",
+      "approvedBy": "manual"
+    },
+    "bar-multi--light--375x300": {
+      "fixtureId": "bar-multi",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "bar-multi--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.123Z",
+      "approvedBy": "manual"
+    },
+    "bar-multi--light--640x480": {
+      "fixtureId": "bar-multi",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "bar-multi--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.124Z",
+      "approvedBy": "manual"
+    },
+    "bar-multi--light--960x600": {
+      "fixtureId": "bar-multi",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "bar-multi--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.125Z",
+      "approvedBy": "manual"
+    },
+    "bar-single--dark--375x300": {
+      "fixtureId": "bar-single",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "bar-single--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.126Z",
+      "approvedBy": "manual"
+    },
+    "bar-single--dark--640x480": {
+      "fixtureId": "bar-single",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "bar-single--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.127Z",
+      "approvedBy": "manual"
+    },
+    "bar-single--dark--960x600": {
+      "fixtureId": "bar-single",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "bar-single--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.128Z",
+      "approvedBy": "manual"
+    },
+    "bar-single--light--375x300": {
+      "fixtureId": "bar-single",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "bar-single--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.129Z",
+      "approvedBy": "manual"
+    },
+    "bar-single--light--640x480": {
+      "fixtureId": "bar-single",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "bar-single--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.130Z",
+      "approvedBy": "manual"
+    },
+    "bar-single--light--960x600": {
+      "fixtureId": "bar-single",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "bar-single--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.131Z",
+      "approvedBy": "manual"
+    },
+    "line-area--dark--375x300": {
+      "fixtureId": "line-area",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-area--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.132Z",
+      "approvedBy": "manual"
+    },
+    "line-area--dark--640x480": {
+      "fixtureId": "line-area",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-area--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.133Z",
+      "approvedBy": "manual"
+    },
+    "line-area--dark--960x600": {
+      "fixtureId": "line-area",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-area--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.134Z",
+      "approvedBy": "manual"
+    },
+    "line-area--light--375x300": {
+      "fixtureId": "line-area",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-area--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.135Z",
+      "approvedBy": "manual"
+    },
+    "line-area--light--640x480": {
+      "fixtureId": "line-area",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-area--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.136Z",
+      "approvedBy": "manual"
+    },
+    "line-area--light--960x600": {
+      "fixtureId": "line-area",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-area--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.137Z",
+      "approvedBy": "manual"
+    },
+    "line-multi--dark--375x300": {
+      "fixtureId": "line-multi",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-multi--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.138Z",
+      "approvedBy": "manual"
+    },
+    "line-multi--dark--640x480": {
+      "fixtureId": "line-multi",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-multi--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.139Z",
+      "approvedBy": "manual"
+    },
+    "line-multi--dark--960x600": {
+      "fixtureId": "line-multi",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-multi--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.139Z",
+      "approvedBy": "manual"
+    },
+    "line-multi--light--375x300": {
+      "fixtureId": "line-multi",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-multi--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.140Z",
+      "approvedBy": "manual"
+    },
+    "line-multi--light--640x480": {
+      "fixtureId": "line-multi",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-multi--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.141Z",
+      "approvedBy": "manual"
+    },
+    "line-multi--light--960x600": {
+      "fixtureId": "line-multi",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-multi--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.142Z",
+      "approvedBy": "manual"
+    },
+    "line-single--dark--375x300": {
+      "fixtureId": "line-single",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-single--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.143Z",
+      "approvedBy": "manual"
+    },
+    "line-single--dark--640x480": {
+      "fixtureId": "line-single",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-single--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.144Z",
+      "approvedBy": "manual"
+    },
+    "line-single--dark--960x600": {
+      "fixtureId": "line-single",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-single--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.145Z",
+      "approvedBy": "manual"
+    },
+    "line-single--light--375x300": {
+      "fixtureId": "line-single",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-single--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.146Z",
+      "approvedBy": "manual"
+    },
+    "line-single--light--640x480": {
+      "fixtureId": "line-single",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-single--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.147Z",
+      "approvedBy": "manual"
+    },
+    "line-single--light--960x600": {
+      "fixtureId": "line-single",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-single--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.148Z",
+      "approvedBy": "manual"
+    },
+    "line-with-options--dark--375x300": {
+      "fixtureId": "line-with-options",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-with-options--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.149Z",
+      "approvedBy": "manual"
+    },
+    "line-with-options--dark--640x480": {
+      "fixtureId": "line-with-options",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-with-options--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.149Z",
+      "approvedBy": "manual"
+    },
+    "line-with-options--dark--960x600": {
+      "fixtureId": "line-with-options",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-with-options--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.152Z",
+      "approvedBy": "manual"
+    },
+    "line-with-options--light--375x300": {
+      "fixtureId": "line-with-options",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "line-with-options--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.153Z",
+      "approvedBy": "manual"
+    },
+    "line-with-options--light--640x480": {
+      "fixtureId": "line-with-options",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "line-with-options--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.154Z",
+      "approvedBy": "manual"
+    },
+    "line-with-options--light--960x600": {
+      "fixtureId": "line-with-options",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "line-with-options--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.155Z",
+      "approvedBy": "manual"
+    },
+    "pie-ring--dark--375x300": {
+      "fixtureId": "pie-ring",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "pie-ring--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.156Z",
+      "approvedBy": "manual"
+    },
+    "pie-ring--dark--640x480": {
+      "fixtureId": "pie-ring",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "pie-ring--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.157Z",
+      "approvedBy": "manual"
+    },
+    "pie-ring--dark--960x600": {
+      "fixtureId": "pie-ring",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "pie-ring--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.158Z",
+      "approvedBy": "manual"
+    },
+    "pie-ring--light--375x300": {
+      "fixtureId": "pie-ring",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "pie-ring--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.159Z",
+      "approvedBy": "manual"
+    },
+    "pie-ring--light--640x480": {
+      "fixtureId": "pie-ring",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "pie-ring--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.160Z",
+      "approvedBy": "manual"
+    },
+    "pie-ring--light--960x600": {
+      "fixtureId": "pie-ring",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "pie-ring--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.161Z",
+      "approvedBy": "manual"
+    },
+    "pie-single--dark--375x300": {
+      "fixtureId": "pie-single",
+      "theme": "dark",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "pie-single--dark--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.162Z",
+      "approvedBy": "manual"
+    },
+    "pie-single--dark--640x480": {
+      "fixtureId": "pie-single",
+      "theme": "dark",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "pie-single--dark--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.163Z",
+      "approvedBy": "manual"
+    },
+    "pie-single--dark--960x600": {
+      "fixtureId": "pie-single",
+      "theme": "dark",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "pie-single--dark--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.164Z",
+      "approvedBy": "manual"
+    },
+    "pie-single--light--375x300": {
+      "fixtureId": "pie-single",
+      "theme": "light",
+      "viewport": "375x300",
+      "renderer": "echarts",
+      "fileName": "pie-single--light--375x300.png",
+      "approvedAt": "2026-04-25T04:43:17.166Z",
+      "approvedBy": "manual"
+    },
+    "pie-single--light--640x480": {
+      "fixtureId": "pie-single",
+      "theme": "light",
+      "viewport": "640x480",
+      "renderer": "echarts",
+      "fileName": "pie-single--light--640x480.png",
+      "approvedAt": "2026-04-25T04:43:17.167Z",
+      "approvedBy": "manual"
+    },
+    "pie-single--light--960x600": {
+      "fixtureId": "pie-single",
+      "theme": "light",
+      "viewport": "960x600",
+      "renderer": "echarts",
+      "fileName": "pie-single--light--960x600.png",
+      "approvedAt": "2026-04-25T04:43:17.168Z",
+      "approvedBy": "manual"
+    }
+  }
 }

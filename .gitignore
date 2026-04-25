@@ -9,3 +9,6 @@ Thumbs.db
 .turbo/
 .cache/
 .vite/
+
+# Playwright VRT 运行时日志（按时间戳分目录）
+apps/bi-playground/tests/visual/.runs/

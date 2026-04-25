@@ -9,21 +9,21 @@
   "resume": {
     "mode": "idle",
     "next_role": "pm",
-    "next_action": "FEAT-007 全部完成。等待用户新需求。"
+    "next_action": "FEAT-008 VRT日志目录规范化已完成。等待用户新需求。"
   },
   "latest_validation": {
-    "story": "ST-007-1~5",
-    "task": "T-001~T-007",
+    "story": "FEAT-008",
+    "task": "vrt-log-dir-normalization",
     "status": "DONE",
     "decision": "pass",
     "root_cause_type": "none",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "FEAT-007 全部实施完毕并通过 QA 验证。379 tests, 0 failures。",
-    "report_ref": "codespec/specs/FEAT-007-新图表类型与BIEngine公共API重构/validation-report.md",
-    "updated_at": "2026-04-25T09:20:00Z"
+    "summary": "VRT 日志目录规范化完成。Playwright outputDir 和 HTML report 统一到 .runs/[timestamp]/ 下，.gitignore 已更新，旧产物已清理。",
+    "report_ref": "",
+    "updated_at": "2026-04-25T15:15:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-25T09:20:00Z"
+  "last_updated": "2026-04-25T15:15:00Z"
 }

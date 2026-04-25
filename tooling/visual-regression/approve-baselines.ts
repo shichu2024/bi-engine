@@ -135,12 +135,11 @@ interface CandidateFile {
 }
 
 function parseCandidateFileName(fileName: string): CandidateFile | null {
-  // 文件名格式：{fixtureId}--{theme}--{viewport}.png
   if (!fileName.endsWith('.png')) {
     return null;
   }
 
-  const baseName = fileName.slice(0, -4); // 移除 .png 扩展名
+  const baseName = fileName.slice(0, -4);
   const parts = baseName.split('--');
 
   if (parts.length !== 3) {

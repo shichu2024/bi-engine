@@ -15,6 +15,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // ---------------------------------------------------------------------------
+// Run directory — stable across Playwright config re-imports
+// ---------------------------------------------------------------------------
+
+// VRT_RUN_ID is set by scripts/vrt-run.mjs to ensure a single directory
+// per invocation. Fallback to timestamp for direct `playwright test` usage.
+const runDir = `tests/visual/.runs/${process.env.VRT_RUN_ID ?? (() => {
+  const now = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}T${p(now.getHours())}-${p(now.getMinutes())}-${p(now.getSeconds())}`;
+})()}`;
+
+// ---------------------------------------------------------------------------
 // Tolerance defaults
 // ---------------------------------------------------------------------------
 
@@ -44,7 +56,7 @@ export default defineConfig({
   // -- Reporting ------------------------------------------------------------
   reporter: [
     ['list'],
-    ['html', { open: 'never', outputFolder: 'tests/visual/diff-artifacts/report' }],
+    ['html', { open: 'never', outputFolder: `${runDir}/report` }],
   ],
 
   // -- Browser context ------------------------------------------------------
@@ -82,11 +94,11 @@ export default defineConfig({
     toHaveScreenshot: {
       threshold: DEFAULT_THRESHOLD,
       maxDiffPixelRatio: DEFAULT_MAX_DIFF_PIXEL_RATIO,
+      // Map snapshot names into fixture-level subdirectories.
+      // When tests call toHaveScreenshot(['line-single', 'line-single--light--960x600']),
+      // Playwright joins the array into: line-single/line-single--light--960x600
+      // The pathTemplate then resolves to:
       // Map snapshot names directly into baselines/ without test-file subdirs.
-      // When tests call toHaveScreenshot('line-single--light--960x600.png'),
-      // Playwright resolves the path to:
-      //   {snapshotDir}/line-single--light--960x600.png
-      // which maps to tests/visual/baselines/line-single--light--960x600.png
       pathTemplate: '{snapshotDir}/{arg}{ext}',
     },
     timeout: 30_000,
@@ -105,5 +117,5 @@ export default defineConfig({
   retries: 0,
 
   // -- Output ---------------------------------------------------------------
-  outputDir: 'tests/visual/diff-artifacts',
+  outputDir: `${runDir}/artifacts`,
 });

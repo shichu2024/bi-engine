@@ -10,6 +10,7 @@ import type { ComponentSearchRef } from '@/components/layout/ComponentSearch';
 import { AppLayout } from './layouts/AppLayout';
 import { SceneDemoPage } from './pages/SceneDemoPage';
 import { EditorPage } from './pages/EditorPage';
+import { VrtRenderPage } from './pages/VrtRenderPage';
 
 // Re-export types for backward compatibility with existing component imports
 export type { ThemeMode, ViewportSize } from './shared-constants';
@@ -67,6 +68,7 @@ export function App(): React.ReactElement {
             />
           }
         >
+          <Route path="/vrt-render" element={<VrtRenderPage />} />
           <Route path="/" element={<SceneDemoPage />} />
           <Route path="/:kind" element={<SceneDemoPage />} />
           <Route path="/editor/:componentId/:sceneId" element={<EditorPage />} />
