@@ -5,7 +5,7 @@
 - 项目：bi-engine2
 - 负责人：
 - 当前激活的功能：无（全部完成）
-- 最后更新时间：2026-04-25T21:00:00Z
+- 最后更新时间：2026-04-26T10:30:00Z
 
 ## 术语
 
@@ -35,6 +35,7 @@
 | FEAT-006 | 设计态支持预留 | done | P2 | specs/FEAT-006-设计态支持预留/ |
 | FEAT-007 | 新图表类型与BIEngine公共API重构 | done | P1 | specs/FEAT-007-新图表类型与BIEngine公共API重构/ |
 | FEAT-009 | ECharts标准化Option构建与扩展能力 | done | P0 | specs/FEAT-009-ECharts标准化Option构建与扩展能力/ |
+| FEAT-010 | 原生React表格组件 | done | P0 | specs/FEAT-010-原生React表格组件/ |
 
 ## Feature 依赖关系
 
@@ -48,6 +49,8 @@ FEAT-003 (done)
   └──→ FEAT-007 (done)
 
 FEAT-001 (done) ──→ FEAT-009 (done)
+
+FEAT-003 (done) ──→ FEAT-010 (proposal)
 ```
 
 ## 状态说明

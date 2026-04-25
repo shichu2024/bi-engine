@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FIXTURE_REGISTRY } from 'bi-engine/testing';
+import { getUnifiedFixturesByKind } from 'bi-engine/testing';
 import { useComponentStore } from '@/stores';
 import { SceneDetail } from '@/components/demo/SceneDetail';
 
@@ -8,7 +8,7 @@ import { SceneDetail } from '@/components/demo/SceneDetail';
 // 常量
 // ---------------------------------------------------------------------------
 
-const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge']);
+const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge', 'table']);
 const DEFAULT_KIND = 'line';
 
 // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ export function SceneDemoPage(): React.ReactElement {
   }, [kind, navigate]);
 
   const fixtures = useMemo(
-    () => FIXTURE_REGISTRY.filter((f) => f.seriesKind === activeKind),
+    () => getUnifiedFixturesByKind(activeKind as 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table'),
     [activeKind],
   );
 

@@ -6,7 +6,7 @@ import {
   CopyOutlined,
   ExpandOutlined,
 } from '@ant-design/icons';
-import type { ChartComponent } from 'bi-engine';
+import type { BIEngineComponent } from 'bi-engine';
 import { InteractivePreview } from './InteractivePreview';
 import { DslCodeSnippet } from './DslCodeSnippet';
 import styles from './SceneDetail.module.css';
@@ -16,7 +16,7 @@ import styles from './SceneDetail.module.css';
 // ---------------------------------------------------------------------------
 
 interface SceneDetailProps {
-  readonly component: ChartComponent;
+  readonly component: BIEngineComponent;
   readonly description: string;
   readonly dsl: string;
   readonly sceneId: string;

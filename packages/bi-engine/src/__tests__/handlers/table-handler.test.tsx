@@ -193,13 +193,13 @@ describe('table-handler', () => {
       expect(container.textContent).toContain('销售数据');
     });
 
-    it('uses CSS grid layout', () => {
+    it('uses HTML table layout', () => {
       const { container } = render(
         <ComponentView component={tableBasic} />,
       );
 
-      const gridEl = container.querySelector('div[style*="grid"]');
-      expect(gridEl).not.toBeNull();
+      const tableEl = container.querySelector('table');
+      expect(tableEl).not.toBeNull();
     });
   });
 

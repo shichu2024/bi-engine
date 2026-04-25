@@ -1,5 +1,5 @@
 {
-  "active_feature": "",
+  "active_feature": "FEAT-010-原生React表格组件",
   "active_phase": "done",
   "active_dispatch": {
     "role": "pm",
@@ -9,21 +9,21 @@
   "resume": {
     "mode": "idle",
     "next_role": "pm",
-    "next_action": "FEAT-009 已完成。等待用户新需求。"
+    "next_action": "FEAT-010 已完成。等待用户新需求。"
   },
   "latest_validation": {
-    "story": "FEAT-009",
+    "story": "FEAT-010",
     "task": "all",
     "status": "DONE",
     "decision": "pass",
     "root_cause_type": "none",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "ECharts 标准化 Option 构建与扩展能力全部完成。416 个测试全部通过，构建成功。",
-    "report_ref": "codespec/specs/FEAT-009-ECharts标准化Option构建与扩展能力/validation-report.md",
-    "updated_at": "2026-04-25T21:00:00Z"
+    "summary": "原生React表格组件实现完成。460个测试全部通过，构建成功。支持基础表格、排序、筛选、列管理、合并单元格、自定义渲染、Playground演示。",
+    "report_ref": "codespec/specs/FEAT-010-原生React表格组件/validation-report.md",
+    "updated_at": "2026-04-26T10:30:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-25T21:00:00Z"
+  "last_updated": "2026-04-26T10:30:00Z"
 }

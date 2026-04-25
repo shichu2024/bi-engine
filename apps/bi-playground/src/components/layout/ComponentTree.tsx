@@ -12,6 +12,7 @@ const CATEGORIES: readonly { kind: string; label: string }[] = [
   { kind: 'radar', label: '雷达图' },
   { kind: 'candlestick', label: '蜡烛图' },
   { kind: 'gauge', label: '仪表盘' },
+  { kind: 'table', label: '表格' },
 ];
 
 // ---------------------------------------------------------------------------

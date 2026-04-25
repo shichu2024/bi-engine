@@ -40,5 +40,9 @@ export {
   FIXTURE_REGISTRY,
   getFixtureById,
   getFixturesByKind,
+  TABLE_FIXTURE_REGISTRY,
+  UNIFIED_FIXTURE_REGISTRY,
+  getUnifiedFixturesByKind,
+  getUnifiedFixtureById,
 } from './fixture-registry';
-export type { FixtureEntry } from './fixture-registry';
+export type { FixtureEntry, TableFixtureEntry, UnifiedFixtureEntry, ComponentKind } from './fixture-registry';

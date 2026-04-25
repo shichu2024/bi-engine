@@ -1,4 +1,4 @@
-import type { ChartComponent } from '../schema/bi-engine-models';
+import type { ChartComponent, TableComponent, BIEngineComponent } from '../schema/bi-engine-models';
 
 import { lineSingleFixture } from './fixtures/line-single';
 import { lineMultiFixture } from './fixtures/line-multi';
@@ -13,6 +13,11 @@ import { scatterBasicFixture } from './fixtures/scatter-basic';
 import { radarBasicFixture } from './fixtures/radar-basic';
 import { candlestickBasicFixture } from './fixtures/candlestick-basic';
 import { gaugeBasicFixture } from './fixtures/gauge-basic';
+import { tableBasic } from './fixtures/table-basic';
+import { tableMultiHeader } from './fixtures/table-multi-header';
+import { tableSortable } from './fixtures/table-sortable-filterable';
+import { tableMerge } from './fixtures/table-merge';
+import { tableEnumRender } from './fixtures/table-enum-render';
 
 // ---------------------------------------------------------------------------
 // 测试夹具条目类型
@@ -154,4 +159,89 @@ export function getFixturesByKind(kind: 'line' | 'bar' | 'pie' | 'scatter' | 'ra
     }
   }
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// 表格夹具注册表
+// ---------------------------------------------------------------------------
+
+/** 组件种类 */
+export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table';
+
+/** 统一夹具条目 */
+export interface UnifiedFixtureEntry {
+  readonly id: string;
+  readonly description: string;
+  readonly componentKind: ComponentKind;
+  readonly component: BIEngineComponent;
+}
+
+/** 表格夹具条目 */
+export interface TableFixtureEntry {
+  readonly id: string;
+  readonly description: string;
+  readonly component: TableComponent;
+}
+
+export const TABLE_FIXTURE_REGISTRY: readonly TableFixtureEntry[] = [
+  {
+    id: 'table-basic',
+    description: '基础表格：销售数据展示',
+    component: tableBasic,
+  },
+  {
+    id: 'table-multi-header',
+    description: '多级表头：学生成绩表',
+    component: tableMultiHeader,
+  },
+  {
+    id: 'table-sortable',
+    description: '可排序表格：学生信息（点击列头排序）',
+    component: tableSortable,
+  },
+  {
+    id: 'table-merge',
+    description: '合并单元格：部门人员表（行合并）',
+    component: tableMerge,
+  },
+  {
+    id: 'table-enum-render',
+    description: '枚举映射：订单状态表（enumConfig 自动映射）',
+    component: tableEnumRender,
+  },
+] as const;
+
+/** 统一注册表（图表 + 表格） */
+export const UNIFIED_FIXTURE_REGISTRY: readonly UnifiedFixtureEntry[] = [
+  ...FIXTURE_REGISTRY.map((f) => ({
+    id: f.id,
+    description: f.description,
+    componentKind: f.seriesKind as ComponentKind,
+    component: f.component as BIEngineComponent,
+  })),
+  ...TABLE_FIXTURE_REGISTRY.map((f) => ({
+    id: f.id,
+    description: f.description,
+    componentKind: 'table' as ComponentKind,
+    component: f.component as BIEngineComponent,
+  })),
+];
+
+/** 按 kind 获取统一夹具 */
+export function getUnifiedFixturesByKind(kind: ComponentKind): readonly UnifiedFixtureEntry[] {
+  const result: UnifiedFixtureEntry[] = [];
+  for (const entry of UNIFIED_FIXTURE_REGISTRY) {
+    if (entry.componentKind === kind) {
+      result.push(entry);
+    }
+  }
+  return result;
+}
+
+/** 按 id 查找统一夹具 */
+export function getUnifiedFixtureById(id: string): UnifiedFixtureEntry | undefined {
+  for (const entry of UNIFIED_FIXTURE_REGISTRY) {
+    if (entry.id === id) return entry;
+  }
+  return undefined;
 }

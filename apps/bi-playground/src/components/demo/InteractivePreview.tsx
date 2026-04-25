@@ -1,5 +1,5 @@
-import type { ChartComponent } from 'bi-engine';
-import { ChartPreview } from '@/components/ChartPreview';
+import type { BIEngineComponent } from 'bi-engine';
+import { BIEngine } from 'bi-engine';
 import styles from './SceneDetail.module.css';
 import type { ReactNode } from 'react';
 
@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 // ---------------------------------------------------------------------------
 
 interface InteractivePreviewProps {
-  readonly component: ChartComponent;
+  readonly component: BIEngineComponent;
   readonly description: string;
   readonly toolbar?: ReactNode;
 }
@@ -19,7 +19,6 @@ interface InteractivePreviewProps {
 
 export function InteractivePreview({
   component,
-  description,
   toolbar,
 }: InteractivePreviewProps): React.ReactElement {
   return (
@@ -27,10 +26,9 @@ export function InteractivePreview({
       className={styles.previewContainer}
       data-testid="interactive-preview"
     >
-      <ChartPreview
-        component={component}
-        description={description}
-        toolbar={toolbar}
+      {toolbar && <div style={{ marginBottom: 8 }}>{toolbar}</div>}
+      <BIEngine
+        schema={component}
       />
     </div>
   );
