@@ -324,7 +324,7 @@ describe('buildSeriesData', () => {
       ]);
     });
 
-    it('静默跳过不支持的系列类型（散点图）', () => {
+    it('处理散点图系列', () => {
       const series = [
         {
           type: 'scatter',
@@ -334,10 +334,24 @@ describe('buildSeriesData', () => {
       ] as Series[];
 
       const result = buildSeriesData(series, sampleData);
+      expect(result).toHaveLength(1);
+      expect(result[0].seriesType).toBe('scatter');
+    });
+
+    it('静默跳过不支持的系列类型（如 heatmap）', () => {
+      const series = [
+        {
+          type: 'heatmap',
+          name: 'Heat',
+          encode: { x: 'month', y: 'sales' },
+        },
+      ] as Series[];
+
+      const result = buildSeriesData(series, sampleData);
       expect(result).toHaveLength(0);
     });
 
-    it('在同一数组中处理支持的类型并跳过不支持的类型', () => {
+    it('在同一数组中处理所有支持的类型', () => {
       const series = [
         {
           type: 'line',
@@ -358,9 +372,10 @@ describe('buildSeriesData', () => {
 
       const result = buildSeriesData(series, sampleData);
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(result[0].seriesType).toBe('line');
-      expect(result[1].seriesType).toBe('bar');
+      expect(result[1].seriesType).toBe('scatter');
+      expect(result[2].seriesType).toBe('bar');
     });
   });
 });

@@ -125,8 +125,8 @@ describe('validateChartComponent - 正常路径', () => {
     const input = validPieChart();
     const result = validateChartComponent(input);
     expect(result.ok).toBe(true);
-    expect(hasError(result, 'PIE_WITH_X_AXIS')).toBe(false);
-    expect(hasError(result, 'PIE_WITH_Y_AXIS')).toBe(false);
+    expect(hasError(result, 'NON_CARTESIAN_WITH_X_AXIS')).toBe(false);
+    expect(hasError(result, 'NON_CARTESIAN_WITH_Y_AXIS')).toBe(false);
   });
 
   it('接受单图表中的多个系列', () => {
@@ -275,7 +275,7 @@ describe('validateChartComponent - 错误路径', () => {
   });
 
   // 错误 5：不支持的系列类型
-  it('拒绝第一阶段不支持的散点图系列', () => {
+  it('拒绝第一阶段不支持的系列类型（如 heatmap）', () => {
     const input = {
       id: 'chart-1',
       type: 'chart',
@@ -283,7 +283,7 @@ describe('validateChartComponent - 错误路径', () => {
         dataType: 'static',
         data: [{ x: 1, y: 2 }],
         series: [
-          { type: 'scatter', name: 'Points', encode: { x: 'x', y: 'y' } },
+          { type: 'heatmap', name: 'Heat', encode: { x: 'x', y: 'y' } },
         ],
       },
       xAxis: { type: 'value' },
@@ -294,63 +294,10 @@ describe('validateChartComponent - 错误路径', () => {
     expect(hasError(result, 'UNSUPPORTED_SERIES_TYPE')).toBe(true);
     const err = getErrors(result, 'UNSUPPORTED_SERIES_TYPE')[0];
     expect(err.kind).toBe(ValidationErrorKind.UNSUPPORTED);
-    expect(err.message).toContain('scatter');
+    expect(err.message).toContain('heatmap');
   });
 
-  it('拒绝第一阶段不支持的雷达图系列', () => {
-    const input = {
-      id: 'chart-1',
-      type: 'chart',
-      dataProperties: {
-        dataType: 'static',
-        data: [{ name: 'A', value: 10 }],
-        series: [
-          { type: 'radar', name: 'Radar', encode: { name: 'name', value: 'value' } },
-        ],
-      },
-    };
-    const result = validateChartComponent(input);
-    expect(result.ok).toBe(false);
-    expect(hasError(result, 'UNSUPPORTED_SERIES_TYPE')).toBe(true);
-  });
-
-  it('拒绝第一阶段不支持的仪表盘系列', () => {
-    const input = {
-      id: 'chart-1',
-      type: 'chart',
-      dataProperties: {
-        dataType: 'static',
-        data: [{ value: 75 }],
-        series: [
-          { type: 'gauge', name: 'Gauge', encode: { value: 'value' } },
-        ],
-      },
-    };
-    const result = validateChartComponent(input);
-    expect(result.ok).toBe(false);
-    expect(hasError(result, 'UNSUPPORTED_SERIES_TYPE')).toBe(true);
-  });
-
-  it('拒绝第一阶段不支持的 K 线图系列', () => {
-    const input = {
-      id: 'chart-1',
-      type: 'chart',
-      dataProperties: {
-        dataType: 'static',
-        data: [{ open: 10, close: 12, low: 8, high: 15 }],
-        series: [
-          { type: 'candlestick', name: 'K', encode: { open: 'open', close: 'close', low: 'low', high: 'high' } },
-        ],
-      },
-      xAxis: { type: 'category' },
-      yAxis: { type: 'value' },
-    };
-    const result = validateChartComponent(input);
-    expect(result.ok).toBe(false);
-    expect(hasError(result, 'UNSUPPORTED_SERIES_TYPE')).toBe(true);
-  });
-
-  // 错误 6：饼图包含笛卡尔坐标轴
+  // 错误 6：非笛卡尔图表包含笛卡尔坐标轴
   it('拒绝包含 xAxis 的饼图', () => {
     const input = {
       ...validPieChart(),
@@ -358,7 +305,7 @@ describe('validateChartComponent - 错误路径', () => {
     };
     const result = validateChartComponent(input);
     expect(result.ok).toBe(false);
-    expect(hasError(result, 'PIE_WITH_X_AXIS')).toBe(true);
+    expect(hasError(result, 'NON_CARTESIAN_WITH_X_AXIS')).toBe(true);
   });
 
   it('拒绝包含 yAxis 的饼图', () => {
@@ -368,7 +315,7 @@ describe('validateChartComponent - 错误路径', () => {
     };
     const result = validateChartComponent(input);
     expect(result.ok).toBe(false);
-    expect(hasError(result, 'PIE_WITH_Y_AXIS')).toBe(true);
+    expect(hasError(result, 'NON_CARTESIAN_WITH_Y_AXIS')).toBe(true);
   });
 
   it('拒绝同时包含 xAxis 和 yAxis 的饼图', () => {
@@ -379,8 +326,8 @@ describe('validateChartComponent - 错误路径', () => {
     };
     const result = validateChartComponent(input);
     expect(result.ok).toBe(false);
-    expect(hasError(result, 'PIE_WITH_X_AXIS')).toBe(true);
-    expect(hasError(result, 'PIE_WITH_Y_AXIS')).toBe(true);
+    expect(hasError(result, 'NON_CARTESIAN_WITH_X_AXIS')).toBe(true);
+    expect(hasError(result, 'NON_CARTESIAN_WITH_Y_AXIS')).toBe(true);
   });
 
   // 错误 7：不支持的 dataType（datasource / api）
@@ -612,7 +559,7 @@ describe('validateChartComponent - 错误分类', () => {
         dataType: 'static',
         data: [{ x: 1, y: 2 }],
         series: [
-          { type: 'scatter', name: 'Points', encode: { x: 'x', y: 'y' } },
+          { type: 'heatmap', name: 'Heat', encode: { x: 'x', y: 'y' } },
         ],
       },
       xAxis: { type: 'value' },
@@ -673,7 +620,7 @@ describe('validateChartComponent - 边界情况', () => {
         dataType: 'static',
         data: 'not-array',
         series: [
-          { type: 'scatter', name: 'Points', encode: { x: 'x', y: 'y' } },
+          { type: 'heatmap', name: 'Heat', encode: { x: 'x', y: 'y' } },
         ],
       },
       xAxis: { type: 'value' },
@@ -715,7 +662,7 @@ describe('validateChartComponent - 边界情况', () => {
       dataProperties: {
         ...validLineChart().dataProperties,
         series: [
-          { type: 'radar', name: 'Radar', encode: { name: 'name', value: 'value' } },
+          { type: 'heatmap', name: 'Heat', encode: { x: 'x', y: 'y' } },
         ],
       },
     };
@@ -732,7 +679,7 @@ describe('validateChartComponent - 边界情况', () => {
         ...validLineChart().dataProperties,
         series: [
           { type: 'line', name: 'Sales', encode: { x: 'month', y: 'sales' } },
-          { type: 'radar', name: 'Radar', encode: { name: 'month', value: 'sales' } },
+          { type: 'heatmap', name: 'Heat', encode: { x: 'month', y: 'sales' } },
         ],
       },
     };

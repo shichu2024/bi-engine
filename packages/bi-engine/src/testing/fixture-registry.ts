@@ -9,6 +9,10 @@ import { barHorizontalFixture } from './fixtures/bar-horizontal';
 import { pieSingleFixture } from './fixtures/pie-single';
 import { pieRingFixture } from './fixtures/pie-ring';
 import { lineWithOptionsFixture } from './fixtures/chart-with-options';
+import { scatterBasicFixture } from './fixtures/scatter-basic';
+import { radarBasicFixture } from './fixtures/radar-basic';
+import { candlestickBasicFixture } from './fixtures/candlestick-basic';
+import { gaugeBasicFixture } from './fixtures/gauge-basic';
 
 // ---------------------------------------------------------------------------
 // 测试夹具条目类型
@@ -26,7 +30,7 @@ export interface FixtureEntry {
   /** 人类可读的描述，说明此夹具展示的内容 */
   readonly description: string;
   /** 此夹具测试的图表类型 */
-  readonly seriesKind: 'line' | 'bar' | 'pie';
+  readonly seriesKind: 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge';
   /** ChartComponent 实例 */
   readonly component: ChartComponent;
 }
@@ -95,6 +99,30 @@ export const FIXTURE_REGISTRY: readonly FixtureEntry[] = [
     seriesKind: 'line',
     component: lineWithOptionsFixture,
   },
+  {
+    id: 'scatter-basic',
+    description: '散点图：广告支出与销售额相关关系',
+    seriesKind: 'scatter',
+    component: scatterBasicFixture,
+  },
+  {
+    id: 'radar-basic',
+    description: '雷达图：产品多维度能力评估',
+    seriesKind: 'radar',
+    component: radarBasicFixture,
+  },
+  {
+    id: 'candlestick-basic',
+    description: '蜡烛图：股票一周 K 线走势',
+    seriesKind: 'candlestick',
+    component: candlestickBasicFixture,
+  },
+  {
+    id: 'gauge-basic',
+    description: '仪表盘：项目完成率',
+    seriesKind: 'gauge',
+    component: gaugeBasicFixture,
+  },
 ] as const;
 
 /**
@@ -118,7 +146,7 @@ export function getFixtureById(id: string): FixtureEntry | undefined {
  * @param kind - 要筛选的图表类型。
  * @returns 匹配的夹具条目数组。
  */
-export function getFixturesByKind(kind: 'line' | 'bar' | 'pie'): readonly FixtureEntry[] {
+export function getFixturesByKind(kind: 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge'): readonly FixtureEntry[] {
   const result: FixtureEntry[] = [];
   for (let i = 0; i < FIXTURE_REGISTRY.length; i++) {
     if (FIXTURE_REGISTRY[i].seriesKind === kind) {

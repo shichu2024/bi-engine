@@ -46,6 +46,10 @@ const PHASE1_SUPPORTED_SERIES_TYPES: ReadonlySet<string> = new Set([
   'line',
   'bar',
   'pie',
+  'scatter',
+  'radar',
+  'candlestick',
+  'gauge',
 ]);
 
 const CARTESIAN_SERIES_TYPES: ReadonlySet<string> = new Set([
@@ -195,7 +199,7 @@ function checkSeries(
     if (!PHASE1_SUPPORTED_SERIES_TYPES.has(seriesType)) {
       errors.push({
         code: 'UNSUPPORTED_SERIES_TYPE',
-        message: `Series type '${seriesType}' is not supported in phase 1. Supported types: line, bar, pie.`,
+        message: `Series type '${seriesType}' is not supported in phase 1. Supported types: line, bar, pie, scatter, radar, candlestick, gauge.`,
         kind: ValidationErrorKind.UNSUPPORTED,
         path: `/dataProperties/series/${i}/type`,
       });
@@ -260,8 +264,91 @@ function checkSeriesEncode(
         path: `/dataProperties/series/${index}/encode/y`,
       });
     }
+  } else if (seriesType === 'scatter') {
+    if (!hasEncodeField(encode, 'x')) {
+      errors.push({
+        code: 'MISSING_SCATTER_ENCODE_X',
+        message: `Scatter series at index ${index} must have encode.x.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/x`,
+      });
+    }
+    if (!hasEncodeField(encode, 'y')) {
+      errors.push({
+        code: 'MISSING_SCATTER_ENCODE_Y',
+        message: `Scatter series at index ${index} must have encode.y.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/y`,
+      });
+    }
+  } else if (seriesType === 'radar') {
+    if (!hasEncodeField(encode, 'name')) {
+      errors.push({
+        code: 'MISSING_RADAR_ENCODE_NAME',
+        message: `Radar series at index ${index} must have encode.name.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/name`,
+      });
+    }
+    if (!hasEncodeField(encode, 'value')) {
+      errors.push({
+        code: 'MISSING_RADAR_ENCODE_VALUE',
+        message: `Radar series at index ${index} must have encode.value.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/value`,
+      });
+    }
+  } else if (seriesType === 'candlestick') {
+    if (!hasEncodeField(encode, 'open')) {
+      errors.push({
+        code: 'MISSING_CANDLESTICK_ENCODE_OPEN',
+        message: `Candlestick series at index ${index} must have encode.open.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/open`,
+      });
+    }
+    if (!hasEncodeField(encode, 'close')) {
+      errors.push({
+        code: 'MISSING_CANDLESTICK_ENCODE_CLOSE',
+        message: `Candlestick series at index ${index} must have encode.close.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/close`,
+      });
+    }
+    if (!hasEncodeField(encode, 'low')) {
+      errors.push({
+        code: 'MISSING_CANDLESTICK_ENCODE_LOW',
+        message: `Candlestick series at index ${index} must have encode.low.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/low`,
+      });
+    }
+    if (!hasEncodeField(encode, 'high')) {
+      errors.push({
+        code: 'MISSING_CANDLESTICK_ENCODE_HIGH',
+        message: `Candlestick series at index ${index} must have encode.high.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/high`,
+      });
+    }
+  } else if (seriesType === 'gauge') {
+    if (!hasEncodeField(encode, 'value')) {
+      errors.push({
+        code: 'MISSING_GAUGE_ENCODE_VALUE',
+        message: `Gauge series at index ${index} must have encode.value.`,
+        kind: ValidationErrorKind.INVALID,
+        path: `/dataProperties/series/${index}/encode/value`,
+      });
+    }
   }
 }
+
+/** Non-cartesian series types that should not have axes. */
+const NON_CARTESIAN_SERIES_TYPES: ReadonlySet<string> = new Set([
+  'pie',
+  'radar',
+  'gauge',
+]);
 
 function checkPieAxisMisuse(
   component: Record<string, unknown>,
@@ -277,31 +364,31 @@ function checkPieAxisMisuse(
     return;
   }
 
-  const hasPieSeries = series.some(
-    (s) => isObject(s) && getSeriesType(s) === 'pie',
+  const hasNonCartesianSeries = series.some(
+    (s) => isObject(s) && NON_CARTESIAN_SERIES_TYPES.has(getSeriesType(s) ?? ''),
   );
 
-  if (!hasPieSeries) {
+  if (!hasNonCartesianSeries) {
     return;
   }
 
-  const hasOnlyPieSeries = series.every(
-    (s) => !isObject(s) || getSeriesType(s) === 'pie',
+  const hasOnlyNonCartesianSeries = series.every(
+    (s) => !isObject(s) || NON_CARTESIAN_SERIES_TYPES.has(getSeriesType(s) ?? ''),
   );
 
-  if (hasOnlyPieSeries) {
+  if (hasOnlyNonCartesianSeries) {
     if (component.xAxis !== undefined) {
       errors.push({
-        code: 'PIE_WITH_X_AXIS',
-        message: 'Pie chart should not have xAxis. Pie charts do not use cartesian axes.',
+        code: 'NON_CARTESIAN_WITH_X_AXIS',
+        message: 'Non-cartesian chart (pie/radar/gauge) should not have xAxis.',
         kind: ValidationErrorKind.INVALID,
         path: '/xAxis',
       });
     }
     if (component.yAxis !== undefined) {
       errors.push({
-        code: 'PIE_WITH_Y_AXIS',
-        message: 'Pie chart should not have yAxis. Pie charts do not use cartesian axes.',
+        code: 'NON_CARTESIAN_WITH_Y_AXIS',
+        message: 'Non-cartesian chart (pie/radar/gauge) should not have yAxis.',
         kind: ValidationErrorKind.INVALID,
         path: '/yAxis',
       });
@@ -328,7 +415,7 @@ function checkAxisSeriesConsistency(
   if (!hasXAxis) {
     errors.push({
       code: 'MISSING_X_AXIS',
-      message: 'Cartesian series (line/bar) require xAxis configuration.',
+      message: 'Cartesian series (line/bar/scatter/candlestick) require xAxis configuration.',
       kind: ValidationErrorKind.INVALID,
       path: '/xAxis',
     });
@@ -337,7 +424,7 @@ function checkAxisSeriesConsistency(
   if (!hasYAxis) {
     errors.push({
       code: 'MISSING_Y_AXIS',
-      message: 'Cartesian series (line/bar) require yAxis configuration.',
+      message: 'Cartesian series (line/bar/scatter/candlestick) require yAxis configuration.',
       kind: ValidationErrorKind.INVALID,
       path: '/yAxis',
     });

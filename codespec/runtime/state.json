@@ -9,21 +9,21 @@
   "resume": {
     "mode": "idle",
     "next_role": "pm",
-    "next_action": "FEAT-004/005/006 全部完成。等待用户新需求。"
+    "next_action": "FEAT-007 全部完成。等待用户新需求。"
   },
   "latest_validation": {
-    "story": "",
-    "task": "",
+    "story": "ST-007-1~5",
+    "task": "T-001~T-007",
     "status": "DONE",
     "decision": "pass",
     "root_cause_type": "none",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "FEAT-004/005/006 全部实施完毕并通过验证。",
-    "report_ref": "",
-    "updated_at": "2026-04-23T20:40:00Z"
+    "summary": "FEAT-007 全部实施完毕并通过 QA 验证。379 tests, 0 failures。",
+    "report_ref": "codespec/specs/FEAT-007-新图表类型与BIEngine公共API重构/validation-report.md",
+    "updated_at": "2026-04-25T09:20:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-23T20:40:00Z"
+  "last_updated": "2026-04-25T09:20:00Z"
 }

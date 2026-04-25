@@ -109,6 +109,10 @@ export type {
 export { ChartView } from './react/ChartView';
 export type { ChartViewProps, ChartViewError } from './react/ChartView';
 
+// ---- BIEngine 统一公共入口 ----
+export { BIEngine } from './react/BIEngine';
+export type { BIEngineProps } from './react/BIEngine';
+
 export { ChartStateView } from './react/ChartStateView';
 export type { ChartStateViewProps, ChartState } from './react/ChartStateView';
 

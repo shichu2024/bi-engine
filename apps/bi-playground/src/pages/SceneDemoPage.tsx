@@ -5,14 +5,14 @@ import { useComponentStore } from '@/stores';
 import { SceneDetail } from '@/components/demo/SceneDetail';
 
 // ---------------------------------------------------------------------------
-// Constants
+// 常量
 // ---------------------------------------------------------------------------
 
-const VALID_KINDS = new Set(['line', 'bar', 'pie']);
+const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge']);
 const DEFAULT_KIND = 'line';
 
 // ---------------------------------------------------------------------------
-// Component
+// 主页面组件
 // ---------------------------------------------------------------------------
 
 export function SceneDemoPage(): React.ReactElement {
@@ -22,17 +22,17 @@ export function SceneDemoPage(): React.ReactElement {
   const selectedKind = useComponentStore((s) => s.selectedComponentId);
   const selectComponent = useComponentStore((s) => s.selectComponent);
 
-  // Resolve kind from URL, fallback to default
+  // 从 URL 解析 kind，回退到默认值
   const activeKind = (kind && VALID_KINDS.has(kind)) ? kind : DEFAULT_KIND;
 
-  // Sync URL → store
+  // 同步 URL → store
   useEffect(() => {
     if (selectedKind !== activeKind) {
       selectComponent(activeKind);
     }
   }, [activeKind, selectedKind, selectComponent]);
 
-  // Redirect "/" → "/line"
+  // 重定向 "/" → "/line"
   useEffect(() => {
     if (!kind || !VALID_KINDS.has(kind)) {
       navigate(`/${DEFAULT_KIND}`, { replace: true });

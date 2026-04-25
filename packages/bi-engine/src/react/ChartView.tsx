@@ -24,6 +24,9 @@ export interface ChartViewError {
 // 组件属性
 // ---------------------------------------------------------------------------
 
+/**
+ * @deprecated Use BIEngineProps instead. ChartViewProps will be removed in a future version.
+ */
 export interface ChartViewProps {
   component: ChartComponent;
   className?: string;
@@ -37,6 +40,8 @@ export interface ChartViewProps {
 
 /**
  * ChartComponent 渲染组件。
+ *
+ * @deprecated Use BIEngine instead. ChartView will be removed in a future version.
  *
  * v2.0 行为：委托给 ComponentView，后者通过注册表分发到 chart handler。
  * 保留原有 ChartViewProps 接口，映射到 ComponentViewProps。
