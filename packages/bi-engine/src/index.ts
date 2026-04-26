@@ -245,3 +245,17 @@ export {
   echartsAdapter,
   EChartsAdapter,
 } from './adapters/echarts/echarts-adapter';
+
+// ---- 图表切换 ----
+export {
+  getSwitchableTypes,
+  convertSchema,
+  isAreaChart,
+  deriveDisplayKind,
+} from './component-handlers/chart/chart-switch';
+export type {
+  SwitchTarget,
+} from './component-handlers/chart/chart-switch';
+
+export { ChartSwitchToolbar } from './component-handlers/chart/ChartSwitchToolbar';
+export type { ChartSwitchToolbarProps } from './component-handlers/chart/ChartSwitchToolbar';

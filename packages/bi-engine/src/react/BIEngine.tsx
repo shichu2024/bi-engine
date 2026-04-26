@@ -2,7 +2,8 @@
 // react/BIEngine.tsx — BI Engine 统一公共入口组件
 // ============================================================================
 
-import type { BIEngineComponent } from '../schema/bi-engine-models';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import type { BIEngineComponent, ChartComponent } from '../schema/bi-engine-models';
 import type { ThemeTokens } from '../theme/theme-tokens';
 import { ComponentView } from './ComponentView';
 import { RenderModeProvider, RenderMode } from '../platform/render-mode';
@@ -51,6 +52,8 @@ export interface BIEngineProps {
   onError?: (error: { code: string; message: string }) => void;
   /** 设计态选中回调 */
   onSelect?: (componentId: string) => void;
+  /** 图表类型切换回调（受控模式）；不传则内部自动切换（非受控模式） */
+  onChartTypeChange?: (newSchema: BIEngineComponent) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,10 +74,23 @@ export function BIEngine({
   style,
   onError,
   onSelect,
+  onChartTypeChange,
 }: BIEngineProps): React.ReactElement {
   ensureHandlersRegistered();
 
   const renderMode = mode === 'design' ? RenderMode.DESIGN : RenderMode.RUNTIME;
+
+  // 非受控模式：内部维护 schema 状态
+  const [internalSchema, setInternalSchema] = useState<BIEngineComponent>(schema);
+
+  // 外部 schema 变化时同步内部状态（非受控模式）
+  useEffect(() => {
+    if (!onChartTypeChange) {
+      setInternalSchema(schema);
+    }
+  }, [schema, onChartTypeChange]);
+
+  const activeSchema = onChartTypeChange ? schema : internalSchema;
 
   const handleError = onError !== undefined
     ? (error: ComponentError) => {
@@ -82,13 +98,34 @@ export function BIEngine({
       }
     : undefined;
 
+  const handleChartTypeChange = useCallback(
+    (newSchema: BIEngineComponent) => {
+      if (onChartTypeChange) {
+        onChartTypeChange(newSchema);
+      } else {
+        setInternalSchema(newSchema);
+      }
+    },
+    [onChartTypeChange],
+  );
+
+  // 追踪最近的 chart schema：切换到 table 后仍保留，以便 toolbar 可以切回
+  const chartSchemaRef = useRef<ChartComponent | undefined>(
+    schema.type === 'chart' ? schema as ChartComponent : undefined,
+  );
+  if (activeSchema.type === 'chart') {
+    chartSchemaRef.current = activeSchema as ChartComponent;
+  }
+
   const inner = (
     <ComponentView
-      component={schema}
+      component={activeSchema}
       className={className}
       style={style}
       onError={handleError}
       onSelect={onSelect}
+      onChartTypeChange={handleChartTypeChange}
+      originalChartSchema={chartSchemaRef.current}
     />
   );
 

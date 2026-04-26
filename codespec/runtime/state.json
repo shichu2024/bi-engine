@@ -1,5 +1,5 @@
 {
-  "active_feature": "FEAT-014-表格交互增强",
+  "active_feature": "FEAT-015-图表切换工具栏",
   "active_phase": "done",
   "active_dispatch": {
     "role": "",
@@ -12,18 +12,18 @@
     "next_action": ""
   },
   "latest_validation": {
-    "story": "ST-001,ST-002,ST-003,ST-004,ST-005,ST-006,ST-007",
+    "story": "ST-001,ST-002,ST-003,ST-004,ST-005,ST-006",
     "task": "T-001,T-002,T-003,T-004,T-005,T-006,T-007,T-008,T-009",
     "status": "DONE",
     "decision": "pass",
     "root_cause_type": "",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "495 测试全部通过，所有 7 个 stories 通过验证",
-    "report_ref": "codespec/specs/FEAT-014-表格交互增强/validation-report.md",
-    "updated_at": "2026-04-26T18:20:00Z"
+    "summary": "531 测试全部通过，6 个 stories 全部通过验证",
+    "report_ref": "codespec/specs/FEAT-015-图表切换工具栏/validation-report.md",
+    "updated_at": "2026-04-26T19:30:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-26T18:20:00Z"
+  "last_updated": "2026-04-26T19:30:00Z"
 }
