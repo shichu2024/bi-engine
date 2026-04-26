@@ -265,6 +265,10 @@ export function buildBarOption(model: ChartSemanticModel): EChartsOption {
       yAxisIndex: s.encode.yAxisIndex ?? 0,
     };
 
+    if (s.stack !== undefined) {
+      seriesEntry.stack = s.stack;
+    }
+
     echartsSeries.push(seriesEntry);
   }
 
@@ -283,6 +287,74 @@ export function buildBarOption(model: ChartSemanticModel): EChartsOption {
     legend: buildLegend(seriesNames),
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
+    series: echartsSeries,
+  };
+
+  return option;
+}
+
+// ---------------------------------------------------------------------------
+// buildComboOption
+// ---------------------------------------------------------------------------
+
+/**
+ * 从 `ChartSemanticModel` 构建混合图表（柱状+折线）的 ECharts 选项对象。
+ *
+ * 职责：
+ * - 同时处理 bar 和 line 系列条目。
+ * - 为提示框、图例、xAxis、yAxis 提供合理的默认值。
+ *
+ * @param model - 完全解析的语义模型。
+ * @returns 可供 ECharts 运行时使用的 `EChartsOption`。
+ */
+export function buildComboOption(model: ChartSemanticModel): EChartsOption {
+  const categoryData = extractCategoryData(model);
+  const seriesNames: string[] = [];
+  const echartsSeries: Record<string, unknown>[] = [];
+
+  for (let i = 0; i < model.series.length; i++) {
+    const s = model.series[i];
+
+    if (isBarSeries(s)) {
+      seriesNames.push(s.name);
+
+      const seriesEntry: Record<string, unknown> = {
+        type: 'bar',
+        name: s.name,
+        data: extractSeriesYData(model, s.encode.y),
+        xAxisIndex: s.encode.xAxisIndex ?? 0,
+        yAxisIndex: s.encode.yAxisIndex ?? 0,
+      };
+
+      if (s.stack !== undefined) {
+        seriesEntry.stack = s.stack;
+      }
+
+      echartsSeries.push(seriesEntry);
+    } else if (isLineSeries(s)) {
+      seriesNames.push(s.name);
+
+      const seriesEntry: Record<string, unknown> = {
+        type: 'line',
+        name: s.name,
+        data: extractSeriesYData(model, s.encode.y),
+        xAxisIndex: s.encode.xAxisIndex ?? 0,
+        yAxisIndex: s.encode.yAxisIndex ?? 0,
+      };
+
+      if (s.subType === 'area') {
+        seriesEntry.areaStyle = {};
+      }
+
+      echartsSeries.push(seriesEntry);
+    }
+  }
+
+  const option: EChartsOption = {
+    tooltip: buildCartesianTooltip(),
+    legend: buildLegend(seriesNames),
+    xAxis: buildXAxes(model.axes, categoryData),
+    yAxis: buildYAxes(model.axes),
     series: echartsSeries,
   };
 

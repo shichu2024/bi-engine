@@ -1,29 +1,29 @@
 {
-  "active_feature": "FEAT-011-深色与浅色主题支持",
-  "active_phase": "implementing",
+  "active_feature": "FEAT-013-axisGroup数据分组处理",
+  "active_phase": "done",
   "active_dispatch": {
-    "role": "dev",
-    "story": "ST-002",
-    "task": "Phase-1"
+    "role": "",
+    "story": "",
+    "task": ""
   },
   "resume": {
-    "mode": "active",
-    "next_role": "dev",
-    "next_action": "按架构设计 Phase 1-4 实施，Phase 1 先扩展 ThemeTokens"
+    "mode": "idle",
+    "next_role": "",
+    "next_action": ""
   },
   "latest_validation": {
-    "story": "",
-    "task": "",
-    "status": "",
-    "decision": "",
+    "story": "ST-001,ST-002,ST-003,ST-004",
+    "task": "T-001,T-002,T-003,T-004,T-005",
+    "status": "DONE",
+    "decision": "pass",
     "root_cause_type": "",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "",
-    "report_ref": "",
-    "updated_at": ""
+    "summary": "所有 4 个 stories 通过验证，487 测试全部通过",
+    "report_ref": "codespec/specs/FEAT-013-axisGroup数据分组处理/validation-report.md",
+    "updated_at": "2026-04-26T15:30:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-26T13:00:00Z"
+  "last_updated": "2026-04-26T15:30:00Z"
 }

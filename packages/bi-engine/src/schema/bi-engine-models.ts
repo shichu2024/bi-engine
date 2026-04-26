@@ -281,6 +281,8 @@ export interface BarSeries {
   type: 'bar';
   /** 衍生类型：条形图（水平柱状图） */
   subType?: 'horizontal';
+  /** 堆叠分组标识，相同 stack 值的系列会堆叠显示 */
+  stack?: string;
   /** 数据映射 */
   encode: {
     x: string;

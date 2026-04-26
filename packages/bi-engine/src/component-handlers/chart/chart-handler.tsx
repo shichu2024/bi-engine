@@ -22,6 +22,7 @@ import { validateChartComponent } from './chart-validator';
 import { normalizeChartComponent } from './chart-normalizer';
 import { resolveChartData } from './chart-resolver';
 import { buildSemanticModel } from './chart-semantic-model';
+import { chartGroupProcess, shouldApplyAxisGroup } from './chart-group-process';
 import { echartsAdapter } from '../../adapters/echarts/echarts-adapter';
 import { createValidationError, createResolutionError } from '../../platform/errors';
 import { useChartInstance } from '../../react/use-chart-instance';
@@ -111,6 +112,26 @@ const chartModelBuilder: ComponentModelBuilder<ChartComponent, ChartSemanticMode
     component: ChartComponent,
   ): PipelineResult<ChartSemanticModel> {
     const normalized = normalizeChartComponent(component);
+    const axisGroup = component.dataProperties.axisGroup;
+
+    // axisGroup 数据分组处理：将窄表透视为宽表
+    if (shouldApplyAxisGroup(axisGroup)) {
+      const data = resolved.data as Record<string, unknown>[];
+      const groupResult = chartGroupProcess({
+        series: normalized.series,
+        axisGroup,
+        chartData: data,
+      });
+
+      // 用转换后的 series 和 data 构建语义模型
+      const transformedNormalized = {
+        ...normalized,
+        series: groupResult.renderSeries,
+      };
+      const model = buildSemanticModel(transformedNormalized, groupResult.renderData);
+      return { ok: true, data: model };
+    }
+
     const model = buildSemanticModel(normalized, resolved.data);
     return { ok: true, data: model };
   },

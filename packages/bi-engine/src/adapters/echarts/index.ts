@@ -1,7 +1,7 @@
 import type { ThemeTokens } from '../../theme/theme-tokens';
 import type { ChartSemanticModel } from '../../core/chart-semantic-model';
 import type { EChartsOption } from './build-line-option';
-import { buildLineOption, buildBarOption } from './build-line-option';
+import { buildLineOption, buildBarOption, buildComboOption } from './build-line-option';
 import { buildPieOption } from './build-pie-option';
 import { buildScatterOption } from './build-scatter-option';
 import { buildRadarOption } from './build-radar-option';
@@ -23,7 +23,7 @@ import {
 } from './option-templates';
 
 // 重新导出所有公共类型和函数，以便消费者可以从单一入口点导入。
-export { buildLineOption, buildBarOption } from './build-line-option';
+export { buildLineOption, buildBarOption, buildComboOption } from './build-line-option';
 export type { EChartsOption } from './build-line-option';
 export { buildPieOption } from './build-pie-option';
 export { buildScatterOption } from './build-scatter-option';
@@ -123,6 +123,8 @@ function getTemplate(model: ChartSemanticModel, theme?: ThemeTokens): EChartsOpt
       return getLineOptionTemplate(theme);
     case 'bar':
       return getBarOptionTemplate(theme);
+    case 'combo':
+      return getBarOptionTemplate(theme);
     case 'pie':
       return getPieOptionTemplate(theme);
     case 'scatter':
@@ -147,6 +149,8 @@ function buildBaseOption(model: ChartSemanticModel): EChartsOption {
       return buildLineOption(model);
     case 'bar':
       return buildBarOption(model);
+    case 'combo':
+      return buildComboOption(model);
     case 'pie':
       return buildPieOption(model);
     case 'scatter':

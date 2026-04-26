@@ -166,6 +166,7 @@ describe('buildEChartsOption integration', () => {
       { kind: 'candlestick', series: { type: 'candlestick', name: 'C', encode: { open: 'sales', close: 'sales2', low: 'sales3', high: 'sales4' } } },
       { kind: 'gauge', series: { type: 'gauge', name: 'G', encode: { value: 'sales' } } },
     ];
+    // Note: 'combo' tested separately in multi-series tests below
 
     const dataset = [
       { month: 'Jan', sales: 100, sales2: 200, sales3: 50, sales4: 300 },
@@ -306,5 +307,244 @@ describe('deepMergeOption with real templates', () => {
     const textStyle = result.textStyle as Record<string, unknown>;
     expect(textStyle.color).toBe('#red');
     expect(textStyle.fontFamily).toBeDefined();
+  });
+});
+
+// ============================================================================
+// Multi-Series Tests
+// ============================================================================
+
+describe('buildEChartsOption multi-series', () => {
+  it('stacked bar chart passes stack field to ECharts series', () => {
+    const model = createModel({
+      seriesKind: 'bar',
+      series: [
+        { type: 'bar' as const, name: 'Direct', stack: 'traffic', encode: { x: 'month', y: 'sales' } },
+        { type: 'bar' as const, name: 'Organic', stack: 'traffic', encode: { x: 'month', y: 'sales' } },
+      ],
+      dataset: [
+        { month: 'Jan', sales: 100 },
+        { month: 'Feb', sales: 200 },
+      ],
+      axes: [
+        { index: 0, direction: 'x' as const, type: 'category' as const },
+        { index: 0, direction: 'y' as const, type: 'value' as const },
+      ],
+    });
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+
+    expect(series.length).toBe(2);
+    expect(series[0].stack).toBe('traffic');
+    expect(series[1].stack).toBe('traffic');
+    expect(series[0].name).toBe('Direct');
+    expect(series[1].name).toBe('Organic');
+  });
+
+  it('3+ line series generates correct legend and series count', () => {
+    const model = createModel({
+      seriesKind: 'line',
+      series: [
+        { type: 'line' as const, name: 'Beijing', encode: { x: 'month', y: 'temp1' } },
+        { type: 'line' as const, name: 'Shanghai', encode: { x: 'month', y: 'temp2' } },
+        { type: 'line' as const, name: 'Guangzhou', encode: { x: 'month', y: 'temp3' } },
+      ],
+      dataset: [
+        { month: 'Jan', temp1: -2, temp2: 5, temp3: 14 },
+        { month: 'Feb', temp1: 1, temp2: 7, temp3: 16 },
+      ],
+      axes: [
+        { index: 0, direction: 'x' as const, type: 'category' as const },
+        { index: 0, direction: 'y' as const, type: 'value' as const },
+      ],
+    });
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+    const legend = option.legend as Record<string, unknown>;
+
+    expect(series.length).toBe(3);
+    expect(series[0].type).toBe('line');
+    expect(series[1].type).toBe('line');
+    expect(series[2].type).toBe('line');
+    expect(legend.show).toBe(true);
+    expect(legend.data).toEqual(['Beijing', 'Shanghai', 'Guangzhou']);
+  });
+
+  it('combo chart renders both bar and line series', () => {
+    const model = createModel({
+      seriesKind: 'combo',
+      series: [
+        { type: 'bar' as const, name: 'Revenue', encode: { x: 'month', y: 'revenue' } },
+        { type: 'line' as const, name: 'Margin %', encode: { x: 'month', y: 'margin' } },
+      ],
+      dataset: [
+        { month: 'Jan', revenue: 120, margin: 22 },
+        { month: 'Feb', revenue: 150, margin: 25 },
+      ],
+      axes: [
+        { index: 0, direction: 'x' as const, type: 'category' as const },
+        { index: 0, direction: 'y' as const, type: 'value' as const },
+      ],
+    });
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+
+    expect(series.length).toBe(2);
+    expect(series[0].type).toBe('bar');
+    expect(series[0].name).toBe('Revenue');
+    expect(series[1].type).toBe('line');
+    expect(series[1].name).toBe('Margin %');
+  });
+
+  it('combo chart includes correct legend for mixed types', () => {
+    const model = createModel({
+      seriesKind: 'combo',
+      series: [
+        { type: 'bar' as const, name: 'Sales', encode: { x: 'month', y: 'sales' } },
+        { type: 'line' as const, name: 'Growth', encode: { x: 'month', y: 'growth' } },
+      ],
+      dataset: [
+        { month: 'Jan', sales: 100, growth: 5 },
+      ],
+      axes: [
+        { index: 0, direction: 'x' as const, type: 'category' as const },
+        { index: 0, direction: 'y' as const, type: 'value' as const },
+      ],
+    });
+
+    const option = buildEChartsOption(model);
+    const legend = option.legend as Record<string, unknown>;
+
+    expect(legend.show).toBe(true);
+    expect(legend.data).toEqual(['Sales', 'Growth']);
+  });
+
+  it('multi-area chart includes areaStyle for each series', () => {
+    const model = createModel({
+      seriesKind: 'line',
+      series: [
+        { type: 'line' as const, subType: 'area', name: 'Desktop', encode: { x: 'month', y: 'desktop' } },
+        { type: 'line' as const, subType: 'area', name: 'Mobile', encode: { x: 'month', y: 'mobile' } },
+      ],
+      dataset: [
+        { month: 'Jan', desktop: 3200, mobile: 2100 },
+        { month: 'Feb', desktop: 3500, mobile: 2500 },
+      ],
+      axes: [
+        { index: 0, direction: 'x' as const, type: 'category' as const },
+        { index: 0, direction: 'y' as const, type: 'value' as const },
+      ],
+    });
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+
+    expect(series.length).toBe(2);
+    expect(series[0].areaStyle).toBeDefined();
+    expect(series[1].areaStyle).toBeDefined();
+    expect(series[0].name).toBe('Desktop');
+    expect(series[1].name).toBe('Mobile');
+  });
+
+  it('combo chart with stacked bar passes stack through correctly', () => {
+    const model = createModel({
+      seriesKind: 'combo',
+      series: [
+        { type: 'bar' as const, name: 'Product A', stack: 'products', encode: { x: 'month', y: 'sales' } },
+        { type: 'bar' as const, name: 'Product B', stack: 'products', encode: { x: 'month', y: 'sales2' } },
+        { type: 'line' as const, name: 'Trend', encode: { x: 'month', y: 'growth' } },
+      ],
+      dataset: [
+        { month: 'Jan', sales: 100, sales2: 80, growth: 5 },
+      ],
+      axes: [
+        { index: 0, direction: 'x' as const, type: 'category' as const },
+        { index: 0, direction: 'y' as const, type: 'value' as const },
+      ],
+    });
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+
+    expect(series.length).toBe(3);
+    expect(series[0].stack).toBe('products');
+    expect(series[1].stack).toBe('products');
+    expect(series[2].type).toBe('line');
+  });
+});
+
+// ============================================================================
+// axisGroup Integration Tests
+// ============================================================================
+
+describe('buildEChartsOption with axisGroup fixtures', () => {
+  it('line-axis-group fixture renders multiple series from pivot', async () => {
+    const { lineAxisGroupFixture: fixture } = await import('../../../testing/fixtures/line-axis-group');
+    const { normalizeChartComponent } = await import('../../../component-handlers/chart/chart-normalizer');
+    const { buildSemanticModel } = await import('../../../component-handlers/chart/chart-semantic-model');
+    const { chartGroupProcess } = await import('../../../component-handlers/chart/chart-group-process');
+
+    const normalized = normalizeChartComponent(fixture);
+    const axisGroup = fixture.dataProperties.axisGroup;
+    const data = fixture.dataProperties.data as Record<string, unknown>[];
+
+    const groupResult = chartGroupProcess({
+      series: normalized.series,
+      axisGroup,
+      chartData: data,
+    });
+
+    const transformedNormalized = {
+      ...normalized,
+      series: groupResult.renderSeries,
+    };
+    const model = buildSemanticModel(transformedNormalized, groupResult.renderData);
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+
+    // 2 series from 2 unique group combinations
+    expect(series.length).toBe(2);
+    expect(series[0].type).toBe('line');
+    expect(series[1].type).toBe('line');
+
+    // Legend should show both group keys
+    const legend = option.legend as Record<string, unknown>;
+    expect(legend.show).toBe(true);
+  });
+
+  it('bar-axis-group fixture renders multiple series from pivot', async () => {
+    const { barAxisGroupFixture: fixture } = await import('../../../testing/fixtures/bar-axis-group');
+    const { normalizeChartComponent } = await import('../../../component-handlers/chart/chart-normalizer');
+    const { buildSemanticModel } = await import('../../../component-handlers/chart/chart-semantic-model');
+    const { chartGroupProcess } = await import('../../../component-handlers/chart/chart-group-process');
+
+    const normalized = normalizeChartComponent(fixture);
+    const axisGroup = fixture.dataProperties.axisGroup;
+    const data = fixture.dataProperties.data as Record<string, unknown>[];
+
+    const groupResult = chartGroupProcess({
+      series: normalized.series,
+      axisGroup,
+      chartData: data,
+    });
+
+    const transformedNormalized = {
+      ...normalized,
+      series: groupResult.renderSeries,
+    };
+    const model = buildSemanticModel(transformedNormalized, groupResult.renderData);
+
+    const option = buildEChartsOption(model);
+    const series = option.series as Record<string, unknown>[];
+
+    // 3 series from 3 unique regions
+    expect(series.length).toBe(3);
+    expect(series[0].type).toBe('bar');
+    expect(series[1].type).toBe('bar');
+    expect(series[2].type).toBe('bar');
   });
 });

@@ -4,8 +4,8 @@
 
 - 项目：bi-engine2
 - 负责人：
-- 当前激活的功能：无（全部完成）
-- 最后更新时间：2026-04-26T12:30:00Z
+- 当前激活的功能：无（FEAT-013 已完成）
+- 最后更新时间：2026-04-26T15:30:00Z
 
 ## 术语
 
@@ -37,6 +37,8 @@
 | FEAT-009 | ECharts标准化Option构建与扩展能力 | done | P0 | specs/FEAT-009-ECharts标准化Option构建与扩展能力/ |
 | FEAT-010 | 原生React表格组件 | done | P0 | specs/FEAT-010-原生React表格组件/ |
 | FEAT-011 | 深色与浅色主题支持 | done | P1 | specs/FEAT-011-深色与浅色主题支持/ |
+| FEAT-012 | 多系列图表支持 | done | P0 | specs/FEAT-012-多系列图表支持/ |
+| FEAT-013 | axisGroup数据分组处理 | done | P0 | specs/FEAT-013-axisGroup数据分组处理/ |
 
 ## Feature 依赖关系
 

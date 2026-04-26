@@ -6,6 +6,12 @@ import { lineAreaFixture } from './fixtures/line-area';
 import { barSingleFixture } from './fixtures/bar-single';
 import { barMultiFixture } from './fixtures/bar-multi';
 import { barHorizontalFixture } from './fixtures/bar-horizontal';
+import { barStackedFixture } from './fixtures/bar-stacked';
+import { lineMultiTrendFixture } from './fixtures/line-multi-trend';
+import { comboBarLineFixture } from './fixtures/combo-bar-line';
+import { lineAreaMultiFixture } from './fixtures/line-area-multi';
+import { lineAxisGroupFixture } from './fixtures/line-axis-group';
+import { barAxisGroupFixture } from './fixtures/bar-axis-group';
 import { pieSingleFixture } from './fixtures/pie-single';
 import { pieRingFixture } from './fixtures/pie-ring';
 import { lineWithOptionsFixture } from './fixtures/chart-with-options';
@@ -69,6 +75,24 @@ export const FIXTURE_REGISTRY: readonly FixtureEntry[] = [
     component: lineAreaFixture,
   },
   {
+    id: 'line-multi-trend',
+    description: '三线趋势图：三城市 8 个月温度变化',
+    seriesKind: 'line',
+    component: lineMultiTrendFixture,
+  },
+  {
+    id: 'line-area-multi',
+    description: '多面积图：桌面端与移动端流量对比',
+    seriesKind: 'line',
+    component: lineAreaMultiFixture,
+  },
+  {
+    id: 'line-axis-group',
+    description: 'axisGroup分组折线图：窄表数据自动透视为多系列（双字段分组）',
+    seriesKind: 'line',
+    component: lineAxisGroupFixture,
+  },
+  {
     id: 'bar-single',
     description: '单柱图：4 个季度的季度收入',
     seriesKind: 'bar',
@@ -85,6 +109,24 @@ export const FIXTURE_REGISTRY: readonly FixtureEntry[] = [
     description: '条形图（水平柱图）：部门绩效评分',
     seriesKind: 'bar',
     component: barHorizontalFixture,
+  },
+  {
+    id: 'bar-stacked',
+    description: '堆叠柱图：三个渠道的季度访问量构成',
+    seriesKind: 'bar',
+    component: barStackedFixture,
+  },
+  {
+    id: 'combo-bar-line',
+    description: '混合图表：月度销售额（柱）与毛利率（线）',
+    seriesKind: 'bar',
+    component: comboBarLineFixture,
+  },
+  {
+    id: 'bar-axis-group',
+    description: 'axisGroup分组柱图：窄表数据自动透视为多系列（单字段分组）',
+    seriesKind: 'bar',
+    component: barAxisGroupFixture,
   },
   {
     id: 'pie-single',

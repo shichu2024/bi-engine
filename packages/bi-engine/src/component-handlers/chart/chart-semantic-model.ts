@@ -16,7 +16,7 @@ import type {
  * 这是完整 `Series` 可辨识联合类型的缩小版本，
  * 仅反映第一阶段支持的类型。
  */
-export type SeriesKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge';
+export type SeriesKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'combo';
 
 /**
  * 语义模型中使用的坐标轴描述符。
@@ -169,6 +169,13 @@ function extractFormatters(
 }
 
 function deriveSeriesKind(series: Series[]): SeriesKind {
+  const types = new Set(series.map((s) => s.type));
+
+  // 检测混合类型：同时包含 line 和 bar 系列
+  if (types.has('line') && types.has('bar')) {
+    return 'combo';
+  }
+
   const firstType = series[0]?.type;
   if (
     firstType === 'line' ||
