@@ -39,6 +39,8 @@ export interface ComponentViewProps {
    * 用于在 table 视图下仍能显示切换 toolbar。
    */
   originalChartSchema?: ChartComponent;
+  /** 组件变更回调（文本编辑、图表切换等统一出口） */
+  onChange?: (newSchema: BIEngineComponent) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,7 @@ export function ComponentView({
   onSelect,
   onChartTypeChange,
   originalChartSchema,
+  onChange,
 }: ComponentViewProps): React.ReactNode {
   const mode = useRenderMode();
   const chartTheme = useChartTheme();
@@ -114,6 +117,7 @@ export function ComponentView({
     componentId: component.id,
     className,
     style,
+    onChange,
   };
 
   // 7. 渲染
@@ -128,13 +132,13 @@ export function ComponentView({
     : null;
   const title = chartSource?.dataProperties?.title;
   const switchToolbar = chartSource
-    ? buildSwitchToolbar(chartSource, chartModel, onChartTypeChange, chartTheme.tokens, component.type, title)
+    ? buildSwitchToolbar(chartSource, chartModel, onChartTypeChange, onChange, chartTheme.tokens, component.type, title)
     : null;
 
   // 9. 组合渲染结果
   const content = switchToolbar
     ? (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ width: '100%', minHeight: 300, display: 'flex', flexDirection: 'column' }}>
         {switchToolbar}
         <div style={{ flex: 1, minHeight: 0 }}>
           {rendered}
@@ -168,11 +172,12 @@ function buildSwitchToolbar(
   chartSchema: ChartComponent,
   chartModel: ChartSemanticModel | null,
   onChartTypeChange: ((newSchema: BIEngineComponent) => void) | undefined,
+  onChange: ((newSchema: BIEngineComponent) => void) | undefined,
   theme: import('../theme/theme-tokens').ThemeTokens,
   currentViewType: string,
   title?: string,
 ): React.ReactNode {
-  if (!onChartTypeChange) return null;
+  if (!onChartTypeChange && !onChange) return null;
 
   // 从 chart schema 推导 seriesKind
   const series = chartSchema.dataProperties.series ?? [];
@@ -197,7 +202,8 @@ function buildSwitchToolbar(
 
   const handleSwitch = (target: SwitchTarget) => {
     const newSchema = convertSchema(chartSchema, target.type);
-    onChartTypeChange(newSchema);
+    onChartTypeChange?.(newSchema);
+    onChange?.(newSchema);
   };
 
   return (

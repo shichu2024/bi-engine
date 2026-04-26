@@ -8,7 +8,7 @@ import { SceneDetail } from '@/components/demo/SceneDetail';
 // 常量
 // ---------------------------------------------------------------------------
 
-const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge', 'table']);
+const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge', 'table', 'text']);
 const DEFAULT_KIND = 'line';
 
 // ---------------------------------------------------------------------------

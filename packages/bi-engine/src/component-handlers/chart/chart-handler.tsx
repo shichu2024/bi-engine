@@ -166,7 +166,7 @@ function ChartRendererContent({
     <div
       ref={containerRef}
       className={context.className}
-      style={{ width: '100%', height: '100%', ...context.style }}
+      style={{ width: '100%', height: '100%', minHeight: 300, ...context.style }}
     />
   );
 }

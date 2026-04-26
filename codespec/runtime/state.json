@@ -1,5 +1,5 @@
 {
-  "active_feature": "FEAT-016-国际化机制与多语言支持",
+  "active_feature": "FEAT-017-文本编辑onChange与设计态切换",
   "active_phase": "done",
   "active_dispatch": {
     "role": "",
@@ -12,18 +12,18 @@
     "next_action": ""
   },
   "latest_validation": {
-    "story": "ST-001,ST-002,ST-003,ST-004,ST-005,ST-006",
+    "story": "ST-001,ST-002,ST-003,ST-004,ST-005",
     "task": "T-001,T-002,T-003,T-004,T-005,T-006,T-007,T-008",
     "status": "DONE",
     "decision": "pass",
     "root_cause_type": "",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "546 测试全部通过，6 个 stories 全部通过验证",
-    "report_ref": "codespec/specs/FEAT-016-国际化机制与多语言支持/validation-report.md",
-    "updated_at": "2026-04-26T21:10:00Z"
+    "summary": "556 测试全部通过，5 个 stories 全部通过验证",
+    "report_ref": "codespec/specs/FEAT-017-文本编辑onChange与设计态切换/validation-report.md",
+    "updated_at": "2026-04-26T22:15:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-26T21:10:00Z"
+  "last_updated": "2026-04-26T22:15:00Z"
 }

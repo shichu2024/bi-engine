@@ -2,6 +2,7 @@
 // component-handlers/text/text-handler.tsx — 文本组件处理器
 // ============================================================================
 
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type {
   ComponentHandler,
   ComponentValidator,
@@ -15,6 +16,7 @@ import type {
   ResolvedData,
   RenderContext,
 } from '../../platform/types';
+import { RenderMode } from '../../platform/types';
 import type { TextComponent } from '../../schema/bi-engine-models';
 
 // ---------------------------------------------------------------------------
@@ -112,6 +114,12 @@ const textModelBuilder: ComponentModelBuilder<TextComponent, TextSemanticModel> 
 
 const textRenderer: ComponentRenderer<TextComponent, TextSemanticModel> = {
   render(model: TextSemanticModel, context: RenderContext): React.ReactNode {
+    if (context.mode === RenderMode.DESIGN && context.onChange) {
+      return (
+        <DesignTextRenderer model={model} context={context} />
+      );
+    }
+
     return (
       <div
         className={context.className}
@@ -125,6 +133,123 @@ const textRenderer: ComponentRenderer<TextComponent, TextSemanticModel> = {
     );
   },
 };
+
+// ---------------------------------------------------------------------------
+// DesignTextRenderer — 设计态：contentEditable 直接编辑 title 和 content
+// ---------------------------------------------------------------------------
+
+interface DesignTextRendererProps {
+  model: TextSemanticModel;
+  context: RenderContext;
+}
+
+function DesignTextRenderer({ model, context }: DesignTextRendererProps): React.ReactElement {
+  const titleRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // 同步外部 model 变化到 DOM
+  useEffect(() => {
+    if (titleRef.current && titleRef.current.textContent !== (model.title ?? '')) {
+      titleRef.current.textContent = model.title ?? '';
+    }
+  }, [model.title]);
+
+  useEffect(() => {
+    if (contentRef.current && contentRef.current.textContent !== model.content) {
+      contentRef.current.textContent = model.content;
+    }
+  }, [model.content]);
+
+  const commitChange = useCallback(() => {
+    const newTitle = titleRef.current?.textContent ?? '';
+    const newContent = contentRef.current?.textContent ?? '';
+    const trimmedTitle = newTitle.trim();
+    const trimmedContent = newContent.trim();
+
+    if (trimmedTitle === (model.title ?? '') && trimmedContent === model.content) return;
+    if (trimmedContent === '') return;
+
+    const newSchema: TextComponent = {
+      id: context.componentId,
+      type: 'text',
+      dataProperties: {
+        dataType: 'static',
+        title: trimmedTitle || undefined,
+        content: trimmedContent,
+      },
+    };
+    context.onChange?.(newSchema);
+  }, [model, context]);
+
+  const handleBlur = useCallback(() => {
+    // 使用 setTimeout 确保relatedTarget已设置（点击另一个editable时不会误触发）
+    setTimeout(commitChange, 0);
+  }, [commitChange]);
+
+  return (
+    <div
+      className={context.className}
+      style={{
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        borderLeft: `2px solid ${context.theme.border?.selectedColor ?? '#1890ff'}33`,
+        paddingLeft: 8,
+        ...context.style,
+        height: undefined,
+      }}
+    >
+      {/* title — 仅在有内容时渲染 */}
+      {model.title !== undefined && model.title !== '' && (
+        <div
+          ref={titleRef}
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={handleBlur}
+          data-field="title"
+          style={{
+            fontWeight: 'bold',
+            fontSize: 16,
+            marginBottom: 8,
+            outline: 'none',
+            borderRadius: 2,
+            transition: 'background-color 0.15s',
+            cursor: 'text',
+          }}
+          onFocus={(e) => {
+            (e.target as HTMLElement).style.backgroundColor = 'rgba(24,144,255,0.06)';
+          }}
+          onBlurCapture={(e) => {
+            (e.target as HTMLElement).style.backgroundColor = '';
+          }}
+        >
+          {model.title}
+        </div>
+      )}
+      {/* content — contentEditable */}
+      <div
+        ref={contentRef}
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={handleBlur}
+        data-field="content"
+        style={{
+          outline: 'none',
+          borderRadius: 2,
+          transition: 'background-color 0.15s',
+          cursor: 'text',
+        }}
+        onFocus={(e) => {
+          (e.target as HTMLElement).style.backgroundColor = 'rgba(24,144,255,0.06)';
+        }}
+        onBlurCapture={(e) => {
+          (e.target as HTMLElement).style.backgroundColor = '';
+        }}
+      >
+        {model.content}
+      </div>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // 导出

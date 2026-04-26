@@ -16,6 +16,7 @@ import { tableHandler } from '../component-handlers/table';
 import { createUnsupportedHandler } from '../component-handlers/unsupported-handler';
 import type { LocaleInput } from '../locale/types';
 import { LocaleProvider, resolveLocale } from '../locale';
+import { SelectionProvider } from '../design/selection-context';
 
 // ---------------------------------------------------------------------------
 // 懒注册：首次渲染前确保 handler 已注册，避免消费方忘记调用
@@ -56,6 +57,8 @@ export interface BIEngineProps {
   onSelect?: (componentId: string) => void;
   /** 图表类型切换回调（受控模式）；不传则内部自动切换（非受控模式） */
   onChartTypeChange?: (newSchema: BIEngineComponent) => void;
+  /** 统一变更回调：图表切换、文本编辑等均通过此回调通知 */
+  onChange?: (newSchema: BIEngineComponent) => void;
   /** 国际化：传入语言标识或自定义词条对象，默认 zh-CN */
   locale?: LocaleInput;
 }
@@ -79,6 +82,7 @@ export function BIEngine({
   onError,
   onSelect,
   onChartTypeChange,
+  onChange,
   locale,
 }: BIEngineProps): React.ReactElement {
   ensureHandlersRegistered();
@@ -110,8 +114,20 @@ export function BIEngine({
       } else {
         setInternalSchema(newSchema);
       }
+      onChange?.(newSchema);
     },
-    [onChartTypeChange],
+    [onChartTypeChange, onChange],
+  );
+
+  // 统一 onChange：透传给 ComponentView，使 renderer（如文本编辑）也能上报变更
+  const handleChange = useCallback(
+    (newSchema: BIEngineComponent) => {
+      if (!onChartTypeChange) {
+        setInternalSchema(newSchema);
+      }
+      onChange?.(newSchema);
+    },
+    [onChartTypeChange, onChange],
   );
 
   // 追踪最近的 chart schema：切换到 table 后仍保留，以便 toolbar 可以切回
@@ -132,6 +148,7 @@ export function BIEngine({
       onError={handleError}
       onSelect={onSelect}
       onChartTypeChange={handleChartTypeChange}
+      onChange={handleChange}
       originalChartSchema={chartSchemaRef.current}
     />
   );
@@ -139,13 +156,15 @@ export function BIEngine({
   return (
     <LocaleProvider locale={resolvedLocale}>
       <RenderModeProvider mode={renderMode}>
-        {theme !== undefined ? (
-          <ChartThemeProvider tokens={theme}>
-            {inner}
-          </ChartThemeProvider>
-        ) : (
-          inner
-        )}
+        <SelectionProvider>
+          {theme !== undefined ? (
+            <ChartThemeProvider tokens={theme}>
+              {inner}
+            </ChartThemeProvider>
+          ) : (
+            inner
+          )}
+        </SelectionProvider>
       </RenderModeProvider>
     </LocaleProvider>
   );

@@ -1,4 +1,4 @@
-import type { ChartComponent, TableComponent, BIEngineComponent } from '../schema/bi-engine-models';
+import type { ChartComponent, TableComponent, TextComponent, BIEngineComponent } from '../schema/bi-engine-models';
 
 import { lineSingleFixture } from './fixtures/line-single';
 import { lineMultiFixture } from './fixtures/line-multi';
@@ -26,6 +26,8 @@ import { tableMerge } from './fixtures/table-merge';
 import { tableEnumRender } from './fixtures/table-enum-render';
 import { tableFullFeatured } from './fixtures/table-full-featured';
 import { tableSortFilter } from './fixtures/table-sort-filter';
+import { textBasic } from './fixtures/text-basic';
+import { textWithTitle } from './fixtures/text-with-title';
 
 // ---------------------------------------------------------------------------
 // 测试夹具条目类型
@@ -210,7 +212,7 @@ export function getFixturesByKind(kind: 'line' | 'bar' | 'pie' | 'scatter' | 'ra
 // ---------------------------------------------------------------------------
 
 /** 组件种类 */
-export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table';
+export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table' | 'text';
 
 /** 统一夹具条目 */
 export interface UnifiedFixtureEntry {
@@ -225,6 +227,13 @@ export interface TableFixtureEntry {
   readonly id: string;
   readonly description: string;
   readonly component: TableComponent;
+}
+
+/** 文本夹具条目 */
+export interface TextFixtureEntry {
+  readonly id: string;
+  readonly description: string;
+  readonly component: TextComponent;
 }
 
 export const TABLE_FIXTURE_REGISTRY: readonly TableFixtureEntry[] = [
@@ -265,7 +274,24 @@ export const TABLE_FIXTURE_REGISTRY: readonly TableFixtureEntry[] = [
   },
 ] as const;
 
-/** 统一注册表（图表 + 表格） */
+// ---------------------------------------------------------------------------
+// 文本夹具注册表
+// ---------------------------------------------------------------------------
+
+export const TEXT_FIXTURE_REGISTRY: readonly TextFixtureEntry[] = [
+  {
+    id: 'text-basic',
+    description: '基础文本：静态内容展示',
+    component: textBasic,
+  },
+  {
+    id: 'text-with-title',
+    description: '带标题文本：标题 + 内容',
+    component: textWithTitle,
+  },
+] as const;
+
+/** 统一注册表（图表 + 表格 + 文本） */
 export const UNIFIED_FIXTURE_REGISTRY: readonly UnifiedFixtureEntry[] = [
   ...FIXTURE_REGISTRY.map((f) => ({
     id: f.id,
@@ -277,6 +303,12 @@ export const UNIFIED_FIXTURE_REGISTRY: readonly UnifiedFixtureEntry[] = [
     id: f.id,
     description: f.description,
     componentKind: 'table' as ComponentKind,
+    component: f.component as BIEngineComponent,
+  })),
+  ...TEXT_FIXTURE_REGISTRY.map((f) => ({
+    id: f.id,
+    description: f.description,
+    componentKind: 'text' as ComponentKind,
     component: f.component as BIEngineComponent,
   })),
 ];

@@ -4,8 +4,8 @@
 
 - 项目：bi-engine2
 - 负责人：
-- 当前激活的功能：FEAT-016-国际化机制与多语言支持
-- 最后更新时间：2026-04-26T18:20:00Z
+- 当前激活的功能：FEAT-017-文本编辑onChange与设计态切换
+- 最后更新时间：2026-04-26T22:00:00Z
 
 ## 术语
 
@@ -42,6 +42,7 @@
 | FEAT-014 | 表格交互增强 | done | P0 | specs/FEAT-014-表格交互增强/ |
 | FEAT-015 | 图表切换工具栏 | done | P0 | specs/FEAT-015-图表切换工具栏/ |
 | FEAT-016 | 国际化机制与多语言支持 | done | P1 | specs/FEAT-016-国际化机制与多语言支持/ |
+| FEAT-017 | 文本编辑onChange与设计态切换 | done | P0 | specs/FEAT-017-文本编辑onChange与设计态切换/ |
 
 ## Feature 依赖关系
 
@@ -59,6 +60,10 @@ FEAT-001 (done) ──→ FEAT-009 (done)
 FEAT-003 (done) ──→ FEAT-010 (done)
 
 FEAT-009 (done) ──→ FEAT-011 (done)
+
+FEAT-003 (done) ──→ FEAT-017 (proposal)
+FEAT-006 (done) ──→ FEAT-017 (proposal)
+FEAT-015 (done) ──→ FEAT-017 (proposal)
 ```
 
 ## 状态说明

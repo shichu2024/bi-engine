@@ -24,3 +24,6 @@ export type { ViewMode, LayoutStore } from './useLayoutStore';
 
 export { useLocaleStore } from './useLocaleStore';
 export type { LocaleStore } from './useLocaleStore';
+
+export { useModeStore } from './useModeStore';
+export type { DesignMode, ChangeEvent, ModeStore } from './useModeStore';
