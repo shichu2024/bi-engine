@@ -24,6 +24,8 @@ import { tableMultiHeader } from './fixtures/table-multi-header';
 import { tableSortable } from './fixtures/table-sortable-filterable';
 import { tableMerge } from './fixtures/table-merge';
 import { tableEnumRender } from './fixtures/table-enum-render';
+import { tableFullFeatured } from './fixtures/table-full-featured';
+import { tableSortFilter } from './fixtures/table-sort-filter';
 
 // ---------------------------------------------------------------------------
 // 测试夹具条目类型
@@ -250,6 +252,16 @@ export const TABLE_FIXTURE_REGISTRY: readonly TableFixtureEntry[] = [
     id: 'table-enum-render',
     description: '枚举映射：订单状态表（enumConfig 自动映射）',
     component: tableEnumRender,
+  },
+  {
+    id: 'table-sort-filter',
+    description: '排序 & 筛选：学生成绩表（列头排序图标、漏斗筛选、列管理齿轮）',
+    component: tableSortFilter,
+  },
+  {
+    id: 'table-full-featured',
+    description: '全功能演示：员工信息表（分页、排序、筛选、列管理）',
+    component: tableFullFeatured,
   },
 ] as const;
 

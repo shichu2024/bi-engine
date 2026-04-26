@@ -4,8 +4,8 @@
 
 - 项目：bi-engine2
 - 负责人：
-- 当前激活的功能：无（FEAT-013 已完成）
-- 最后更新时间：2026-04-26T15:30:00Z
+- 当前激活的功能：无（FEAT-014 已完成）
+- 最后更新时间：2026-04-26T18:20:00Z
 
 ## 术语
 
@@ -39,6 +39,7 @@
 | FEAT-011 | 深色与浅色主题支持 | done | P1 | specs/FEAT-011-深色与浅色主题支持/ |
 | FEAT-012 | 多系列图表支持 | done | P0 | specs/FEAT-012-多系列图表支持/ |
 | FEAT-013 | axisGroup数据分组处理 | done | P0 | specs/FEAT-013-axisGroup数据分组处理/ |
+| FEAT-014 | 表格交互增强 | done | P0 | specs/FEAT-014-表格交互增强/ |
 
 ## Feature 依赖关系
 

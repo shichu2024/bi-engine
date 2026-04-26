@@ -762,4 +762,10 @@ export interface Column {
   colSpan?: number;
   /** 子列定义（多级表头）。存在 children 时，当前列为父级表头，自动跨列显示 */
   children?: Column[];
+  /** 是否开启排序 */
+  sortable?: boolean;
+  /** 是否开启筛选 */
+  filterable?: boolean;
+  /** 列宽 */
+  width?: string | number;
 }

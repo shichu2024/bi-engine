@@ -19,7 +19,6 @@ import type {
   TableComponent,
   Column,
   MergeRowConfig,
-  EnumValue,
 } from '../../schema/bi-engine-models';
 import { TableView } from './TableView';
 import type { TableColumn } from './types';
@@ -35,6 +34,8 @@ export interface TableSemanticModel {
   data: Record<string, unknown>[];
   mergeRows: MergeRowConfig[];
   hasMerge: boolean;
+  showColumnManager?: boolean;
+  pagination?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,7 +103,7 @@ const tableModelBuilder: ComponentModelBuilder<TableComponent, TableSemanticMode
   build(
     normalized: NormalizedComponent,
     _resolved: ResolvedData,
-    _component: TableComponent,
+    component: TableComponent,
   ): PipelineResult<TableSemanticModel> {
     return {
       ok: true,
@@ -113,22 +114,25 @@ const tableModelBuilder: ComponentModelBuilder<TableComponent, TableSemanticMode
         data: (normalized.properties.data as Record<string, unknown>[]) ?? [],
         mergeRows: (normalized.properties.mergeRows as MergeRowConfig[]) ?? [],
         hasMerge: (normalized.properties.hasMerge as boolean) ?? false,
+        showColumnManager: component.basicProperties?.showColumnManager as boolean | undefined,
+        pagination: component.basicProperties?.pagination as boolean | undefined,
       },
     };
   },
 };
 
 // ---------------------------------------------------------------------------
-// DSL-to-Props 转换
+// DSL-to-Props 转换 — Column.sortable / Column.filterable / Column.width
 // ---------------------------------------------------------------------------
 
-/** 将 Column DSL 映射为 TableColumn（标准化列配置） */
 function dslToTableColumns(columns: Column[]): TableColumn[] {
   return columns.map((col) => {
     const tc: TableColumn = {
       key: col.key,
       title: col.title,
-      width: undefined, // Column DSL doesn't have width yet
+      width: col.width,
+      sortable: col.sortable,
+      filterable: col.filterable,
     };
 
     // Enum config mapping — auto-render enum values
@@ -174,6 +178,8 @@ const tableRenderer: ComponentRenderer<TableComponent, TableSemanticModel> = {
         className={context.className}
         style={context.style}
         theme={context.theme}
+        showColumnManager={model.showColumnManager}
+        pagination={model.pagination}
         declaredMerges={mergeRows.map((m) => ({
           startRowIndex: m.startRowIndex,
           rowSpan: m.rowSpan,

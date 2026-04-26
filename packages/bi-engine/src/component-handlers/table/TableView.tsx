@@ -2,53 +2,290 @@
 // component-handlers/table/TableView.tsx — 原生 React 表格视图组件
 // ============================================================================
 
-import { useState, useCallback, useMemo, Fragment, type ReactNode } from 'react';
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+  type ReactNode,
+} from 'react';
 import type {
   TableColumn,
   SortState,
   SortDirection,
   FilterState,
-  CellMerge,
+  PaginationState,
+  PaginationConfig,
   MergeMap,
 } from './types';
 import type { ThemeTokens } from '../../theme/theme-tokens';
 import { DEFAULT_THEME_TOKENS } from '../../theme/theme-tokens';
 
 // ---------------------------------------------------------------------------
-// 样式工厂 — 从 ThemeTokens 生成 inline styles
+// Constants
+// ---------------------------------------------------------------------------
+
+const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+const MIN_COL_WIDTH = 50;
+
+// ---------------------------------------------------------------------------
+// Style factory
 // ---------------------------------------------------------------------------
 
 function createStyles(t: ThemeTokens) {
   return {
     wrapper: { width: '100%', overflowX: 'auto', fontSize: 14, color: t.font.color } as React.CSSProperties,
     title: { fontWeight: 600, fontSize: 16, marginBottom: 8, color: t.font.color } as React.CSSProperties,
-    table: { width: '100%', borderCollapse: 'collapse', border: `1px solid ${t.table.headerBorder}`, tableLayout: 'auto' as const } as React.CSSProperties,
-    th: { padding: '10px 12px', fontWeight: 600, fontSize: 13, backgroundColor: t.table.headerBg, borderBottom: `2px solid ${t.table.headerBorder}`, textAlign: 'left', whiteSpace: 'nowrap', userSelect: 'none' as const } as React.CSSProperties,
-    td: { padding: '8px 12px', borderBottom: `1px solid ${t.table.cellBorder}`, fontSize: 14 } as React.CSSProperties,
-    thSortable: { cursor: 'pointer' } as React.CSSProperties,
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+      border: `1px solid ${t.table.headerBorder}`,
+      tableLayout: 'fixed' as const,
+    } as React.CSSProperties,
+    th: {
+      padding: '10px 12px',
+      fontWeight: 600,
+      fontSize: 13,
+      backgroundColor: t.table.headerBg,
+      borderBottom: `2px solid ${t.table.headerBorder}`,
+      textAlign: 'left',
+      userSelect: 'none' as const,
+      position: 'relative' as const,
+    } as React.CSSProperties,
+    td: {
+      padding: '8px 12px',
+      borderBottom: `1px solid ${t.table.cellBorder}`,
+      fontSize: 14,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    } as React.CSSProperties,
     thRight: { borderRight: `1px solid ${t.table.cellBorder}` } as React.CSSProperties,
     tdRight: { borderRight: `1px solid ${t.table.cellBorder}` } as React.CSSProperties,
     rowEven: { backgroundColor: t.table.rowStripeBg } as React.CSSProperties,
     rowHover: { backgroundColor: t.table.rowHoverBg } as React.CSSProperties,
     empty: { textAlign: 'center', padding: '32px 16px', color: t.font.tertiaryColor, fontSize: 14 } as React.CSSProperties,
-    sortIcon: { display: 'inline-flex', flexDirection: 'column', marginLeft: 4, verticalAlign: 'middle', lineHeight: 1, fontSize: 10, color: t.font.tertiaryColor } as React.CSSProperties,
-    sortIconActive: { color: t.semantic.info } as React.CSSProperties,
-    arrow: { lineHeight: '8px' } as React.CSSProperties,
-    filterRow: (padding: string): React.CSSProperties => ({ padding, backgroundColor: t.table.headerBg, borderBottom: `1px solid ${t.table.headerBorder}` }),
-    filterInput: { width: '100%', padding: '4px 8px', border: `1px solid ${t.table.inputBorder}`, borderRadius: t.border.radius, fontSize: 12, outline: 'none', boxSizing: 'border-box', backgroundColor: t.table.inputBg, color: t.font.color } as React.CSSProperties,
-    toolbar: { display: 'flex', justifyContent: 'flex-end', marginBottom: 8 } as React.CSSProperties,
-    toolbarBtn: { padding: '4px 12px', border: `1px solid ${t.table.buttonBorder}`, borderRadius: t.border.radius, background: t.table.buttonBg, cursor: 'pointer', fontSize: 13, color: t.table.buttonColor } as React.CSSProperties,
+    headerContent: {
+      display: 'flex',
+      alignItems: 'center',
+      width: '100%',
+      overflow: 'hidden',
+    } as React.CSSProperties,
+    headerText: {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      flex: '1 1 auto',
+      minWidth: 0,
+    } as React.CSSProperties,
+    sortIcon: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 4,
+      flexShrink: 0,
+      width: 16,
+      height: 16,
+    } as React.CSSProperties,
+    filterIcon: {
+      cursor: 'pointer',
+      marginLeft: 4,
+      flexShrink: 0,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 20,
+      height: 20,
+      borderRadius: 2,
+    } as React.CSSProperties,
+    filterIconActive: {
+      color: t.semantic.info,
+      backgroundColor: 'rgba(22,119,255,0.1)',
+    } as React.CSSProperties,
+    gearIcon: {
+      cursor: 'pointer',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 4,
+      flexShrink: 0,
+      width: 20,
+      height: 20,
+      borderRadius: 2,
+      color: t.font.tertiaryColor,
+    } as React.CSSProperties,
+    resizeHandle: {
+      position: 'absolute' as const,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 4,
+      cursor: 'col-resize',
+      backgroundColor: 'transparent',
+      zIndex: 1,
+    } as React.CSSProperties,
+    tooltip: {
+      position: 'fixed' as const,
+      backgroundColor: 'rgba(0,0,0,0.75)',
+      color: '#fff',
+      padding: '4px 8px',
+      borderRadius: 4,
+      fontSize: 12,
+      zIndex: 1100,
+      pointerEvents: 'none' as const,
+      maxWidth: 300,
+      wordBreak: 'break-word' as const,
+    } as React.CSSProperties,
+    paginationWrapper: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      padding: '8px 0',
+      gap: 8,
+      fontSize: 13,
+      color: t.font.color,
+    } as React.CSSProperties,
+    paginationBtn: {
+      minWidth: 28,
+      height: 28,
+      padding: '0 6px',
+      border: `1px solid ${t.table.buttonBorder}`,
+      borderRadius: t.border.radius,
+      background: t.table.buttonBg,
+      cursor: 'pointer',
+      fontSize: 13,
+      color: t.table.buttonColor,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as React.CSSProperties,
+    paginationBtnActive: {
+      background: t.table.primaryButtonBg,
+      color: t.table.primaryButtonColor,
+      borderColor: t.table.primaryButtonBg,
+    } as React.CSSProperties,
+    paginationBtnDisabled: {
+      opacity: 0.4,
+      cursor: 'not-allowed',
+    } as React.CSSProperties,
+    paginationSelect: {
+      padding: '2px 4px',
+      border: `1px solid ${t.table.buttonBorder}`,
+      borderRadius: t.border.radius,
+      background: t.table.inputBg,
+      color: t.font.color,
+      fontSize: 13,
+      outline: 'none',
+    } as React.CSSProperties,
+    // ColumnManager modal styles
+    modalOverlay: {
+      position: 'fixed' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: t.table.modalMask,
+      zIndex: 1000,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as React.CSSProperties,
+    modalContent: {
+      background: t.table.modalBg,
+      borderRadius: 8,
+      padding: 20,
+      minWidth: 520,
+      maxWidth: 680,
+      boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
+    } as React.CSSProperties,
+    modalPanel: {
+      flex: 1,
+      border: `1px solid ${t.table.headerBorder}`,
+      borderRadius: 4,
+      minHeight: 200,
+    } as React.CSSProperties,
+    modalItem: (selected: boolean): React.CSSProperties => ({
+      display: 'flex',
+      alignItems: 'center',
+      padding: '6px 12px',
+      cursor: 'pointer',
+      fontSize: 13,
+      backgroundColor: selected ? t.table.selectedBg : 'transparent',
+    }),
+    modalBtn: {
+      padding: '4px 8px',
+      border: `1px solid ${t.table.buttonBorder}`,
+      borderRadius: 4,
+      background: t.table.buttonBg,
+      cursor: 'pointer',
+      fontSize: 16,
+      lineHeight: 1,
+      color: t.table.buttonColor,
+    } as React.CSSProperties,
+    modalPrimaryBtn: {
+      padding: '5px 16px',
+      border: 'none',
+      borderRadius: 4,
+      cursor: 'pointer',
+      fontSize: 13,
+      background: t.table.primaryButtonBg,
+      color: t.table.primaryButtonColor,
+    } as React.CSSProperties,
+    modalDefaultBtn: {
+      padding: '5px 16px',
+      border: `1px solid ${t.table.buttonBorder}`,
+      borderRadius: 4,
+      cursor: 'pointer',
+      fontSize: 13,
+      background: t.table.buttonBg,
+      color: t.table.buttonColor,
+    } as React.CSSProperties,
   };
 }
 
-/** 默认样式（向后兼容） */
-const S = createStyles(DEFAULT_THEME_TOKENS);
-
 // ---------------------------------------------------------------------------
-// 辅助函数
+// SVG Icon Components
 // ---------------------------------------------------------------------------
 
-/** 收集叶子列（平铺多级表头） */
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={14} height={14} fill="currentColor">
+      <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.98l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z" />
+    </svg>
+  );
+}
+
+function FunnelIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={12} height={12} fill="currentColor">
+      <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+    </svg>
+  );
+}
+
+// Sort arrow icons — separate up/down for clarity
+function SortUpIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill={active ? 'currentColor' : 'currentColor'} style={{ opacity: active ? 1 : 0.3 }}>
+      <path d="M8 3l5 6H3z" />
+    </svg>
+  );
+}
+
+function SortDownIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="currentColor" style={{ opacity: active ? 1 : 0.3 }}>
+      <path d="M8 13l5-6H3z" />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Helper functions
+// ---------------------------------------------------------------------------
+
 function collectLeafColumns(columns: TableColumn[]): TableColumn[] {
   const result: TableColumn[] = [];
   for (const col of columns) {
@@ -61,7 +298,6 @@ function collectLeafColumns(columns: TableColumn[]): TableColumn[] {
   return result;
 }
 
-/** 计算列树最大深度 */
 function getMaxDepth(columns: TableColumn[]): number {
   let max = 1;
   for (const col of columns) {
@@ -73,15 +309,13 @@ function getMaxDepth(columns: TableColumn[]): number {
   return max;
 }
 
-/** 计算列叶子数 */
-function countLeaves(col: TableColumn): number {
+function countLeaves(col: TableColumn[]): number {
   if (!col.children || col.children.length === 0) return 1;
   let c = 0;
   for (const ch of col.children) c += countLeaves(ch);
   return c;
 }
 
-/** 获取行唯一 key */
 function getRowKey(
   row: Record<string, unknown>,
   index: number,
@@ -92,17 +326,14 @@ function getRowKey(
   return String(index);
 }
 
-/** 格式化单元格值 */
 function formatCellValue(value: unknown): string {
   if (value === null || value === undefined) return '';
   return String(value);
 }
 
-/** 排序比较函数 */
 function compareValues(a: unknown, b: unknown, direction: SortDirection): number {
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
-
   if (typeof a === 'number' && typeof b === 'number') {
     return direction === 'asc' ? a - b : b - a;
   }
@@ -112,20 +343,33 @@ function compareValues(a: unknown, b: unknown, direction: SortDirection): number
   return direction === 'asc' ? cmp : -cmp;
 }
 
-/** 筛选：模糊匹配（不区分大小写） */
 function fuzzyMatch(cellValue: unknown, keyword: string): boolean {
   if (!keyword) return true;
   return String(cellValue ?? '').toLowerCase().includes(keyword.toLowerCase());
 }
 
+function filterVisibleColumns(columns: TableColumn[], visibleKeys: Set<string>): TableColumn[] {
+  const result: TableColumn[] = [];
+  for (const col of columns) {
+    if (col.children && col.children.length > 0) {
+      const filteredChildren = filterVisibleColumns(col.children, visibleKeys);
+      if (filteredChildren.length > 0) {
+        result.push({ ...col, children: filteredChildren });
+      }
+    } else {
+      if (visibleKeys.has(col.key)) {
+        result.push(col);
+      }
+    }
+  }
+  return result;
+}
+
 // ---------------------------------------------------------------------------
-// 排序 Hook
+// Hooks
 // ---------------------------------------------------------------------------
 
-function useTableSort(
-  data: Record<string, unknown>[],
-  columns: TableColumn[],
-) {
+function useTableSort(data: Record<string, unknown>[]) {
   const [sortState, setSortState] = useState<SortState>({ columnKey: '', direction: 'default' });
 
   const handleSort = useCallback((columnKey: string) => {
@@ -133,22 +377,21 @@ function useTableSort(
       if (prev.columnKey !== columnKey) {
         return { columnKey, direction: 'asc' };
       }
-      const next: SortDirection = prev.direction === 'default' ? 'asc' : prev.direction === 'asc' ? 'desc' : 'default';
+      const next: SortDirection =
+        prev.direction === 'default' ? 'asc' : prev.direction === 'asc' ? 'desc' : 'default';
       return { columnKey, direction: next };
     });
   }, []);
 
   const sortedData = useMemo(() => {
     if (!sortState.columnKey || sortState.direction === 'default') return data;
-    return [...data].sort((a, b) => compareValues(a[sortState.columnKey], b[sortState.columnKey], sortState.direction));
+    return [...data].sort((a, b) =>
+      compareValues(a[sortState.columnKey], b[sortState.columnKey], sortState.direction),
+    );
   }, [data, sortState]);
 
   return { sortedData, sortState, handleSort };
 }
-
-// ---------------------------------------------------------------------------
-// 筛选 Hook
-// ---------------------------------------------------------------------------
 
 function useTableFilter(data: Record<string, unknown>[]) {
   const [filterState, setFilterState] = useState<FilterState>({});
@@ -170,14 +413,53 @@ function useTableFilter(data: Record<string, unknown>[]) {
   return { filteredData, filterState, setFilter, clearFilters };
 }
 
-// ---------------------------------------------------------------------------
-// 列管理 Hook
-// ---------------------------------------------------------------------------
+function useTablePagination(
+  totalItems: number,
+  config?: PaginationConfig | boolean,
+) {
+  const pageSizeOpts = config && config !== true
+    ? (config.pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS)
+    : DEFAULT_PAGE_SIZE_OPTIONS;
+  const defaultPageSize = config && config !== true
+    ? (config.defaultPageSize ?? DEFAULT_PAGE_SIZE)
+    : DEFAULT_PAGE_SIZE;
 
-function useColumnManager(allColumns: TableColumn[]) {
-  const leafCols = useMemo(() => collectLeafColumns(allColumns), [allColumns]);
-  const initialVisible = useMemo(() => leafCols.map((c) => c.key), [leafCols]);
-  const [visibleKeys, setVisibleKeys] = useState<string[]>(initialVisible);
+  const [pagination, setPagination] = useState<PaginationState>({
+    current: 1,
+    pageSize: defaultPageSize,
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / pagination.pageSize));
+
+  useEffect(() => {
+    setPagination((prev) => {
+      const newTotalPages = Math.max(1, Math.ceil(totalItems / prev.pageSize));
+      if (prev.current > newTotalPages) {
+        return { ...prev, current: Math.max(1, newTotalPages) };
+      }
+      return prev;
+    });
+  }, [totalItems]);
+
+  const paginatedRange = useMemo((): [number, number] => {
+    const start = (pagination.current - 1) * pagination.pageSize;
+    const end = Math.min(start + pagination.pageSize, totalItems);
+    return [start, end];
+  }, [pagination, totalItems]);
+
+  const changePage = useCallback((page: number) => {
+    setPagination((prev) => ({ ...prev, current: Math.max(1, Math.min(page, Math.ceil(totalItems / prev.pageSize))) }));
+  }, [totalItems]);
+
+  const changePageSize = useCallback((size: number) => {
+    setPagination({ current: 1, pageSize: size });
+  }, []);
+
+  return { pagination, totalPages, paginatedRange, changePage, changePageSize, pageSizeOpts };
+}
+
+function useColumnManager(allLeafColumns: TableColumn[]) {
+  const [visibleKeys, setVisibleKeys] = useState<string[]>(() => allLeafColumns.map((c) => c.key));
   const [managerOpen, setManagerOpen] = useState(false);
 
   const openManager = useCallback(() => setManagerOpen(true), []);
@@ -187,19 +469,17 @@ function useColumnManager(allColumns: TableColumn[]) {
     setManagerOpen(false);
   }, []);
 
-  // Reset when columns change
-  const colKeyStr = leafCols.map((c) => c.key).join(',');
-  const visibleKeysMemo = useMemo(() => {
-    const valid = visibleKeys.filter((k) => leafCols.some((c) => c.key === k));
-    return valid.length > 0 ? valid : leafCols.map((c) => c.key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colKeyStr, leafCols]);
-
-  return { visibleKeys: visibleKeysMemo, managerOpen, openManager, closeManager, applyColumns, allLeafColumns: leafCols };
+  return {
+    visibleKeys,
+    managerOpen,
+    openManager,
+    closeManager,
+    applyColumns,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// 合并单元格计算
+// Merge cell computation
 // ---------------------------------------------------------------------------
 
 interface DeclaredMerge {
@@ -226,11 +506,10 @@ function buildDeclaredMergeMap(
 function computeMergeMap(
   data: Record<string, unknown>[],
   leafColumns: TableColumn[],
-  declaredMerges: Array<{ startRowIndex: number; rowSpan: number; columnKey: string }> | undefined,
+  declaredMerges?: Array<{ startRowIndex: number; rowSpan: number; columnKey: string }>,
 ): MergeMap {
   const map: MergeMap = {};
 
-  // 1. Declarative merges
   if (declaredMerges && declaredMerges.length > 0) {
     const declared = buildDeclaredMergeMap(declaredMerges, leafColumns);
     for (const [k, v] of Object.entries(declared)) {
@@ -238,149 +517,163 @@ function computeMergeMap(
     }
   }
 
-  // 2. Column-level function merges (override declarative)
   for (let rowIdx = 0; rowIdx < data.length; rowIdx++) {
     for (let colIdx = 0; colIdx < leafColumns.length; colIdx++) {
       const col = leafColumns[colIdx];
       const value = data[rowIdx][col.key];
-
       const rs = col.rowSpan ? col.rowSpan(value, data[rowIdx], rowIdx) : 1;
       const cs = col.colSpan ? col.colSpan(value, data[rowIdx], rowIdx) : 1;
-
       if (rs > 1 || cs > 1) {
-        const key = `${rowIdx}:${colIdx}`;
-        map[key] = { rowSpan: rs, colSpan: cs, hidden: false };
-
-        // Mark covered cells as hidden
+        map[`${rowIdx}:${colIdx}`] = { rowSpan: rs, colSpan: cs, hidden: false };
         for (let r = 0; r < rs; r++) {
           for (let c = 0; c < cs; c++) {
             if (r === 0 && c === 0) continue;
             const ck = `${rowIdx + r}:${colIdx + c}`;
-            if (!map[ck]) {
-              map[ck] = { rowSpan: 1, colSpan: 1, hidden: true };
-            }
+            if (!map[ck]) map[ck] = { rowSpan: 1, colSpan: 1, hidden: true };
           }
         }
       }
     }
   }
-
   return map;
 }
 
 // ---------------------------------------------------------------------------
-// Header rendering
+// HeaderTooltip
 // ---------------------------------------------------------------------------
 
-function renderHeaderRows(
-  columns: TableColumn[],
-  totalLeafCount: number,
-  maxDepth: number,
-  sortState: SortState,
-  filterState: FilterState,
-  onSort: (key: string) => void,
-  onFilter: (key: string, value: string) => void,
-  leafColumns: TableColumn[],
-  styles: ReturnType<typeof createStyles>,
-): ReactNode[] {
-  const rows: ReactNode[] = [];
-  const hasSortable = leafColumns.some((c) => c.sortable);
-  const hasFilterable = leafColumns.some((c) => c.filterable);
+function HeaderTooltip({
+  text,
+  anchorRef,
+}: {
+  text: string;
+  anchorRef: React.RefObject<HTMLElement | null>;
+}) {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Header rows
-  for (let level = 0; level < maxDepth; level++) {
-    const cells: ReactNode[] = [];
-    fillHeaderRow(columns, level, 0, cells, maxDepth, totalLeafCount, sortState, onSort, styles);
-    rows.push(
-      <tr key={`header-row-${level}`}>{cells}</tr>,
-    );
-  }
+  useEffect(() => {
+    if (anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPos({ x: rect.left, y: rect.bottom + 4 });
+    }
+  }, [anchorRef]);
 
-  // Filter row
-  if (hasFilterable) {
-    const filterCells: ReactNode[] = [];
-    for (let i = 0; i < totalLeafCount; i++) {
-      const col = leafColumns[i];
-      if (col.filterable) {
-        filterCells.push(
-          <td key={`filter-${col.key}`} style={styles.filterRow('4px 8px')}>
-            <input
-              type="text"
-              placeholder={`筛选 ${col.title}`}
-              value={filterState[col.key] ?? ''}
-              onChange={(e) => onFilter(col.key, e.target.value)}
-              style={styles.filterInput}
-            />
-          </td>,
-        );
-      } else {
-        filterCells.push(
-          <td key={`filter-${col.key}`} style={styles.filterRow('0')} />,
-        );
+  if (!pos) return null;
+
+  const st = createStyles(DEFAULT_THEME_TOKENS);
+  return (
+    <div style={{ ...st.tooltip, left: pos.x, top: pos.y }}>
+      {text}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// FilterDropdown — positioned below the funnel icon
+// ---------------------------------------------------------------------------
+
+function FilterDropdown({
+  columnKey,
+  columnTitle,
+  currentValue,
+  onConfirm,
+  onClose,
+  theme,
+}: {
+  columnKey: string;
+  columnTitle: string;
+  currentValue: string;
+  onConfirm: (key: string, val: string) => void;
+  onClose: () => void;
+  theme: ThemeTokens;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inputValue, setInputValue] = useState(currentValue);
+  const t = theme;
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
       }
+    };
+    const timer = setTimeout(() => document.addEventListener('mousedown', handler), 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handler);
+    };
+  }, [onClose]);
+
+  const handleConfirm = useCallback(() => {
+    onConfirm(columnKey, inputValue);
+    onClose();
+  }, [columnKey, inputValue, onConfirm, onClose]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleConfirm();
+    } else if (e.key === 'Escape') {
+      onClose();
     }
-    rows.push(<tr key="filter-row">{filterCells}</tr>);
-  }
+  }, [handleConfirm, onClose]);
 
-  return rows;
-}
+  const dropdownStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    zIndex: 1050,
+    background: t.table.modalBg,
+    border: `1px solid ${t.table.headerBorder}`,
+    borderRadius: 4,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    padding: 8,
+    minWidth: 180,
+  };
 
-function fillHeaderRow(
-  columns: TableColumn[],
-  targetLevel: number,
-  currentLevel: number,
-  cells: ReactNode[],
-  maxDepth: number,
-  _totalLeafCount: number,
-  sortState: SortState,
-  onSort: (key: string) => void,
-  styles: ReturnType<typeof createStyles>,
-): number {
-  let leafCount = 0;
-  for (let i = 0; i < columns.length; i++) {
-    const col = columns[i];
-    const hasChildren = col.children && col.children.length > 0;
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '4px 8px',
+    border: `1px solid ${t.table.inputBorder}`,
+    borderRadius: t.border.radius,
+    fontSize: 12,
+    outline: 'none',
+    boxSizing: 'border-box',
+    backgroundColor: t.table.inputBg,
+    color: t.font.color,
+  };
 
-    if (currentLevel === targetLevel) {
-      const span = hasChildren ? countLeaves(col) : 1;
-      const depth = hasChildren ? 1 : (maxDepth - currentLevel);
-      const isLeaf = !hasChildren;
-      const isSorted = isLeaf && sortState.columnKey === col.key;
-      const isActive = isSorted && sortState.direction !== 'default';
+  const btnStyle: React.CSSProperties = {
+    marginTop: 6,
+    padding: '3px 12px',
+    border: 'none',
+    borderRadius: t.border.radius,
+    fontSize: 12,
+    cursor: 'pointer',
+    background: t.table.primaryButtonBg,
+    color: t.table.primaryButtonColor,
+  };
 
-      cells.push(
-        <th
-          key={`th-${cells.length}`}
-          colSpan={span > 1 ? span : undefined}
-          rowSpan={depth > 1 ? depth : undefined}
-          style={{
-            ...styles.th,
-            ...(cells.length > 0 ? styles.thRight : {}),
-            ...(isLeaf && col.sortable ? styles.thSortable : {}),
-          }}
-          onClick={isLeaf && col.sortable ? () => onSort(col.key) : undefined}
-        >
-          {col.title}
-          {isLeaf && col.sortable && (
-            <span style={{ ...styles.sortIcon, ...(isActive ? styles.sortIconActive : {}) }}>
-              <span style={{ ...styles.arrow, ...(isActive && sortState.direction === 'asc' ? styles.sortIconActive : {}) }}>&#9650;</span>
-              <span style={{ ...styles.arrow, ...(isActive && sortState.direction === 'desc' ? styles.sortIconActive : {}) }}>&#9660;</span>
-            </span>
-          )}
-        </th>,
-      );
-      leafCount += span;
-    } else if (hasChildren) {
-      leafCount += fillHeaderRow(col.children!, targetLevel, currentLevel + 1, cells, maxDepth, _totalLeafCount, sortState, onSort, styles);
-    } else if (currentLevel < targetLevel) {
-      leafCount += 1;
-    }
-  }
-  return leafCount;
+  return (
+    <div ref={ref} style={dropdownStyle} onClick={(e) => e.stopPropagation()}>
+      <div style={{ fontSize: 12, color: t.font.tertiaryColor, marginBottom: 4 }}>筛选 {columnTitle}</div>
+      <input
+        type="text"
+        placeholder="输入筛选关键词，回车确认"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        style={inputStyle}
+        autoFocus
+      />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+        <button style={btnStyle} onClick={handleConfirm}>确定</button>
+      </div>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
-// ColumnManager Modal
+// ColumnManagerModal
 // ---------------------------------------------------------------------------
 
 function ColumnManagerModal({
@@ -396,6 +689,8 @@ function ColumnManagerModal({
   onApply: (keys: string[]) => void;
   theme: ThemeTokens;
 }): React.ReactElement {
+  const st = useMemo(() => createStyles(theme), [theme]);
+
   const [leftKeys, setLeftKeys] = useState<string[]>(() =>
     allLeafColumns.map((c) => c.key).filter((k) => !visibleKeys.includes(k)),
   );
@@ -434,7 +729,9 @@ function ColumnManagerModal({
   }, [rightKeys]);
 
   const handleApply = useCallback(() => {
-    onApply(rightKeys);
+    if (rightKeys.length > 0) {
+      onApply(rightKeys);
+    }
   }, [rightKeys, onApply]);
 
   const toggleLeft = useCallback((key: string) => {
@@ -455,89 +752,54 @@ function ColumnManagerModal({
     });
   }, []);
 
-  const overlayStyle: React.CSSProperties = {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    background: theme.table.modalMask, zIndex: 1000,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-  };
-
-  const modalStyle: React.CSSProperties = {
-    background: theme.table.modalBg, borderRadius: 8, padding: 20, minWidth: 520, maxWidth: 680,
-    boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
-  };
-
-  const panelStyle: React.CSSProperties = {
-    flex: 1, border: `1px solid ${theme.table.headerBorder}`, borderRadius: 4, minHeight: 200,
-  };
-
-  const itemStyle = (selected: boolean): React.CSSProperties => ({
-    display: 'flex', alignItems: 'center', padding: '6px 12px', cursor: 'pointer', fontSize: 13,
-    backgroundColor: selected ? theme.table.selectedBg : 'transparent',
-  });
-
-  const btnStyle: React.CSSProperties = {
-    padding: '4px 8px', border: `1px solid ${theme.table.buttonBorder}`, borderRadius: 4, background: theme.table.buttonBg,
-    cursor: 'pointer', fontSize: 16, lineHeight: 1, color: theme.table.buttonColor,
-  };
-
-  const primaryBtnStyle: React.CSSProperties = {
-    padding: '5px 16px', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13,
-    background: theme.table.primaryButtonBg, color: theme.table.primaryButtonColor,
-  };
-
-  const defaultBtnStyle: React.CSSProperties = {
-    padding: '5px 16px', border: `1px solid ${theme.table.buttonBorder}`, borderRadius: 4, cursor: 'pointer', fontSize: 13,
-    background: theme.table.buttonBg, color: theme.table.buttonColor,
+  const headerStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    fontWeight: 600,
+    fontSize: 13,
+    background: theme.table.headerBg,
+    borderBottom: `1px solid ${theme.table.headerBorder}`,
+    color: theme.font.color,
   };
 
   return (
-    <div style={overlayStyle} onClick={onClose}>
-      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={st.modalOverlay} onClick={onClose}>
+      <div style={st.modalContent} onClick={(e) => e.stopPropagation()}>
         <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, color: theme.font.color }}>列管理</div>
         <div style={{ display: 'flex', gap: 16 }}>
-          {/* Left panel - hidden columns */}
-          <div style={panelStyle}>
-            <div style={{ padding: '8px 12px', fontWeight: 600, fontSize: 13, background: theme.table.headerBg, borderBottom: `1px solid ${theme.table.headerBorder}`, color: theme.font.color }}>
-              可选列
-            </div>
+          <div style={st.modalPanel}>
+            <div style={headerStyle}>可选列</div>
             <ul style={{ padding: '4px 0', listStyle: 'none', margin: 0 }}>
               {leftKeys.map((key) => (
-                <li key={key} style={itemStyle(leftSelected.has(key))} onClick={() => toggleLeft(key)}>
+                <li key={key} style={st.modalItem(leftSelected.has(key))} onClick={() => toggleLeft(key)}>
                   <input type="checkbox" checked={leftSelected.has(key)} readOnly style={{ marginRight: 8 }} />
                   {keyToTitle[key] ?? key}
                 </li>
               ))}
-              {leftKeys.length === 0 && <li style={{ padding: '12px', color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无可选列</li>}
+              {leftKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无可选列</li>}
             </ul>
           </div>
-
-          {/* Action buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
-            <button style={{ ...btnStyle, opacity: leftKeys.length === 0 ? 0.4 : 1 }} onClick={moveAllToRight} disabled={leftKeys.length === 0}>&gt;&gt;</button>
-            <button style={{ ...btnStyle, opacity: leftSelected.size === 0 ? 0.4 : 1 }} onClick={moveToRight} disabled={leftSelected.size === 0}>&gt;</button>
-            <button style={{ ...btnStyle, opacity: rightSelected.size === 0 ? 0.4 : 1 }} onClick={moveToLeft} disabled={rightSelected.size === 0}>&lt;</button>
-            <button style={{ ...btnStyle, opacity: rightKeys.length === 0 ? 0.4 : 1 }} onClick={moveAllToLeft} disabled={rightKeys.length === 0}>&lt;&lt;</button>
+            <button style={{ ...st.modalBtn, opacity: leftKeys.length === 0 ? 0.4 : 1 }} onClick={moveAllToRight} disabled={leftKeys.length === 0}>&gt;&gt;</button>
+            <button style={{ ...st.modalBtn, opacity: leftSelected.size === 0 ? 0.4 : 1 }} onClick={moveToRight} disabled={leftSelected.size === 0}>&gt;</button>
+            <button style={{ ...st.modalBtn, opacity: rightSelected.size === 0 ? 0.4 : 1 }} onClick={moveToLeft} disabled={rightSelected.size === 0}>&lt;</button>
+            <button style={{ ...st.modalBtn, opacity: rightKeys.length === 0 ? 0.4 : 1 }} onClick={moveAllToLeft} disabled={rightKeys.length === 0}>&lt;&lt;</button>
           </div>
-
-          {/* Right panel - visible columns */}
-          <div style={panelStyle}>
-            <div style={{ padding: '8px 12px', fontWeight: 600, fontSize: 13, background: theme.table.headerBg, borderBottom: `1px solid ${theme.table.headerBorder}`, color: theme.font.color }}>
-              已选列
-            </div>
+          <div style={st.modalPanel}>
+            <div style={headerStyle}>已选列</div>
             <ul style={{ padding: '4px 0', listStyle: 'none', margin: 0 }}>
               {rightKeys.map((key) => (
-                <li key={key} style={itemStyle(rightSelected.has(key))} onClick={() => toggleRight(key)}>
+                <li key={key} style={st.modalItem(rightSelected.has(key))} onClick={() => toggleRight(key)}>
                   <input type="checkbox" checked={rightSelected.has(key)} readOnly style={{ marginRight: 8 }} />
                   {keyToTitle[key] ?? key}
                 </li>
               ))}
-              {rightKeys.length === 0 && <li style={{ padding: '12px', color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无已选列</li>}
+              {rightKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无已选列</li>}
             </ul>
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <button style={defaultBtnStyle} onClick={onClose}>取消</button>
-          <button style={primaryBtnStyle} onClick={handleApply}>确认</button>
+          <button style={st.modalDefaultBtn} onClick={onClose}>取消</button>
+          <button style={{ ...st.modalPrimaryBtn, opacity: rightKeys.length === 0 ? 0.4 : 1, cursor: rightKeys.length === 0 ? 'not-allowed' : 'pointer' }} onClick={handleApply} disabled={rightKeys.length === 0}>确认</button>
         </div>
       </div>
     </div>
@@ -545,26 +807,103 @@ function ColumnManagerModal({
 }
 
 // ---------------------------------------------------------------------------
-// TableView 主组件
+// Pagination Component
+// ---------------------------------------------------------------------------
+
+function Pagination({
+  current,
+  totalPages,
+  totalItems,
+  pageSize,
+  pageSizeOpts,
+  onPageChange,
+  onPageSizeChange,
+  styles: st,
+}: {
+  current: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  pageSizeOpts: number[];
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  styles: ReturnType<typeof createStyles>;
+}) {
+  if (totalItems <= pageSizeOpts[0] && totalPages <= 1) return null;
+
+  const pages: number[] = [];
+  const maxVisible = 5;
+  let start = Math.max(1, current - Math.floor(maxVisible / 2));
+  const end = Math.min(totalPages, start + maxVisible - 1);
+  start = Math.max(1, end - maxVisible + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  return (
+    <div style={st.paginationWrapper}>
+      <span>共 {totalItems} 条</span>
+      <select
+        value={pageSize}
+        onChange={(e) => onPageSizeChange(Number(e.target.value))}
+        style={st.paginationSelect}
+      >
+        {pageSizeOpts.map((s) => (
+          <option key={s} value={s}>{s} 条/页</option>
+        ))}
+      </select>
+      <button
+        style={{ ...st.paginationBtn, ...(current <= 1 ? st.paginationBtnDisabled : {}) }}
+        onClick={() => onPageChange(current - 1)}
+        disabled={current <= 1}
+      >
+        &lt;
+      </button>
+      {start > 1 && (
+        <>
+          <button style={st.paginationBtn} onClick={() => onPageChange(1)}>1</button>
+          {start > 2 && <span>...</span>}
+        </>
+      )}
+      {pages.map((p) => (
+        <button
+          key={p}
+          style={{ ...st.paginationBtn, ...(p === current ? st.paginationBtnActive : {}) }}
+          onClick={() => onPageChange(p)}
+        >
+          {p}
+        </button>
+      ))}
+      {end < totalPages && (
+        <>
+          {end < totalPages - 1 && <span>...</span>}
+          <button style={st.paginationBtn} onClick={() => onPageChange(totalPages)}>{totalPages}</button>
+        </>
+      )}
+      <button
+        style={{ ...st.paginationBtn, ...(current >= totalPages ? st.paginationBtnDisabled : {}) }}
+        onClick={() => onPageChange(current + 1)}
+        disabled={current >= totalPages}
+      >
+        &gt;
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main TableView Component
 // ---------------------------------------------------------------------------
 
 export interface TableViewProps {
-  /** 数据源 */
   dataSource: Record<string, unknown>[];
-  /** 列配置 */
   columns: TableColumn[];
-  /** 行唯一标识 */
   rowKey?: string | ((row: Record<string, unknown>, index: number) => string);
-  /** 标题 */
   title?: string;
-  /** 自定义类名 */
   className?: string;
-  /** 自定义样式 */
   style?: React.CSSProperties;
-  /** 主题令牌 */
   theme?: ThemeTokens;
-  /** 声明式行合并配置 */
   declaredMerges?: Array<{ startRowIndex: number; rowSpan: number; columnKey: string }>;
+  showColumnManager?: boolean;
+  pagination?: PaginationConfig | boolean;
 }
 
 export function TableView({
@@ -576,42 +915,66 @@ export function TableView({
   style,
   theme,
   declaredMerges,
+  showColumnManager = false,
+  pagination: paginationProp,
 }: TableViewProps): React.ReactElement {
   const [hoverRow, setHoverRow] = useState<number | null>(null);
+  const [activeFilterKey, setActiveFilterKey] = useState<string | null>(null);
   const st = useMemo(() => createStyles(theme ?? DEFAULT_THEME_TOKENS), [theme]);
 
-  const { sortedData, sortState, handleSort } = useTableSort(dataSource, columns);
-  const { filteredData, filterState, setFilter } = useTableFilter(sortedData);
-  const { visibleKeys, managerOpen, openManager, closeManager, applyColumns, allLeafColumns } = useColumnManager(columns);
-
-  const maxDepth = useMemo(() => getMaxDepth(columns), [columns]);
+  // Leaf columns
   const leafColumns = useMemo(() => collectLeafColumns(columns), [columns]);
-  const visibleLeafCols = useMemo(() => leafColumns.filter((c) => visibleKeys.includes(c.key)), [leafColumns, visibleKeys]);
+
+  // Column manager
+  const { visibleKeys, managerOpen, openManager, closeManager, applyColumns } = useColumnManager(leafColumns);
+
+  // Visible columns
+  const visibleLeafCols = useMemo(
+    () => leafColumns.filter((c) => visibleKeys.includes(c.key)),
+    [leafColumns, visibleKeys],
+  );
   const visibleColCount = visibleLeafCols.length;
 
-  // Build merge map for visible columns only
+  // Visible header tree
+  const visibleHeaderColumns = useMemo(
+    () => filterVisibleColumns(columns, new Set(visibleKeys)),
+    [columns, visibleKeys],
+  );
+  const visibleHeaderMaxDepth = useMemo(() => getMaxDepth(visibleHeaderColumns), [visibleHeaderColumns]);
+
+  // Data pipeline: filter → sort → paginate
+  const { filteredData, filterState, setFilter } = useTableFilter(dataSource);
+  const { sortedData, sortState, handleSort } = useTableSort(filteredData);
+
+  // Pagination
+  const enablePagination = paginationProp !== undefined && paginationProp !== false;
+  const {
+    pagination,
+    totalPages,
+    paginatedRange,
+    changePage,
+    changePageSize,
+    pageSizeOpts,
+  } = useTablePagination(sortedData.length, enablePagination ? (paginationProp === true ? undefined : paginationProp) : undefined);
+
+  const finalData = enablePagination
+    ? sortedData.slice(paginatedRange[0], paginatedRange[1])
+    : sortedData;
+
+  // Merge map
   const mergeMap = useMemo(
-    () => computeMergeMap(filteredData, visibleLeafCols, declaredMerges?.filter((m) => visibleKeys.includes(m.columnKey))),
-    [filteredData, visibleLeafCols, declaredMerges, visibleKeys],
+    () => computeMergeMap(
+      finalData,
+      visibleLeafCols,
+      declaredMerges?.filter((m) => visibleKeys.includes(m.columnKey)),
+    ),
+    [finalData, visibleLeafCols, declaredMerges, visibleKeys],
   );
 
-  const hasSortable = leafColumns.some((c) => c.sortable);
-  const hasFilterable = leafColumns.some((c) => c.filterable);
-  const hasColumnManager = leafColumns.length > 1;
+  const hasGear = showColumnManager && leafColumns.length > 1;
 
-  // Build visible columns version of header columns tree
-  // For simplicity, we keep the original header tree but only show visible leaf columns
-  // We need to rebuild the header to only include visible columns
-  const visibleHeaderColumns = useMemo(() => {
-    return filterVisibleColumns(columns, new Set(visibleKeys));
-  }, [columns, visibleKeys]);
-
-  const visibleHeaderMaxDepth = useMemo(() => getMaxDepth(visibleHeaderColumns), [visibleHeaderColumns]);
-  const visibleHeaderLeafCount = useMemo(() => {
-    let count = 0;
-    for (const c of visibleHeaderColumns) count += countLeaves(c);
-    return count;
-  }, [visibleHeaderColumns]);
+  // Tooltip state
+  const [tooltipInfo, setTooltipInfo] = useState<{ text: string; rect: DOMRect } | null>(null);
 
   if (visibleColCount === 0) {
     return (
@@ -622,38 +985,38 @@ export function TableView({
     );
   }
 
+  // ---- Build header rows ----
+  const headerRows: ReactNode[] = [];
+  for (let level = 0; level < visibleHeaderMaxDepth; level++) {
+    const cells: ReactNode[] = [];
+    fillHeaderRow(
+      visibleHeaderColumns, level, 0, cells, visibleHeaderMaxDepth,
+      sortState, handleSort, filterState, setFilter,
+      activeFilterKey, setActiveFilterKey,
+    );
+    headerRows.push(<tr key={`header-row-${level}`}>{cells}</tr>);
+  }
+
   return (
     <div style={{ ...st.wrapper, ...style }} className={className}>
       {title && <div style={st.title}>{title}</div>}
 
-      {/* Toolbar */}
-      {hasColumnManager && (
-        <div style={st.toolbar}>
-          <button style={st.toolbarBtn} onClick={openManager}>列管理</button>
-        </div>
-      )}
-
       <table style={st.table}>
+        <colgroup>
+          {visibleLeafCols.map((col) => (
+            <col key={`col-${col.key}`} style={col.width ? { width: typeof col.width === 'number' ? `${col.width}px` : col.width } : undefined} />
+          ))}
+        </colgroup>
         <thead>
-          {renderHeaderRows(
-            visibleHeaderColumns,
-            visibleHeaderLeafCount,
-            visibleHeaderMaxDepth,
-            sortState,
-            filterState,
-            handleSort,
-            setFilter,
-            visibleLeafCols,
-            st,
-          )}
+          {headerRows}
         </thead>
         <tbody>
-          {filteredData.length === 0 ? (
+          {finalData.length === 0 ? (
             <tr>
               <td colSpan={visibleColCount} style={st.empty}>暂无数据</td>
             </tr>
           ) : (
-            filteredData.map((row, rowIdx) => {
+            finalData.map((row, rowIdx) => {
               const isHovered = hoverRow === rowIdx;
               return (
                 <tr
@@ -665,12 +1028,9 @@ export function TableView({
                   {visibleLeafCols.map((col, colIdx) => {
                     const mergeKey = `${rowIdx}:${colIdx}`;
                     const merge = mergeMap[mergeKey];
-
                     if (merge && merge.hidden) return null;
 
                     const value = row[col.key];
-
-                    // Custom render
                     let cellContent: ReactNode;
                     if (col.render) {
                       cellContent = col.render(value, row, rowIdx, col);
@@ -696,37 +1056,313 @@ export function TableView({
         </tbody>
       </table>
 
+      {/* Pagination */}
+      {enablePagination && (
+        <Pagination
+          current={pagination.current}
+          totalPages={totalPages}
+          totalItems={sortedData.length}
+          pageSize={pagination.pageSize}
+          pageSizeOpts={pageSizeOpts}
+          onPageChange={changePage}
+          onPageSizeChange={changePageSize}
+          styles={st}
+        />
+      )}
+
       {/* Column manager modal */}
       {managerOpen && (
         <ColumnManagerModal
-          allLeafColumns={allLeafColumns}
+          allLeafColumns={leafColumns}
           visibleKeys={visibleKeys}
           onClose={closeManager}
           onApply={applyColumns}
           theme={theme ?? DEFAULT_THEME_TOKENS}
         />
       )}
+
+      {/* Tooltip */}
+      {tooltipInfo && (
+        <div
+          style={{
+            ...st.tooltip,
+            left: tooltipInfo.rect.left,
+            top: tooltipInfo.rect.bottom + 4,
+          }}
+        >
+          {tooltipInfo.text}
+        </div>
+      )}
     </div>
   );
+
+  // ---- Header row filling (nested) ----
+  function fillHeaderRow(
+    cols: TableColumn[],
+    targetLevel: number,
+    currentLevel: number,
+    cells: ReactNode[],
+    maxDepth: number,
+    ss: SortState,
+    onSort: (key: string) => void,
+    fs: FilterState,
+    onSetFilter: (key: string, val: string) => void,
+    activeFKey: string | null,
+    setActiveFKey: (key: string | null) => void,
+  ): number {
+    let leafCount = 0;
+    for (let i = 0; i < cols.length; i++) {
+      const col = cols[i];
+      const hasChildren = col.children && col.children.length > 0;
+
+      if (currentLevel === targetLevel) {
+        const span = hasChildren ? countLeaves(col) : 1;
+        const depth = hasChildren ? 1 : (maxDepth - currentLevel);
+        const isLeaf = !hasChildren;
+        const isLastCol = isLeaf && i === cols.length - 1 && targetLevel === 0;
+
+        if (isLeaf) {
+          const isSorted = ss.columnKey === col.key;
+          const sortDir = isSorted ? ss.direction : 'default';
+
+          // Determine sort icon
+          let sortIconEl: ReactNode = null;
+          if (col.sortable) {
+            if (sortDir === 'asc') {
+              sortIconEl = (
+                <span style={st.sortIcon}>
+                  <SortUpIcon active={true} />
+                </span>
+              );
+            } else if (sortDir === 'desc') {
+              sortIconEl = (
+                <span style={st.sortIcon}>
+                  <SortDownIcon active={true} />
+                </span>
+              );
+            } else {
+              // default: show dimmed up arrow
+              sortIconEl = (
+                <span style={st.sortIcon}>
+                  <SortUpIcon active={false} />
+                </span>
+              );
+            }
+          }
+
+          const hasFilter = fs[col.key] && fs[col.key].length > 0;
+
+          cells.push(
+            <LeafHeaderCell
+              key={`th-${col.key}`}
+              col={col}
+              sortIcon={sortIconEl}
+              sortable={!!col.sortable}
+              onSort={onSort}
+              hasFilter={!!hasFilter}
+              filterable={!!col.filterable}
+              activeFilterKey={activeFKey}
+              onSetActiveFilterKey={setActiveFKey}
+              filterValue={fs[col.key] ?? ''}
+              onSetFilter={onSetFilter}
+              showGear={isLastCol && hasGear}
+              onGearClick={openManager}
+              onTooltip={setTooltipInfo}
+              thStyle={st.th}
+              thRightStyle={i < cols.length - 1 ? st.thRight : undefined}
+              headerContentStyle={st.headerContent}
+              headerTextStyle={st.headerText}
+              filterIconStyle={st.filterIcon}
+              filterIconActiveStyle={st.filterIconActive}
+              gearIconStyle={st.gearIcon}
+              resizeHandleStyle={st.resizeHandle}
+              theme={theme ?? DEFAULT_THEME_TOKENS}
+            />,
+          );
+        } else {
+          cells.push(
+            <th
+              key={`th-${col.key}-${targetLevel}`}
+              colSpan={span > 1 ? span : undefined}
+              rowSpan={depth > 1 ? depth : undefined}
+              style={st.th}
+            >
+              {col.title}
+            </th>,
+          );
+        }
+        leafCount += span;
+      } else if (hasChildren) {
+        leafCount += fillHeaderRow(col.children!, targetLevel, currentLevel + 1, cells, maxDepth, ss, onSort, fs, onSetFilter, activeFKey, setActiveFKey);
+      } else if (currentLevel < targetLevel) {
+        leafCount += 1;
+      }
+    }
+    return leafCount;
+  }
 }
 
 // ---------------------------------------------------------------------------
-// 过滤可见列（保留多级表头结构）
+// LeafHeaderCell — handles sort, filter, gear, tooltip, resize
 // ---------------------------------------------------------------------------
 
-function filterVisibleColumns(columns: TableColumn[], visibleKeys: Set<string>): TableColumn[] {
-  const result: TableColumn[] = [];
-  for (const col of columns) {
-    if (col.children && col.children.length > 0) {
-      const filteredChildren = filterVisibleColumns(col.children, visibleKeys);
-      if (filteredChildren.length > 0) {
-        result.push({ ...col, children: filteredChildren });
-      }
-    } else {
-      if (visibleKeys.has(col.key)) {
-        result.push(col);
-      }
+function LeafHeaderCell({
+  col,
+  sortIcon,
+  sortable,
+  onSort,
+  hasFilter,
+  filterable,
+  activeFilterKey,
+  onSetActiveFilterKey,
+  filterValue,
+  onSetFilter,
+  showGear,
+  onGearClick,
+  onTooltip,
+  thStyle,
+  thRightStyle,
+  headerContentStyle,
+  headerTextStyle,
+  filterIconStyle,
+  filterIconActiveStyle,
+  gearIconStyle,
+  resizeHandleStyle,
+  theme,
+}: {
+  col: TableColumn;
+  sortIcon: ReactNode;
+  sortable: boolean;
+  onSort: (key: string) => void;
+  hasFilter: boolean;
+  filterable: boolean;
+  activeFilterKey: string | null;
+  onSetActiveFilterKey: (key: string | null) => void;
+  filterValue: string;
+  onSetFilter: (key: string, val: string) => void;
+  showGear: boolean;
+  onGearClick: () => void;
+  onTooltip: (info: { text: string; rect: DOMRect } | null) => void;
+  thStyle: React.CSSProperties;
+  thRightStyle?: React.CSSProperties;
+  headerContentStyle: React.CSSProperties;
+  headerTextStyle: React.CSSProperties;
+  filterIconStyle: React.CSSProperties;
+  filterIconActiveStyle: React.CSSProperties;
+  gearIconStyle: React.CSSProperties;
+  resizeHandleStyle: React.CSSProperties;
+  theme: ThemeTokens;
+}) {
+  const thRef = useRef<HTMLTableCellElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  const isFilterOpen = activeFilterKey === col.key;
+
+  // Check if text overflows
+  const [isOverflow, setIsOverflow] = useState(false);
+  useEffect(() => {
+    if (textRef.current) {
+      setIsOverflow(textRef.current.scrollWidth > textRef.current.clientWidth);
     }
-  }
-  return result;
+  }, [col.title, isFilterOpen]);
+
+  const handleMouseEnter = useCallback(() => {
+    if (isOverflow && thRef.current) {
+      const rect = thRef.current.getBoundingClientRect();
+      onTooltip({ text: col.title, rect });
+    }
+  }, [isOverflow, col.title, onTooltip]);
+
+  const handleMouseLeave = useCallback(() => {
+    onTooltip(null);
+  }, [onTooltip]);
+
+  const handleFilterClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSetActiveFilterKey(isFilterOpen ? null : col.key);
+  }, [col.key, isFilterOpen, onSetActiveFilterKey]);
+
+  const handleThClick = useCallback(() => {
+    if (sortable) onSort(col.key);
+  }, [sortable, col.key, onSort]);
+
+  // Resize
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const th = (e.target as HTMLElement).closest('th') as HTMLTableCellElement;
+    if (!th) return;
+    const startX = e.clientX;
+    const startW = th.offsetWidth;
+    const handle = e.target as HTMLElement;
+    handle.style.backgroundColor = 'var(--resize-color, #1677ff)';
+
+    const onMouseMove = (ev: MouseEvent) => {
+      const diff = ev.clientX - startX;
+      th.style.width = `${Math.max(50, startW + diff)}px`;
+    };
+    const onMouseUp = () => {
+      handle.style.backgroundColor = 'transparent';
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, []);
+
+  return (
+    <th
+      ref={thRef}
+      style={{
+        ...thStyle,
+        ...(thRightStyle ?? {}),
+        ...(sortable ? { cursor: 'pointer' } : {}),
+      }}
+      onClick={handleThClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div style={headerContentStyle}>
+        <span ref={textRef} style={headerTextStyle}>
+          {col.title}
+        </span>
+        {sortIcon}
+        {filterable && (
+          <span
+            style={{
+              ...filterIconStyle,
+              ...(hasFilter ? filterIconActiveStyle : {}),
+              color: hasFilter ? theme.semantic.info : theme.font.tertiaryColor,
+            }}
+            onClick={handleFilterClick}
+          >
+            <FunnelIcon />
+          </span>
+        )}
+        {showGear && (
+          <span style={gearIconStyle} onClick={(e) => { e.stopPropagation(); onGearClick(); }}>
+            <GearIcon />
+          </span>
+        )}
+      </div>
+      {/* Filter dropdown — positioned absolute inside th */}
+      {isFilterOpen && (
+        <FilterDropdown
+          columnKey={col.key}
+          columnTitle={col.title}
+          currentValue={filterValue}
+          onConfirm={onSetFilter}
+          onClose={() => onSetActiveFilterKey(null)}
+          theme={theme}
+        />
+      )}
+      {/* Resize handle */}
+      <div
+        style={resizeHandleStyle}
+        onMouseDown={handleResizeMouseDown}
+        onMouseEnter={(e) => { (e.target as HTMLElement).style.backgroundColor = 'var(--resize-color, #1677ff)'; }}
+        onMouseLeave={(e) => { (e.target as HTMLElement).style.backgroundColor = 'transparent'; }}
+      />
+    </th>
+  );
 }

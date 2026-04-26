@@ -11,6 +11,8 @@ export type {
   SortState,
   SortDirection,
   FilterState,
+  PaginationState,
+  PaginationConfig,
   CellMerge,
   MergeMap,
 } from './types';

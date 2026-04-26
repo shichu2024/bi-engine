@@ -20,6 +20,14 @@ export interface SortState {
 /** 筛选状态：列 key → 筛选文本 */
 export type FilterState = Record<string, string>;
 
+/** 分页状态 */
+export interface PaginationState {
+  /** 当前页码（1-based） */
+  current: number;
+  /** 每页条数 */
+  pageSize: number;
+}
+
 /** 表格列配置（标准化后） */
 export interface TableColumn {
   /** 列唯一标识 */
@@ -28,6 +36,8 @@ export interface TableColumn {
   title: string;
   /** 列宽 */
   width?: string | number;
+  /** 最小列宽（拖拽调整时下限） */
+  minWidth?: number;
   /** 是否开启排序 */
   sortable?: boolean;
   /** 是否开启筛选 */
@@ -46,6 +56,14 @@ export interface TableColumn {
 // 表格组件 Props
 // ---------------------------------------------------------------------------
 
+/** 分页配置 */
+export interface PaginationConfig {
+  /** 默认每页条数，默认 10 */
+  defaultPageSize?: number;
+  /** 可选的每页条数，默认 [10, 20, 50, 100] */
+  pageSizeOptions?: number[];
+}
+
 /** 表格组件标准 Props */
 export interface TableViewProps {
   /** 数据源 */
@@ -54,10 +72,16 @@ export interface TableViewProps {
   columns: TableColumn[];
   /** 行唯一标识字段名或生成函数 */
   rowKey?: string | ((row: Record<string, unknown>, index: number) => string);
+  /** 标题 */
+  title?: string;
   /** 自定义类名 */
   className?: string;
   /** 自定义样式 */
   style?: React.CSSProperties;
+  /** 是否显示列管理（齿轮图标），默认 false */
+  showColumnManager?: boolean;
+  /** 分页配置，不传则不分页 */
+  pagination?: PaginationConfig | boolean;
 }
 
 // ---------------------------------------------------------------------------

@@ -24,10 +24,11 @@ export function InteractivePreview({
 }: InteractivePreviewProps): React.ReactElement {
   const mode = useThemeStore((s) => s.mode);
   const isDark = mode === 'dark';
+  const isTable = component.type === 'table';
 
   return (
     <div
-      className={styles.previewContainer}
+      className={isTable ? styles.previewContainerTable : styles.previewContainer}
       data-testid="interactive-preview"
     >
       {toolbar && <div style={{ marginBottom: 8 }}>{toolbar}</div>}
