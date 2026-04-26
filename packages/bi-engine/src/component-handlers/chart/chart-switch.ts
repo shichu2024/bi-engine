@@ -22,8 +22,8 @@ import type { SeriesKind } from './chart-semantic-model';
 export interface SwitchTarget {
   /** 目标视图类型（SeriesKind 或 'table'） */
   type: SeriesKind | 'table' | 'area';
-  /** 显示标签 */
-  label: string;
+  /** locale 词条键（用于渲染时查找翻译） */
+  labelKey: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -31,27 +31,16 @@ export interface SwitchTarget {
 // ---------------------------------------------------------------------------
 
 /** 轴类图表可以互相切换 */
-const AXIS_SWITCHABLE: SwitchTarget[] = [
-  { type: 'bar', label: '柱状图' },
-  { type: 'line', label: '折线图' },
-  { type: 'area', label: '面积图' },
-  { type: 'table', label: '表格' },
-];
+const AXIS_SWITCHABLE_KEYS: readonly string[] = ['bar', 'line', 'area', 'table'];
 
 /** 其他图表只能切换到自身和表格 */
-function otherSwitchable(kind: SeriesKind): SwitchTarget[] {
-  const labels: Record<string, string> = {
-    pie: '饼图',
-    scatter: '散点图',
-    radar: '雷达图',
-    gauge: '仪表盘',
-    candlestick: 'K线图',
-  };
-  return [
-    { type: kind, label: labels[kind] ?? kind },
-    { type: 'table', label: '表格' },
-  ];
-}
+const OTHER_CHART_KEYS: Record<string, string> = {
+  pie: 'pie',
+  scatter: 'scatter',
+  radar: 'radar',
+  gauge: 'gauge',
+  candlestick: 'candlestick',
+};
 
 /**
  * 根据当前图表类型返回可切换的目标类型列表。
@@ -68,10 +57,14 @@ export function getSwitchableTypes(
   const isArea = isAreaChart(series);
 
   if (seriesKind === 'bar' || seriesKind === 'line' || isArea) {
-    return AXIS_SWITCHABLE;
+    return AXIS_SWITCHABLE_KEYS.map((key) => ({ type: key as SeriesKind | 'table' | 'area', labelKey: key }));
   }
 
-  return otherSwitchable(seriesKind);
+  const key = OTHER_CHART_KEYS[seriesKind] ?? seriesKind;
+  return [
+    { type: seriesKind, labelKey: key },
+    { type: 'table', labelKey: 'table' },
+  ];
 }
 
 /**

@@ -21,6 +21,7 @@ import type {
 } from './types';
 import type { ThemeTokens } from '../../theme/theme-tokens';
 import { DEFAULT_THEME_TOKENS } from '../../theme/theme-tokens';
+import { useLocale, interpolate } from '../../locale';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -590,6 +591,7 @@ function FilterDropdown({
   const ref = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState(currentValue);
   const t = theme;
+  const locale = useLocale();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -655,10 +657,10 @@ function FilterDropdown({
 
   return (
     <div ref={ref} style={dropdownStyle} onClick={(e) => e.stopPropagation()}>
-      <div style={{ fontSize: 12, color: t.font.tertiaryColor, marginBottom: 4 }}>筛选 {columnTitle}</div>
+      <div style={{ fontSize: 12, color: t.font.tertiaryColor, marginBottom: 4 }}>{interpolate(locale.table.filter.title, { column: columnTitle })}</div>
       <input
         type="text"
-        placeholder="输入筛选关键词，回车确认"
+        placeholder={locale.table.filter.placeholder}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -666,7 +668,7 @@ function FilterDropdown({
         autoFocus
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
-        <button style={btnStyle} onClick={handleConfirm}>确定</button>
+        <button style={btnStyle} onClick={handleConfirm}>{locale.table.filter.confirm}</button>
       </div>
     </div>
   );
@@ -690,6 +692,7 @@ function ColumnManagerModal({
   theme: ThemeTokens;
 }): React.ReactElement {
   const st = useMemo(() => createStyles(theme), [theme]);
+  const locale = useLocale();
 
   const [leftKeys, setLeftKeys] = useState<string[]>(() =>
     allLeafColumns.map((c) => c.key).filter((k) => !visibleKeys.includes(k)),
@@ -764,10 +767,10 @@ function ColumnManagerModal({
   return (
     <div style={st.modalOverlay} onClick={onClose}>
       <div style={st.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, color: theme.font.color }}>列管理</div>
+        <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, color: theme.font.color }}>{locale.table.columnManager.title}</div>
         <div style={{ display: 'flex', gap: 16 }}>
           <div style={st.modalPanel}>
-            <div style={headerStyle}>可选列</div>
+            <div style={headerStyle}>{locale.table.columnManager.available}</div>
             <ul style={{ padding: '4px 0', listStyle: 'none', margin: 0 }}>
               {leftKeys.map((key) => (
                 <li key={key} style={st.modalItem(leftSelected.has(key))} onClick={() => toggleLeft(key)}>
@@ -775,7 +778,7 @@ function ColumnManagerModal({
                   {keyToTitle[key] ?? key}
                 </li>
               ))}
-              {leftKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无可选列</li>}
+              {leftKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>{locale.table.columnManager.emptyAvailable}</li>}
             </ul>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
@@ -785,7 +788,7 @@ function ColumnManagerModal({
             <button style={{ ...st.modalBtn, opacity: rightKeys.length === 0 ? 0.4 : 1 }} onClick={moveAllToLeft} disabled={rightKeys.length === 0}>&lt;&lt;</button>
           </div>
           <div style={st.modalPanel}>
-            <div style={headerStyle}>已选列</div>
+            <div style={headerStyle}>{locale.table.columnManager.selected}</div>
             <ul style={{ padding: '4px 0', listStyle: 'none', margin: 0 }}>
               {rightKeys.map((key) => (
                 <li key={key} style={st.modalItem(rightSelected.has(key))} onClick={() => toggleRight(key)}>
@@ -793,13 +796,13 @@ function ColumnManagerModal({
                   {keyToTitle[key] ?? key}
                 </li>
               ))}
-              {rightKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无已选列</li>}
+              {rightKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>{locale.table.columnManager.emptySelected}</li>}
             </ul>
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <button style={st.modalDefaultBtn} onClick={onClose}>取消</button>
-          <button style={{ ...st.modalPrimaryBtn, opacity: rightKeys.length === 0 ? 0.4 : 1, cursor: rightKeys.length === 0 ? 'not-allowed' : 'pointer' }} onClick={handleApply} disabled={rightKeys.length === 0}>确认</button>
+          <button style={st.modalDefaultBtn} onClick={onClose}>{locale.table.columnManager.cancel}</button>
+          <button style={{ ...st.modalPrimaryBtn, opacity: rightKeys.length === 0 ? 0.4 : 1, cursor: rightKeys.length === 0 ? 'not-allowed' : 'pointer' }} onClick={handleApply} disabled={rightKeys.length === 0}>{locale.table.columnManager.confirm}</button>
         </div>
       </div>
     </div>
@@ -829,6 +832,8 @@ function Pagination({
   onPageSizeChange: (size: number) => void;
   styles: ReturnType<typeof createStyles>;
 }) {
+  const locale = useLocale();
+
   if (totalItems <= pageSizeOpts[0] && totalPages <= 1) return null;
 
   const pages: number[] = [];
@@ -840,14 +845,14 @@ function Pagination({
 
   return (
     <div style={st.paginationWrapper}>
-      <span>共 {totalItems} 条</span>
+      <span>{interpolate(locale.table.pagination.total, { count: totalItems })}</span>
       <select
         value={pageSize}
         onChange={(e) => onPageSizeChange(Number(e.target.value))}
         style={st.paginationSelect}
       >
         {pageSizeOpts.map((s) => (
-          <option key={s} value={s}>{s} 条/页</option>
+          <option key={s} value={s}>{interpolate(locale.table.pagination.pageSize, { size: s })}</option>
         ))}
       </select>
       <button
@@ -921,6 +926,7 @@ export function TableView({
   const [hoverRow, setHoverRow] = useState<number | null>(null);
   const [activeFilterKey, setActiveFilterKey] = useState<string | null>(null);
   const st = useMemo(() => createStyles(theme ?? DEFAULT_THEME_TOKENS), [theme]);
+  const locale = useLocale();
 
   // Leaf columns
   const leafColumns = useMemo(() => collectLeafColumns(columns), [columns]);
@@ -980,7 +986,7 @@ export function TableView({
     return (
       <div style={{ ...st.wrapper, ...style }} className={className}>
         {title && <div style={st.title}>{title}</div>}
-        <div style={st.empty}>暂无可见列</div>
+        <div style={st.empty}>{locale.table.empty.noVisibleColumns}</div>
       </div>
     );
   }
@@ -1013,7 +1019,7 @@ export function TableView({
         <tbody>
           {finalData.length === 0 ? (
             <tr>
-              <td colSpan={visibleColCount} style={st.empty}>暂无数据</td>
+              <td colSpan={visibleColCount} style={st.empty}>{locale.table.empty.noData}</td>
             </tr>
           ) : (
             finalData.map((row, rowIdx) => {

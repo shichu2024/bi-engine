@@ -21,3 +21,6 @@ export type {
 
 export { useLayoutStore } from './useLayoutStore';
 export type { ViewMode, LayoutStore } from './useLayoutStore';
+
+export { useLocaleStore } from './useLocaleStore';
+export type { LocaleStore } from './useLocaleStore';

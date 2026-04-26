@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { BIEngine, ChartStateView, createValidationError } from 'bi-engine';
-import type { ChartComponent, ChartRenderError } from 'bi-engine';
+import type { ChartComponent, ChartRenderError, BuiltInLocale } from 'bi-engine';
 import { ComponentHeader } from './ComponentHeader';
 import type { ReactNode } from 'react';
 
@@ -8,12 +8,14 @@ interface ChartPreviewProps {
   readonly component: ChartComponent;
   readonly description: string;
   readonly toolbar?: ReactNode;
+  readonly locale?: BuiltInLocale;
 }
 
 export function ChartPreview({
   component,
   description,
   toolbar,
+  locale,
 }: ChartPreviewProps): React.ReactElement {
   const [chartState, setChartState] = useState<'loading' | 'empty' | 'error' | 'success'>('success');
   const [errorObj, setErrorObj] = useState<ChartRenderError | undefined>(undefined);
@@ -36,6 +38,7 @@ export function ChartPreview({
           <BIEngine
             schema={component}
             onError={handleError}
+            locale={locale}
           />
         </ChartStateView>
       </div>

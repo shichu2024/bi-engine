@@ -259,3 +259,18 @@ export type {
 
 export { ChartSwitchToolbar } from './component-handlers/chart/ChartSwitchToolbar';
 export type { ChartSwitchToolbarProps } from './component-handlers/chart/ChartSwitchToolbar';
+
+// ---- 国际化 ----
+export {
+  LocaleProvider,
+  useLocale,
+  resolveLocale,
+  interpolate,
+  zhCN,
+  enUS,
+} from './locale';
+export type {
+  BILocale,
+  BuiltInLocale,
+  LocaleInput,
+} from './locale';

@@ -9,7 +9,7 @@ import {
 import { Button, Flex, Input, Select, Switch, Typography } from 'antd';
 import React from 'react';
 
-import { useLayoutStore, useThemeStore } from '@/stores';
+import { useLayoutStore, useThemeStore, useLocaleStore } from '@/stores';
 
 import styles from './TopNavBar.module.css';
 
@@ -20,6 +20,8 @@ const TopNavBar: React.FC = () => {
   const toggleMode = useThemeStore((s) => s.toggleMode);
   const sidebarCollapsed = useLayoutStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
+  const locale = useLocaleStore((s) => s.locale);
+  const setLocale = useLocaleStore((s) => s.setLocale);
 
   const isDark = mode === 'dark';
 
@@ -56,6 +58,17 @@ const TopNavBar: React.FC = () => {
           unCheckedChildren={<MoonOutlined />}
           checked={isDark}
           onChange={toggleMode}
+        />
+
+        <Select
+          value={locale}
+          onChange={setLocale}
+          size="small"
+          style={{ width: 90 }}
+          options={[
+            { value: 'zh-CN', label: 'zh-CN' },
+            { value: 'en-US', label: 'en-US' },
+          ]}
         />
 
         <Button

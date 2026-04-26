@@ -5,21 +5,22 @@
 import type { EChartsOption } from '../build-line-option';
 import type { ThemeTokens } from '../../../theme/theme-tokens';
 import { DEFAULT_THEME_TOKENS } from '../../../theme/theme-tokens';
-
-/** 空数据提示文案 */
-const EMPTY_DATA_TEXT = '暂无数据';
+import type { BILocale } from '../../../locale/types';
+import { zhCN } from '../../../locale';
 
 /**
  * 返回空数据场景下的兜底 Option。
  *
- * 使用 ECharts graphic 组件在图表中心显示"暂无数据"提示。
+ * 使用 ECharts graphic 组件在图表中心显示空数据提示。
  */
 export function getEmptyDataOption(
   width: number = 400,
   height: number = 300,
   theme?: ThemeTokens,
+  locale?: BILocale,
 ): EChartsOption {
   const t = theme ?? DEFAULT_THEME_TOKENS;
+  const l = locale ?? zhCN;
 
   return {
     title: { show: false },
@@ -33,7 +34,7 @@ export function getEmptyDataOption(
       left: 'center',
       top: 'middle',
       style: {
-        text: EMPTY_DATA_TEXT,
+        text: l.table.empty.noData,
         fontSize: 14,
         fill: t.font.secondaryColor,
         fontFamily: t.font.family,

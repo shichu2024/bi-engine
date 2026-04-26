@@ -3,6 +3,8 @@
 // ============================================================================
 
 import type { BIEngineComponent, ComponentLayout } from '../schema/bi-engine-models';
+import type { BILocale } from '../locale/types';
+import { zhCN } from '../locale';
 
 /**
  * 检查组件是否在网格布局中。
@@ -23,13 +25,14 @@ export function isAbsoluteLayout(layout: ComponentLayout | undefined): boolean {
 /**
  * 获取组件在设计态下的显示名称。
  */
-export function getComponentDisplayName(component: BIEngineComponent): string {
+export function getComponentDisplayName(component: BIEngineComponent, locale?: BILocale): string {
+  const l = locale ?? zhCN;
   const nameMap: Record<string, string> = {
-    chart: '图表',
-    table: '表格',
-    text: '文本',
-    markdown: 'Markdown',
-    compositeTable: '组合表格',
+    chart: l.design.component.chart,
+    table: l.design.component.table,
+    text: l.design.component.text,
+    markdown: l.design.component.markdown,
+    compositeTable: l.design.component.compositeTable,
   };
   return nameMap[component.type] ?? component.type;
 }

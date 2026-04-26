@@ -1,6 +1,6 @@
 import type { BIEngineComponent } from 'bi-engine';
 import { BIEngine, ChartThemeProvider, DARK_THEME_TOKENS } from 'bi-engine';
-import { useThemeStore } from '@/stores';
+import { useThemeStore, useLocaleStore } from '@/stores';
 import styles from './SceneDetail.module.css';
 import type { ReactNode } from 'react';
 
@@ -24,6 +24,7 @@ export function InteractivePreview({
 }: InteractivePreviewProps): React.ReactElement {
   const mode = useThemeStore((s) => s.mode);
   const isDark = mode === 'dark';
+  const locale = useLocaleStore((s) => s.locale);
   const isTable = component.type === 'table';
 
   return (
@@ -35,6 +36,7 @@ export function InteractivePreview({
       <ChartThemeProvider tokens={isDark ? DARK_THEME_TOKENS : undefined}>
         <BIEngine
           schema={component}
+          locale={locale}
         />
       </ChartThemeProvider>
     </div>

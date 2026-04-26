@@ -22,6 +22,7 @@ import type {
 } from '../../schema/bi-engine-models';
 import { TableView } from './TableView';
 import type { TableColumn } from './types';
+import { useLocale } from '../../locale';
 
 // ---------------------------------------------------------------------------
 // 语义模型
@@ -157,6 +158,15 @@ function dslToTableColumns(columns: Column[]): TableColumn[] {
 }
 
 // ---------------------------------------------------------------------------
+// TableEmptyFallback — 空列状态展示（需要 locale）
+// ---------------------------------------------------------------------------
+
+function TableEmptyFallback({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  const locale = useLocale();
+  return <div className={className} style={style}>{locale.table.noColumnsDefined}</div>;
+}
+
+// ---------------------------------------------------------------------------
 // Renderer — 使用 TableView 组件
 // ---------------------------------------------------------------------------
 
@@ -165,7 +175,7 @@ const tableRenderer: ComponentRenderer<TableComponent, TableSemanticModel> = {
     const { columns, data, mergeRows } = model;
 
     if (columns.length === 0) {
-      return <div className={context.className} style={context.style}>No columns defined.</div>;
+      return <TableEmptyFallback className={context.className} style={context.style} />;
     }
 
     const tableColumns = dslToTableColumns(columns);

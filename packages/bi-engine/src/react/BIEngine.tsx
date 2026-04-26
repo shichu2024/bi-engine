@@ -14,6 +14,8 @@ import { chartHandler } from '../component-handlers/chart';
 import { textHandler } from '../component-handlers/text';
 import { tableHandler } from '../component-handlers/table';
 import { createUnsupportedHandler } from '../component-handlers/unsupported-handler';
+import type { LocaleInput } from '../locale/types';
+import { LocaleProvider, resolveLocale } from '../locale';
 
 // ---------------------------------------------------------------------------
 // 懒注册：首次渲染前确保 handler 已注册，避免消费方忘记调用
@@ -54,6 +56,8 @@ export interface BIEngineProps {
   onSelect?: (componentId: string) => void;
   /** 图表类型切换回调（受控模式）；不传则内部自动切换（非受控模式） */
   onChartTypeChange?: (newSchema: BIEngineComponent) => void;
+  /** 国际化：传入语言标识或自定义词条对象，默认 zh-CN */
+  locale?: LocaleInput;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,6 +79,7 @@ export function BIEngine({
   onError,
   onSelect,
   onChartTypeChange,
+  locale,
 }: BIEngineProps): React.ReactElement {
   ensureHandlersRegistered();
 
@@ -117,6 +122,8 @@ export function BIEngine({
     chartSchemaRef.current = activeSchema as ChartComponent;
   }
 
+  const resolvedLocale = resolveLocale(locale);
+
   const inner = (
     <ComponentView
       component={activeSchema}
@@ -130,14 +137,16 @@ export function BIEngine({
   );
 
   return (
-    <RenderModeProvider mode={renderMode}>
-      {theme !== undefined ? (
-        <ChartThemeProvider tokens={theme}>
-          {inner}
-        </ChartThemeProvider>
-      ) : (
-        inner
-      )}
-    </RenderModeProvider>
+    <LocaleProvider locale={resolvedLocale}>
+      <RenderModeProvider mode={renderMode}>
+        {theme !== undefined ? (
+          <ChartThemeProvider tokens={theme}>
+            {inner}
+          </ChartThemeProvider>
+        ) : (
+          inner
+        )}
+      </RenderModeProvider>
+    </LocaleProvider>
   );
 }

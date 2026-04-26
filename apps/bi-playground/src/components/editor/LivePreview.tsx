@@ -3,7 +3,7 @@ import { Alert } from 'antd';
 import { ChartThemeProvider, DARK_THEME_TOKENS } from 'bi-engine';
 import type { ChartComponent } from 'bi-engine';
 import { ChartPreview } from '@/components/ChartPreview';
-import { useEditorStore, useThemeStore, useViewportStore } from '@/stores';
+import { useEditorStore, useThemeStore, useViewportStore, useLocaleStore } from '@/stores';
 import { PreviewToolbar } from './PreviewToolbar';
 import styles from './LivePreview.module.css';
 
@@ -91,6 +91,7 @@ export function LivePreview(): React.ReactElement {
   const palette = useThemeStore((s) => s.palette);
   const mode = useThemeStore((s) => s.mode);
   const isDark = mode === 'dark';
+  const locale = useLocaleStore((s) => s.locale);
   const viewport = useViewportStore((s) => s.currentViewport());
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -192,6 +193,7 @@ export function LivePreview(): React.ReactElement {
                 <ChartPreview
                   component={renderState.component}
                   description={renderState.component.id ?? 'Preview'}
+                  locale={locale}
                 />
               </ChartThemeProvider>
             </PreviewErrorBoundary>

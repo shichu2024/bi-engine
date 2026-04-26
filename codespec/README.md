@@ -4,7 +4,7 @@
 
 - 项目：bi-engine2
 - 负责人：
-- 当前激活的功能：无（FEAT-014 已完成）
+- 当前激活的功能：FEAT-016-国际化机制与多语言支持
 - 最后更新时间：2026-04-26T18:20:00Z
 
 ## 术语
@@ -40,6 +40,8 @@
 | FEAT-012 | 多系列图表支持 | done | P0 | specs/FEAT-012-多系列图表支持/ |
 | FEAT-013 | axisGroup数据分组处理 | done | P0 | specs/FEAT-013-axisGroup数据分组处理/ |
 | FEAT-014 | 表格交互增强 | done | P0 | specs/FEAT-014-表格交互增强/ |
+| FEAT-015 | 图表切换工具栏 | done | P0 | specs/FEAT-015-图表切换工具栏/ |
+| FEAT-016 | 国际化机制与多语言支持 | done | P1 | specs/FEAT-016-国际化机制与多语言支持/ |
 
 ## Feature 依赖关系
 

@@ -139,8 +139,8 @@ describe('table-handler', () => {
         <ComponentView component={emptyTable} />,
       );
 
-      // Empty table shows the "No columns defined." fallback
-      expect(container.textContent).toContain('No columns defined.');
+      // Empty table shows the "未定义列。" fallback (zh-CN default locale)
+      expect(container.textContent).toContain('未定义列。');
     });
 
     it('table without columns property defaults to empty columns', () => {
