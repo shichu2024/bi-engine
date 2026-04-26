@@ -25,20 +25,20 @@
   font-size: 13px;
   font-weight: 500;
   text-align: center;
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--pg-color-text-secondary);
 }
 
 .diffImageColumnTitle {
-  color: #cf1322;
+  color: var(--pg-color-error);
 }
 
 .diffImage {
-  border: 2px solid #ff4d4f;
+  border: 2px solid var(--pg-color-error);
   border-radius: 4px;
 }
 
 .normalImage {
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--pg-color-border-secondary);
   border-radius: 4px;
 }
 
@@ -47,7 +47,7 @@
   gap: 32px;
   align-items: center;
   padding: 12px 16px;
-  background: #fafafa;
+  background: var(--pg-color-fill-quaternary);
   border-radius: 6px;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .resultCard:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+  box-shadow: var(--pg-box-shadow);
 }
 
 .cardHeaderRow {
@@ -87,7 +87,7 @@
 
 .cardExecTime {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--pg-color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -100,7 +100,7 @@
   max-width: 100%;
   max-height: 120px;
   border-radius: 4px;
-  border: 1px solid #ffccc7;
+  border: 1px solid var(--pg-color-error-border);
 }
 
 .diffMetricsRow {
@@ -112,17 +112,17 @@
 
 .diffMetricText {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--pg-color-text-secondary);
 }
 
 .diffPercentage {
-  color: #cf1322;
+  color: var(--pg-color-error);
   font-weight: 500;
 }
 
 .expandHint {
   font-size: 12px;
-  color: #1677ff;
+  color: var(--pg-color-primary);
   margin-top: 8px;
   cursor: pointer;
 }

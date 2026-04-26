@@ -89,8 +89,8 @@ describe('buildEChartsOption integration', () => {
     const tooltip = option.tooltip as Record<string, unknown>;
 
     // 来自标准化模板的 tooltip 样式
-    expect(tooltip.backgroundColor).toBe('#fff');
-    expect(tooltip.borderColor).toBe('#e0e0e0');
+    expect(tooltip.backgroundColor).toBe('rgba(255, 255, 255, 0.96)');
+    expect(tooltip.borderColor).toBe('#E8E8E8');
     // 来自 builder 的 tooltip trigger
     expect(tooltip.trigger).toBe('axis');
   });

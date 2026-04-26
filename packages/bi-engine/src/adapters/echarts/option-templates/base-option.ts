@@ -3,70 +3,8 @@
 // ============================================================================
 
 import type { EChartsOption } from '../build-line-option';
-
-// ---------------------------------------------------------------------------
-// 设计令牌（Design Tokens）
-// ---------------------------------------------------------------------------
-
-/** 标准字体族 */
-const FONT_FAMILY = [
-  '-apple-system',
-  'BlinkMacSystemFont',
-  "'Segoe UI'",
-  'Roboto',
-  "'Helvetica Neue'",
-  'Arial',
-  'sans-serif',
-].join(', ');
-
-/** 字号分级 */
-const FONT_SIZE = {
-  title: 14,
-  subtitle: 12,
-  legend: 12,
-  axisLabel: 12,
-  axisName: 12,
-  tooltip: 12,
-  dataLabel: 12,
-} as const;
-
-/** 文字颜色 */
-const TEXT_COLOR = {
-  primary: '#333',
-  secondary: '#666',
-  tertiary: '#999',
-  inverse: '#fff',
-} as const;
-
-/** 标准色板（8 色，低饱和度） */
-const COLOR_PALETTE = [
-  '#5470C6',
-  '#91CC75',
-  '#FAC858',
-  '#EE6666',
-  '#73C0DE',
-  '#3BA272',
-  '#FC8452',
-  '#9A60B4',
-] as const;
-
-/** 间距 */
-const SPACING = {
-  gridLeft: 60,
-  gridRight: 80,
-  gridTop: 60,
-  gridBottom: 60,
-} as const;
-
-/** 阴影 */
-const SHADOW = {
-  tooltip: '0 4px 12px rgba(0,0,0,0.1)',
-} as const;
-
-/** 边框 */
-const BORDER = {
-  tooltip: '#e0e0e0',
-} as const;
+import type { ThemeTokens } from '../../../theme/theme-tokens';
+import { DEFAULT_THEME_TOKENS } from '../../../theme/theme-tokens';
 
 // ---------------------------------------------------------------------------
 // getBaseOption — 全局标准化基础 Option
@@ -77,17 +15,21 @@ const BORDER = {
  *
  * 所有图表类型的标准化模板均以此为基础，保证视觉一致性。
  * 消费者可通过深度合并工具覆盖任意配置项。
+ *
+ * @param theme - 可选主题令牌，不传时降级到 DEFAULT_THEME_TOKENS
  */
-export function getBaseOption(): EChartsOption {
+export function getBaseOption(theme?: ThemeTokens): EChartsOption {
+  const t = theme ?? DEFAULT_THEME_TOKENS;
+
   return {
     // 标准色板
-    color: [...COLOR_PALETTE],
+    color: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4'],
 
     // 全局字体
     textStyle: {
-      fontFamily: FONT_FAMILY,
-      fontSize: FONT_SIZE.axisLabel,
-      color: TEXT_COLOR.primary,
+      fontFamily: t.font.family,
+      fontSize: t.font.axisLabelSize,
+      color: t.font.color,
     },
 
     // 标题
@@ -96,35 +38,35 @@ export function getBaseOption(): EChartsOption {
       left: 'center',
       top: 12,
       textStyle: {
-        fontSize: FONT_SIZE.title,
+        fontSize: t.font.titleSize,
         fontWeight: 600,
-        color: TEXT_COLOR.primary,
-        fontFamily: FONT_FAMILY,
+        color: t.font.color,
+        fontFamily: t.font.family,
       },
       subtextStyle: {
-        fontSize: FONT_SIZE.subtitle,
-        color: TEXT_COLOR.secondary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.size,
+        color: t.font.secondaryColor,
+        fontFamily: t.font.family,
       },
     },
 
     // 提示框
     tooltip: {
       show: true,
-      backgroundColor: '#fff',
-      borderColor: BORDER.tooltip,
+      backgroundColor: t.background.tooltip,
+      borderColor: t.border.tooltipBorderColor,
       borderWidth: 1,
       padding: [8, 12],
       textStyle: {
-        color: TEXT_COLOR.primary,
-        fontSize: FONT_SIZE.tooltip,
-        fontFamily: FONT_FAMILY,
+        color: t.font.color,
+        fontSize: t.font.size,
+        fontFamily: t.font.family,
       },
-      extraCssText: `box-shadow: ${SHADOW.tooltip};`,
+      extraCssText: `box-shadow: 0 4px 12px rgba(0,0,0,0.1);`,
       confine: true,
     },
 
-    // 图例（含超长文本截断 + 悬浮 tooltip 显示全名）
+    // 图例
     legend: {
       show: false,
       bottom: 0,
@@ -134,9 +76,9 @@ export function getBaseOption(): EChartsOption {
       itemHeight: 10,
       itemGap: 16,
       textStyle: {
-        fontSize: FONT_SIZE.legend,
-        color: TEXT_COLOR.secondary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.size,
+        color: t.font.secondaryColor,
+        fontFamily: t.font.family,
         width: 100,
         overflow: 'truncate',
         ellipsis: '...',
@@ -145,10 +87,9 @@ export function getBaseOption(): EChartsOption {
       type: 'scroll',
       pageIconSize: 10,
       pageTextStyle: {
-        fontSize: FONT_SIZE.legend,
-        color: TEXT_COLOR.tertiary,
+        fontSize: t.font.size,
+        color: t.font.tertiaryColor,
       },
-      // 悬浮时显示完整图例名称
       tooltip: {
         show: true,
       },
@@ -163,10 +104,10 @@ export function getBaseOption(): EChartsOption {
 
     // 网格
     grid: {
-      left: SPACING.gridLeft,
-      right: SPACING.gridRight,
-      top: SPACING.gridTop,
-      bottom: SPACING.gridBottom,
+      left: 60,
+      right: 80,
+      top: 60,
+      bottom: 60,
       containLabel: true,
     },
 
@@ -178,20 +119,6 @@ export function getBaseOption(): EChartsOption {
 }
 
 // ---------------------------------------------------------------------------
-// 导出设计令牌（供高级用户自定义时参考）
-// ---------------------------------------------------------------------------
-
-export {
-  FONT_FAMILY,
-  FONT_SIZE,
-  TEXT_COLOR,
-  COLOR_PALETTE,
-  SPACING,
-  SHADOW,
-  BORDER,
-};
-
-// ---------------------------------------------------------------------------
 // getCartesianAxisDefaults — 笛卡尔坐标系坐标轴默认样式
 // ---------------------------------------------------------------------------
 
@@ -200,38 +127,39 @@ export {
  *
  * 非笛卡尔图表（pie/radar/gauge）不应使用此函数。
  */
-export function getCartesianAxisDefaults(): {
+export function getCartesianAxisDefaults(theme?: ThemeTokens): {
   xAxis: Record<string, unknown>;
   yAxis: Record<string, unknown>;
 } {
+  const t = theme ?? DEFAULT_THEME_TOKENS;
+
   return {
     xAxis: {
       axisLine: {
         lineStyle: {
-          color: '#ccc',
+          color: t.border.axisLineColor,
         },
       },
       axisTick: {
         lineStyle: {
-          color: '#ccc',
+          color: t.border.axisLineColor,
         },
       },
       axisLabel: {
-        fontSize: FONT_SIZE.axisLabel,
-        color: TEXT_COLOR.secondary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.axisLabelSize,
+        color: t.font.secondaryColor,
+        fontFamily: t.font.family,
         width: 80,
         overflow: 'truncate',
         ellipsis: '...',
-        // 截断标签悬浮时显示完整文本
         tooltip: {
           show: true,
         },
       },
       axisName: {
-        fontSize: FONT_SIZE.axisName,
-        color: TEXT_COLOR.secondary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.size,
+        color: t.font.secondaryColor,
+        fontFamily: t.font.family,
         width: 80,
         overflow: 'truncate',
         ellipsis: '...',
@@ -253,9 +181,9 @@ export function getCartesianAxisDefaults(): {
         show: false,
       },
       axisLabel: {
-        fontSize: FONT_SIZE.axisLabel,
-        color: TEXT_COLOR.secondary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.axisLabelSize,
+        color: t.font.secondaryColor,
+        fontFamily: t.font.family,
         width: 60,
         overflow: 'truncate',
         ellipsis: '...',
@@ -264,9 +192,9 @@ export function getCartesianAxisDefaults(): {
         },
       },
       axisName: {
-        fontSize: FONT_SIZE.axisName,
-        color: TEXT_COLOR.secondary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.size,
+        color: t.font.secondaryColor,
+        fontFamily: t.font.family,
         width: 60,
         overflow: 'truncate',
         ellipsis: '...',
@@ -276,10 +204,37 @@ export function getCartesianAxisDefaults(): {
       },
       splitLine: {
         lineStyle: {
-          color: '#f0f0f0',
+          color: t.border.splitLineColor,
           type: 'dashed',
         },
       },
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// 兼容性导出：供高级用户自定义时参考的常量（从 DEFAULT_TOKENS 推导）
+// ---------------------------------------------------------------------------
+
+export const FONT_FAMILY = DEFAULT_THEME_TOKENS.font.family;
+export const FONT_SIZE = {
+  title: DEFAULT_THEME_TOKENS.font.titleSize,
+  subtitle: DEFAULT_THEME_TOKENS.font.size,
+  legend: DEFAULT_THEME_TOKENS.font.size,
+  axisLabel: DEFAULT_THEME_TOKENS.font.axisLabelSize,
+  axisName: DEFAULT_THEME_TOKENS.font.size,
+  tooltip: DEFAULT_THEME_TOKENS.font.size,
+  dataLabel: DEFAULT_THEME_TOKENS.font.size,
+} as const;
+export const TEXT_COLOR = {
+  primary: DEFAULT_THEME_TOKENS.font.color,
+  secondary: DEFAULT_THEME_TOKENS.font.secondaryColor,
+  tertiary: DEFAULT_THEME_TOKENS.font.tertiaryColor,
+  inverse: '#fff',
+} as const;
+export const COLOR_PALETTE = [
+  '#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4',
+] as const;
+export const SPACING = { gridLeft: 60, gridRight: 80, gridTop: 60, gridBottom: 60 } as const;
+export const SHADOW = { tooltip: '0 4px 12px rgba(0,0,0,0.1)' } as const;
+export const BORDER = { tooltip: DEFAULT_THEME_TOKENS.border.tooltipBorderColor } as const;

@@ -1,29 +1,21 @@
-// ============================================================================
-// option-templates/radar-option-template.ts — 雷达图标准化模板
-// ============================================================================
-
 import type { EChartsOption } from '../build-line-option';
-import { getBaseOption, FONT_SIZE, TEXT_COLOR, FONT_FAMILY } from './base-option';
+import type { ThemeTokens } from '../../../theme/theme-tokens';
+import { DEFAULT_THEME_TOKENS } from '../../../theme/theme-tokens';
+import { getBaseOption } from './base-option';
 
-/**
- * 返回雷达图的标准化 Option 模板。
- *
- * 继承全局基础配置，补充雷达图特有默认值：
- * - 指示器名称样式
- * - 分隔线统一
- * - 面积半透明填充
- */
-export function getRadarOptionTemplate(): EChartsOption {
+export function getRadarOptionTemplate(theme?: ThemeTokens): EChartsOption {
+  const t = theme ?? DEFAULT_THEME_TOKENS;
+
   return {
-    ...getBaseOption(),
+    ...getBaseOption(theme),
 
     tooltip: {
-      ...getBaseOption().tooltip,
+      ...getBaseOption(theme).tooltip,
       trigger: 'item',
     },
 
     legend: {
-      ...getBaseOption().legend,
+      ...getBaseOption(theme).legend,
     },
 
     radar: {
@@ -32,9 +24,9 @@ export function getRadarOptionTemplate(): EChartsOption {
       radius: '65%',
       name: {
         textStyle: {
-          fontSize: FONT_SIZE.axisLabel,
-          color: TEXT_COLOR.secondary,
-          fontFamily: FONT_FAMILY,
+          fontSize: t.font.axisLabelSize,
+          color: t.font.secondaryColor,
+          fontFamily: t.font.family,
         },
       },
       splitArea: {
@@ -44,12 +36,12 @@ export function getRadarOptionTemplate(): EChartsOption {
       },
       splitLine: {
         lineStyle: {
-          color: '#e0e0e0',
+          color: t.border.gridColor,
         },
       },
       axisLine: {
         lineStyle: {
-          color: '#e0e0e0',
+          color: t.border.gridColor,
         },
       },
       indicator: [],

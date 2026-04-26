@@ -1,3 +1,4 @@
+import type { ThemeTokens } from '../../theme/theme-tokens';
 import type { ChartSemanticModel } from '../../core/chart-semantic-model';
 import type { EChartsOption } from './build-line-option';
 import { buildLineOption, buildBarOption } from './build-line-option';
@@ -83,17 +84,23 @@ export {
  */
 export function buildEChartsOption(
   model: ChartSemanticModel,
+  theme?: ThemeTokens,
 ): EChartsOption {
   // 空数据兜底
   if (isDatasetEmpty(model.dataset)) {
-    return getEmptyDataOption();
+    return getEmptyDataOption(400, 300, theme);
   }
 
-  // 获取标准化模板（传入 model 以检测 subType 等信息）
-  const template = getTemplate(model);
+  // 获取标准化模板
+  const template = getTemplate(model, theme);
 
   // 获取数据驱动的构建结果
   const dataOption = buildBaseOption(model);
+
+  // 注入图表标题（来自语义模型）
+  if (model.title !== undefined && model.title !== '') {
+    (dataOption as Record<string, unknown>).title = { show: true, text: model.title };
+  }
 
   // 深度合并：模板 + 数据构建器
   const mergedBase = deepMergeOption(template, dataOption, 'merge');
@@ -108,26 +115,26 @@ export function buildEChartsOption(
  * 饼图/环形图共用同一个模板（视觉规范一致），
  * 环形图特有的 center 文本和 radius 由 builder 层负责。
  */
-function getTemplate(model: ChartSemanticModel): EChartsOption {
+function getTemplate(model: ChartSemanticModel, theme?: ThemeTokens): EChartsOption {
   const kind = model.seriesKind;
 
   switch (kind) {
     case 'line':
-      return getLineOptionTemplate();
+      return getLineOptionTemplate(theme);
     case 'bar':
-      return getBarOptionTemplate();
+      return getBarOptionTemplate(theme);
     case 'pie':
-      return getPieOptionTemplate();
+      return getPieOptionTemplate(theme);
     case 'scatter':
-      return getScatterOptionTemplate();
+      return getScatterOptionTemplate(theme);
     case 'radar':
-      return getRadarOptionTemplate();
+      return getRadarOptionTemplate(theme);
     case 'candlestick':
-      return getCandlestickOptionTemplate();
+      return getCandlestickOptionTemplate(theme);
     case 'gauge':
-      return getGaugeOptionTemplate();
+      return getGaugeOptionTemplate(theme);
     default:
-      return getBarOptionTemplate();
+      return getBarOptionTemplate(theme);
   }
 }
 

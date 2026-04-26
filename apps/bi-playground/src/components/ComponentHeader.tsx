@@ -34,7 +34,7 @@ export function ComponentHeader({
       gap: 8,
       padding: '6px 12px',
       minHeight: 36,
-      borderBottom: '1px solid #f0f0f0',
+      borderBottom: '1px solid var(--pg-color-border-secondary)',
       flexShrink: 0,
     }}
     data-testid="component-header"

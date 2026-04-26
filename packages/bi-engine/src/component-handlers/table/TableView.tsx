@@ -11,31 +11,38 @@ import type {
   CellMerge,
   MergeMap,
 } from './types';
+import type { ThemeTokens } from '../../theme/theme-tokens';
+import { DEFAULT_THEME_TOKENS } from '../../theme/theme-tokens';
 
 // ---------------------------------------------------------------------------
-// 样式常量
+// 样式工厂 — 从 ThemeTokens 生成 inline styles
 // ---------------------------------------------------------------------------
 
-const S = {
-  wrapper: { width: '100%', overflowX: 'auto', fontSize: 14, color: '#333' } as React.CSSProperties,
-  title: { fontWeight: 600, fontSize: 16, marginBottom: 8, color: '#1a1a1a' } as React.CSSProperties,
-  table: { width: '100%', borderCollapse: 'collapse', border: '1px solid #e8e8e8', tableLayout: 'auto' as const } as React.CSSProperties,
-  th: { padding: '10px 12px', fontWeight: 600, fontSize: 13, backgroundColor: '#fafafa', borderBottom: '2px solid #e8e8e8', textAlign: 'left', whiteSpace: 'nowrap', userSelect: 'none' as const } as React.CSSProperties,
-  td: { padding: '8px 12px', borderBottom: '1px solid #f0f0f0', fontSize: 14 } as React.CSSProperties,
-  thSortable: { cursor: 'pointer' } as React.CSSProperties,
-  thRight: { borderRight: '1px solid #f0f0f0' } as React.CSSProperties,
-  tdRight: { borderRight: '1px solid #f0f0f0' } as React.CSSProperties,
-  rowEven: { backgroundColor: '#fafafa' } as React.CSSProperties,
-  rowHover: { backgroundColor: '#e6f7ff' } as React.CSSProperties,
-  empty: { textAlign: 'center', padding: '32px 16px', color: '#999', fontSize: 14 } as React.CSSProperties,
-  sortIcon: { display: 'inline-flex', flexDirection: 'column', marginLeft: 4, verticalAlign: 'middle', lineHeight: 1, fontSize: 10, color: '#bbb' } as React.CSSProperties,
-  sortIconActive: { color: '#1890ff' } as React.CSSProperties,
-  arrow: { lineHeight: '8px' } as React.CSSProperties,
-  filterRow: (padding: string): React.CSSProperties => ({ padding, backgroundColor: '#fafafa', borderBottom: '1px solid #e8e8e8' }),
-  filterInput: { width: '100%', padding: '4px 8px', border: '1px solid #d9d9d9', borderRadius: 4, fontSize: 12, outline: 'none', boxSizing: 'border-box' } as React.CSSProperties,
-  toolbar: { display: 'flex', justifyContent: 'flex-end', marginBottom: 8 } as React.CSSProperties,
-  toolbarBtn: { padding: '4px 12px', border: '1px solid #d9d9d9', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 13, color: '#333' } as React.CSSProperties,
-};
+function createStyles(t: ThemeTokens) {
+  return {
+    wrapper: { width: '100%', overflowX: 'auto', fontSize: 14, color: t.font.color } as React.CSSProperties,
+    title: { fontWeight: 600, fontSize: 16, marginBottom: 8, color: t.font.color } as React.CSSProperties,
+    table: { width: '100%', borderCollapse: 'collapse', border: `1px solid ${t.table.headerBorder}`, tableLayout: 'auto' as const } as React.CSSProperties,
+    th: { padding: '10px 12px', fontWeight: 600, fontSize: 13, backgroundColor: t.table.headerBg, borderBottom: `2px solid ${t.table.headerBorder}`, textAlign: 'left', whiteSpace: 'nowrap', userSelect: 'none' as const } as React.CSSProperties,
+    td: { padding: '8px 12px', borderBottom: `1px solid ${t.table.cellBorder}`, fontSize: 14 } as React.CSSProperties,
+    thSortable: { cursor: 'pointer' } as React.CSSProperties,
+    thRight: { borderRight: `1px solid ${t.table.cellBorder}` } as React.CSSProperties,
+    tdRight: { borderRight: `1px solid ${t.table.cellBorder}` } as React.CSSProperties,
+    rowEven: { backgroundColor: t.table.rowStripeBg } as React.CSSProperties,
+    rowHover: { backgroundColor: t.table.rowHoverBg } as React.CSSProperties,
+    empty: { textAlign: 'center', padding: '32px 16px', color: t.font.tertiaryColor, fontSize: 14 } as React.CSSProperties,
+    sortIcon: { display: 'inline-flex', flexDirection: 'column', marginLeft: 4, verticalAlign: 'middle', lineHeight: 1, fontSize: 10, color: t.font.tertiaryColor } as React.CSSProperties,
+    sortIconActive: { color: t.semantic.info } as React.CSSProperties,
+    arrow: { lineHeight: '8px' } as React.CSSProperties,
+    filterRow: (padding: string): React.CSSProperties => ({ padding, backgroundColor: t.table.headerBg, borderBottom: `1px solid ${t.table.headerBorder}` }),
+    filterInput: { width: '100%', padding: '4px 8px', border: `1px solid ${t.table.inputBorder}`, borderRadius: t.border.radius, fontSize: 12, outline: 'none', boxSizing: 'border-box', backgroundColor: t.table.inputBg, color: t.font.color } as React.CSSProperties,
+    toolbar: { display: 'flex', justifyContent: 'flex-end', marginBottom: 8 } as React.CSSProperties,
+    toolbarBtn: { padding: '4px 12px', border: `1px solid ${t.table.buttonBorder}`, borderRadius: t.border.radius, background: t.table.buttonBg, cursor: 'pointer', fontSize: 13, color: t.table.buttonColor } as React.CSSProperties,
+  };
+}
+
+/** 默认样式（向后兼容） */
+const S = createStyles(DEFAULT_THEME_TOKENS);
 
 // ---------------------------------------------------------------------------
 // 辅助函数
@@ -274,6 +281,7 @@ function renderHeaderRows(
   onSort: (key: string) => void,
   onFilter: (key: string, value: string) => void,
   leafColumns: TableColumn[],
+  styles: ReturnType<typeof createStyles>,
 ): ReactNode[] {
   const rows: ReactNode[] = [];
   const hasSortable = leafColumns.some((c) => c.sortable);
@@ -282,7 +290,7 @@ function renderHeaderRows(
   // Header rows
   for (let level = 0; level < maxDepth; level++) {
     const cells: ReactNode[] = [];
-    fillHeaderRow(columns, level, 0, cells, maxDepth, totalLeafCount, sortState, onSort);
+    fillHeaderRow(columns, level, 0, cells, maxDepth, totalLeafCount, sortState, onSort, styles);
     rows.push(
       <tr key={`header-row-${level}`}>{cells}</tr>,
     );
@@ -295,19 +303,19 @@ function renderHeaderRows(
       const col = leafColumns[i];
       if (col.filterable) {
         filterCells.push(
-          <td key={`filter-${col.key}`} style={S.filterRow('4px 8px')}>
+          <td key={`filter-${col.key}`} style={styles.filterRow('4px 8px')}>
             <input
               type="text"
               placeholder={`筛选 ${col.title}`}
               value={filterState[col.key] ?? ''}
               onChange={(e) => onFilter(col.key, e.target.value)}
-              style={S.filterInput}
+              style={styles.filterInput}
             />
           </td>,
         );
       } else {
         filterCells.push(
-          <td key={`filter-${col.key}`} style={S.filterRow('0')} />,
+          <td key={`filter-${col.key}`} style={styles.filterRow('0')} />,
         );
       }
     }
@@ -326,6 +334,7 @@ function fillHeaderRow(
   _totalLeafCount: number,
   sortState: SortState,
   onSort: (key: string) => void,
+  styles: ReturnType<typeof createStyles>,
 ): number {
   let leafCount = 0;
   for (let i = 0; i < columns.length; i++) {
@@ -345,24 +354,24 @@ function fillHeaderRow(
           colSpan={span > 1 ? span : undefined}
           rowSpan={depth > 1 ? depth : undefined}
           style={{
-            ...S.th,
-            ...(cells.length > 0 ? S.thRight : {}),
-            ...(isLeaf && col.sortable ? S.thSortable : {}),
+            ...styles.th,
+            ...(cells.length > 0 ? styles.thRight : {}),
+            ...(isLeaf && col.sortable ? styles.thSortable : {}),
           }}
           onClick={isLeaf && col.sortable ? () => onSort(col.key) : undefined}
         >
           {col.title}
           {isLeaf && col.sortable && (
-            <span style={{ ...S.sortIcon, ...(isActive ? S.sortIconActive : {}) }}>
-              <span style={{ ...S.arrow, ...(isActive && sortState.direction === 'asc' ? { color: '#1890ff' } : {}) }}>&#9650;</span>
-              <span style={{ ...S.arrow, ...(isActive && sortState.direction === 'desc' ? { color: '#1890ff' } : {}) }}>&#9660;</span>
+            <span style={{ ...styles.sortIcon, ...(isActive ? styles.sortIconActive : {}) }}>
+              <span style={{ ...styles.arrow, ...(isActive && sortState.direction === 'asc' ? styles.sortIconActive : {}) }}>&#9650;</span>
+              <span style={{ ...styles.arrow, ...(isActive && sortState.direction === 'desc' ? styles.sortIconActive : {}) }}>&#9660;</span>
             </span>
           )}
         </th>,
       );
       leafCount += span;
     } else if (hasChildren) {
-      leafCount += fillHeaderRow(col.children!, targetLevel, currentLevel + 1, cells, maxDepth, _totalLeafCount, sortState, onSort);
+      leafCount += fillHeaderRow(col.children!, targetLevel, currentLevel + 1, cells, maxDepth, _totalLeafCount, sortState, onSort, styles);
     } else if (currentLevel < targetLevel) {
       leafCount += 1;
     }
@@ -379,11 +388,13 @@ function ColumnManagerModal({
   visibleKeys,
   onClose,
   onApply,
+  theme,
 }: {
   allLeafColumns: TableColumn[];
   visibleKeys: string[];
   onClose: () => void;
   onApply: (keys: string[]) => void;
+  theme: ThemeTokens;
 }): React.ReactElement {
   const [leftKeys, setLeftKeys] = useState<string[]>(() =>
     allLeafColumns.map((c) => c.key).filter((k) => !visibleKeys.includes(k)),
@@ -446,47 +457,47 @@ function ColumnManagerModal({
 
   const overlayStyle: React.CSSProperties = {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    background: 'rgba(0,0,0,0.45)', zIndex: 1000,
+    background: theme.table.modalMask, zIndex: 1000,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   };
 
   const modalStyle: React.CSSProperties = {
-    background: '#fff', borderRadius: 8, padding: 20, minWidth: 520, maxWidth: 680,
+    background: theme.table.modalBg, borderRadius: 8, padding: 20, minWidth: 520, maxWidth: 680,
     boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
   };
 
   const panelStyle: React.CSSProperties = {
-    flex: 1, border: '1px solid #e8e8e8', borderRadius: 4, minHeight: 200,
+    flex: 1, border: `1px solid ${theme.table.headerBorder}`, borderRadius: 4, minHeight: 200,
   };
 
   const itemStyle = (selected: boolean): React.CSSProperties => ({
     display: 'flex', alignItems: 'center', padding: '6px 12px', cursor: 'pointer', fontSize: 13,
-    backgroundColor: selected ? '#bae7ff' : 'transparent',
+    backgroundColor: selected ? theme.table.selectedBg : 'transparent',
   });
 
   const btnStyle: React.CSSProperties = {
-    padding: '4px 8px', border: '1px solid #d9d9d9', borderRadius: 4, background: '#fff',
-    cursor: 'pointer', fontSize: 16, lineHeight: 1,
+    padding: '4px 8px', border: `1px solid ${theme.table.buttonBorder}`, borderRadius: 4, background: theme.table.buttonBg,
+    cursor: 'pointer', fontSize: 16, lineHeight: 1, color: theme.table.buttonColor,
   };
 
   const primaryBtnStyle: React.CSSProperties = {
     padding: '5px 16px', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13,
-    background: '#1890ff', color: '#fff',
+    background: theme.table.primaryButtonBg, color: theme.table.primaryButtonColor,
   };
 
   const defaultBtnStyle: React.CSSProperties = {
-    padding: '5px 16px', border: '1px solid #d9d9d9', borderRadius: 4, cursor: 'pointer', fontSize: 13,
-    background: '#fff',
+    padding: '5px 16px', border: `1px solid ${theme.table.buttonBorder}`, borderRadius: 4, cursor: 'pointer', fontSize: 13,
+    background: theme.table.buttonBg, color: theme.table.buttonColor,
   };
 
   return (
     <div style={overlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16 }}>列管理</div>
+        <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, color: theme.font.color }}>列管理</div>
         <div style={{ display: 'flex', gap: 16 }}>
           {/* Left panel - hidden columns */}
           <div style={panelStyle}>
-            <div style={{ padding: '8px 12px', fontWeight: 600, fontSize: 13, background: '#fafafa', borderBottom: '1px solid #e8e8e8' }}>
+            <div style={{ padding: '8px 12px', fontWeight: 600, fontSize: 13, background: theme.table.headerBg, borderBottom: `1px solid ${theme.table.headerBorder}`, color: theme.font.color }}>
               可选列
             </div>
             <ul style={{ padding: '4px 0', listStyle: 'none', margin: 0 }}>
@@ -496,7 +507,7 @@ function ColumnManagerModal({
                   {keyToTitle[key] ?? key}
                 </li>
               ))}
-              {leftKeys.length === 0 && <li style={{ padding: '12px', color: '#999', fontSize: 13, textAlign: 'center' }}>暂无可选列</li>}
+              {leftKeys.length === 0 && <li style={{ padding: '12px', color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无可选列</li>}
             </ul>
           </div>
 
@@ -510,7 +521,7 @@ function ColumnManagerModal({
 
           {/* Right panel - visible columns */}
           <div style={panelStyle}>
-            <div style={{ padding: '8px 12px', fontWeight: 600, fontSize: 13, background: '#fafafa', borderBottom: '1px solid #e8e8e8' }}>
+            <div style={{ padding: '8px 12px', fontWeight: 600, fontSize: 13, background: theme.table.headerBg, borderBottom: `1px solid ${theme.table.headerBorder}`, color: theme.font.color }}>
               已选列
             </div>
             <ul style={{ padding: '4px 0', listStyle: 'none', margin: 0 }}>
@@ -520,7 +531,7 @@ function ColumnManagerModal({
                   {keyToTitle[key] ?? key}
                 </li>
               ))}
-              {rightKeys.length === 0 && <li style={{ padding: '12px', color: '#999', fontSize: 13, textAlign: 'center' }}>暂无已选列</li>}
+              {rightKeys.length === 0 && <li style={{ padding: '12px', color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>暂无已选列</li>}
             </ul>
           </div>
         </div>
@@ -550,6 +561,8 @@ export interface TableViewProps {
   className?: string;
   /** 自定义样式 */
   style?: React.CSSProperties;
+  /** 主题令牌 */
+  theme?: ThemeTokens;
   /** 声明式行合并配置 */
   declaredMerges?: Array<{ startRowIndex: number; rowSpan: number; columnKey: string }>;
 }
@@ -561,9 +574,11 @@ export function TableView({
   title,
   className,
   style,
+  theme,
   declaredMerges,
 }: TableViewProps): React.ReactElement {
   const [hoverRow, setHoverRow] = useState<number | null>(null);
+  const st = useMemo(() => createStyles(theme ?? DEFAULT_THEME_TOKENS), [theme]);
 
   const { sortedData, sortState, handleSort } = useTableSort(dataSource, columns);
   const { filteredData, filterState, setFilter } = useTableFilter(sortedData);
@@ -600,25 +615,25 @@ export function TableView({
 
   if (visibleColCount === 0) {
     return (
-      <div style={{ ...S.wrapper, ...style }} className={className}>
-        {title && <div style={S.title}>{title}</div>}
-        <div style={S.empty}>暂无可见列</div>
+      <div style={{ ...st.wrapper, ...style }} className={className}>
+        {title && <div style={st.title}>{title}</div>}
+        <div style={st.empty}>暂无可见列</div>
       </div>
     );
   }
 
   return (
-    <div style={{ ...S.wrapper, ...style }} className={className}>
-      {title && <div style={S.title}>{title}</div>}
+    <div style={{ ...st.wrapper, ...style }} className={className}>
+      {title && <div style={st.title}>{title}</div>}
 
       {/* Toolbar */}
       {hasColumnManager && (
-        <div style={S.toolbar}>
-          <button style={S.toolbarBtn} onClick={openManager}>列管理</button>
+        <div style={st.toolbar}>
+          <button style={st.toolbarBtn} onClick={openManager}>列管理</button>
         </div>
       )}
 
-      <table style={S.table}>
+      <table style={st.table}>
         <thead>
           {renderHeaderRows(
             visibleHeaderColumns,
@@ -629,12 +644,13 @@ export function TableView({
             handleSort,
             setFilter,
             visibleLeafCols,
+            st,
           )}
         </thead>
         <tbody>
           {filteredData.length === 0 ? (
             <tr>
-              <td colSpan={visibleColCount} style={S.empty}>暂无数据</td>
+              <td colSpan={visibleColCount} style={st.empty}>暂无数据</td>
             </tr>
           ) : (
             filteredData.map((row, rowIdx) => {
@@ -642,7 +658,7 @@ export function TableView({
               return (
                 <tr
                   key={getRowKey(row, rowIdx, rowKey)}
-                  style={{ ...(rowIdx % 2 === 1 ? S.rowEven : {}), ...(isHovered ? S.rowHover : {}) }}
+                  style={{ ...(rowIdx % 2 === 1 ? st.rowEven : {}), ...(isHovered ? st.rowHover : {}) }}
                   onMouseEnter={() => setHoverRow(rowIdx)}
                   onMouseLeave={() => setHoverRow(null)}
                 >
@@ -667,7 +683,7 @@ export function TableView({
                         key={col.key}
                         colSpan={merge && merge.colSpan > 1 ? merge.colSpan : undefined}
                         rowSpan={merge && merge.rowSpan > 1 ? merge.rowSpan : undefined}
-                        style={{ ...S.td, ...(colIdx < visibleColCount - 1 ? S.tdRight : {}) }}
+                        style={{ ...st.td, ...(colIdx < visibleColCount - 1 ? st.tdRight : {}) }}
                       >
                         {cellContent}
                       </td>
@@ -687,6 +703,7 @@ export function TableView({
           visibleKeys={visibleKeys}
           onClose={closeManager}
           onApply={applyColumns}
+          theme={theme ?? DEFAULT_THEME_TOKENS}
         />
       )}
     </div>

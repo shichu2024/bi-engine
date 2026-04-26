@@ -1,6 +1,6 @@
 import { Component, useState, useEffect, useMemo, useCallback } from 'react';
 import { Alert } from 'antd';
-import { ChartThemeProvider } from 'bi-engine';
+import { ChartThemeProvider, DARK_THEME_TOKENS } from 'bi-engine';
 import type { ChartComponent } from 'bi-engine';
 import { ChartPreview } from '@/components/ChartPreview';
 import { useEditorStore, useThemeStore, useViewportStore } from '@/stores';
@@ -89,6 +89,8 @@ class PreviewErrorBoundary extends Component<
 export function LivePreview(): React.ReactElement {
   const dsl = useEditorStore((s) => s.dsl);
   const palette = useThemeStore((s) => s.palette);
+  const mode = useThemeStore((s) => s.mode);
+  const isDark = mode === 'dark';
   const viewport = useViewportStore((s) => s.currentViewport());
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -186,7 +188,7 @@ export function LivePreview(): React.ReactElement {
             } as React.CSSProperties}
           >
             <PreviewErrorBoundary onError={handleBoundaryError}>
-              <ChartThemeProvider palette={palette}>
+              <ChartThemeProvider palette={palette} tokens={isDark ? DARK_THEME_TOKENS : undefined}>
                 <ChartPreview
                   component={renderState.component}
                   description={renderState.component.id ?? 'Preview'}

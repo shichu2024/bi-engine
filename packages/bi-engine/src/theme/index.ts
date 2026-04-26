@@ -9,13 +9,29 @@ export {
   resolvePaletteColor,
 } from './palette';
 
-export type { ThemeTokens, BackgroundTokens, FontTokens, SpacingTokens, BorderTokens } from './theme-tokens';
+export type {
+  ThemeTokens,
+  BackgroundTokens,
+  FontTokens,
+  SpacingTokens,
+  BorderTokens,
+  SemanticTokens,
+  TableTokens,
+} from './theme-tokens';
 export {
   DEFAULT_BACKGROUND_TOKENS,
   DEFAULT_FONT_TOKENS,
   DEFAULT_SPACING_TOKENS,
   DEFAULT_BORDER_TOKENS,
+  DEFAULT_SEMANTIC_TOKENS,
+  DEFAULT_TABLE_TOKENS,
   DEFAULT_THEME_TOKENS,
+  DARK_BACKGROUND_TOKENS,
+  DARK_FONT_TOKENS,
+  DARK_BORDER_TOKENS,
+  DARK_SEMANTIC_TOKENS,
+  DARK_TABLE_TOKENS,
+  DARK_THEME_TOKENS,
 } from './theme-tokens';
 
 // ---- 格式化器 ----

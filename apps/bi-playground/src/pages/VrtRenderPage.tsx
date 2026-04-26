@@ -16,7 +16,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChartThemeProvider, BIEngine, ChartStateView } from 'bi-engine';
+import { ChartThemeProvider, BIEngine, ChartStateView, DARK_THEME_TOKENS } from 'bi-engine';
 import { getFixtureById } from 'bi-engine/testing';
 import { DARK_PALETTE, LIGHT_PALETTE } from '../shared-constants';
 
@@ -94,7 +94,7 @@ export function VrtRenderPage(): React.ReactElement {
         overflow: 'hidden',
       }}
     >
-      <ChartThemeProvider palette={palette}>
+      <ChartThemeProvider palette={palette} tokens={theme === 'dark' ? DARK_THEME_TOKENS : undefined}>
         <ChartStateView state="success">
           <BIEngine schema={fixture.component} />
         </ChartStateView>

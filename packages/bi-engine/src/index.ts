@@ -153,8 +153,10 @@ export type {
   FontTokens,
   SpacingTokens,
   BorderTokens,
+  SemanticTokens,
+  TableTokens,
 } from './theme/theme-tokens';
-export { DEFAULT_THEME_TOKENS } from './theme/theme-tokens';
+export { DEFAULT_THEME_TOKENS, DARK_THEME_TOKENS } from './theme/theme-tokens';
 
 // ============================================================================
 // v2.0 — 统一组件渲染平台

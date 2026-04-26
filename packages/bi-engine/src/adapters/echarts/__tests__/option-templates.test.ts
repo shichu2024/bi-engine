@@ -58,8 +58,8 @@ describe('getBaseOption', () => {
   it('includes standardized tooltip config', () => {
     const option = getBaseOption();
     const tooltip = option.tooltip as Record<string, unknown>;
-    expect(tooltip.backgroundColor).toBe('#fff');
-    expect(tooltip.borderColor).toBe('#e0e0e0');
+    expect(tooltip.backgroundColor).toBe('rgba(255, 255, 255, 0.96)');
+    expect(tooltip.borderColor).toBe('#E8E8E8');
     expect(tooltip.confine).toBe(true);
   });
 
@@ -338,9 +338,9 @@ describe('Design Tokens', () => {
   });
 
   it('FONT_SIZE has all required levels', () => {
-    expect(FONT_SIZE.title).toBe(14);
+    expect(FONT_SIZE.title).toBe(16);
     expect(FONT_SIZE.legend).toBe(12);
-    expect(FONT_SIZE.axisLabel).toBe(12);
+    expect(FONT_SIZE.axisLabel).toBe(11);
   });
 
   it('TEXT_COLOR has primary, secondary, tertiary', () => {

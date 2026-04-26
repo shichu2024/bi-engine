@@ -7,7 +7,7 @@
 }
 
 .sceneCard:hover {
-  box-shadow: var(--ant-box-shadow, 0 6px 16px 0 rgba(0,0,0,0.08));
+  box-shadow: var(--pg-box-shadow-secondary);
 }
 
 .cardHeader {
@@ -33,7 +33,7 @@
 .cardDescription {
   font-size: 13px;
   line-height: 1.4;
-  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
+  color: var(--pg-color-text-tertiary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -47,7 +47,7 @@
 .bottomBar {
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  border-top: 1px solid var(--pg-color-border-secondary);
   margin-top: 8px;
   padding-top: 4px;
 }
@@ -57,11 +57,11 @@
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
+  color: var(--pg-color-text-tertiary);
 }
 
 .toggleCodeBtn:hover {
-  color: var(--ant-color-primary, #1677ff);
+  color: var(--pg-color-primary);
 }
 
 /* -------------------------------------------------------------------------- */

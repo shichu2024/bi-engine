@@ -134,7 +134,7 @@ function ChartRendererContent({
   context: RenderContext;
 }): React.ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const option = useMemo(() => echartsAdapter.adapt(model), [model]);
+  const option = useMemo(() => echartsAdapter.adapt(model, context.theme), [model, context.theme]);
 
   useChartInstance({
     containerRef,

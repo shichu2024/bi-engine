@@ -1,24 +1,16 @@
-// ============================================================================
-// option-templates/gauge-option-template.ts — 仪表盘标准化模板
-// ============================================================================
-
 import type { EChartsOption } from '../build-line-option';
-import { getBaseOption, FONT_SIZE, TEXT_COLOR, FONT_FAMILY, COLOR_PALETTE } from './base-option';
+import type { ThemeTokens } from '../../../theme/theme-tokens';
+import { DEFAULT_THEME_TOKENS } from '../../../theme/theme-tokens';
+import { getBaseOption, COLOR_PALETTE } from './base-option';
 
-/**
- * 返回仪表盘的标准化 Option 模板。
- *
- * 继承全局基础配置，补充仪表盘特有默认值：
- * - 指针样式
- * - 轴线配色
- * - 详情文本样式
- */
-export function getGaugeOptionTemplate(): EChartsOption {
+export function getGaugeOptionTemplate(theme?: ThemeTokens): EChartsOption {
+  const t = theme ?? DEFAULT_THEME_TOKENS;
+
   return {
-    ...getBaseOption(),
+    ...getBaseOption(theme),
 
     tooltip: {
-      ...getBaseOption().tooltip,
+      ...getBaseOption(theme).tooltip,
       trigger: 'item',
     },
 
@@ -54,7 +46,7 @@ export function getGaugeOptionTemplate(): EChartsOption {
         distance: -16,
         length: 6,
         lineStyle: {
-          color: '#fff',
+          color: t.background.chart,
           width: 1,
         },
       },
@@ -62,30 +54,30 @@ export function getGaugeOptionTemplate(): EChartsOption {
         distance: -16,
         length: 16,
         lineStyle: {
-          color: '#fff',
+          color: t.background.chart,
           width: 2,
         },
       },
       axisLabel: {
-        color: TEXT_COLOR.tertiary,
+        color: t.font.tertiaryColor,
         distance: 24,
-        fontSize: FONT_SIZE.axisLabel - 2,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.axisLabelSize - 2,
+        fontFamily: t.font.family,
       },
       detail: {
         valueAnimation: true,
         formatter: '{value}',
-        fontSize: FONT_SIZE.title + 8,
+        fontSize: t.font.titleSize + 8,
         fontWeight: 600,
-        color: TEXT_COLOR.primary,
-        fontFamily: FONT_FAMILY,
+        color: t.font.color,
+        fontFamily: t.font.family,
         offsetCenter: [0, '40%'],
       },
       title: {
         offsetCenter: [0, '60%'],
-        fontSize: FONT_SIZE.subtitle,
-        color: TEXT_COLOR.tertiary,
-        fontFamily: FONT_FAMILY,
+        fontSize: t.font.size,
+        color: t.font.tertiaryColor,
+        fontFamily: t.font.family,
       },
       data: [],
     }],

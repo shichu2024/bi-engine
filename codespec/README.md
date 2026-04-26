@@ -5,7 +5,7 @@
 - 项目：bi-engine2
 - 负责人：
 - 当前激活的功能：无（全部完成）
-- 最后更新时间：2026-04-26T10:30:00Z
+- 最后更新时间：2026-04-26T12:30:00Z
 
 ## 术语
 
@@ -36,6 +36,7 @@
 | FEAT-007 | 新图表类型与BIEngine公共API重构 | done | P1 | specs/FEAT-007-新图表类型与BIEngine公共API重构/ |
 | FEAT-009 | ECharts标准化Option构建与扩展能力 | done | P0 | specs/FEAT-009-ECharts标准化Option构建与扩展能力/ |
 | FEAT-010 | 原生React表格组件 | done | P0 | specs/FEAT-010-原生React表格组件/ |
+| FEAT-011 | 深色与浅色主题支持 | done | P1 | specs/FEAT-011-深色与浅色主题支持/ |
 
 ## Feature 依赖关系
 
@@ -50,7 +51,9 @@ FEAT-003 (done)
 
 FEAT-001 (done) ──→ FEAT-009 (done)
 
-FEAT-003 (done) ──→ FEAT-010 (proposal)
+FEAT-003 (done) ──→ FEAT-010 (done)
+
+FEAT-009 (done) ──→ FEAT-011 (done)
 ```
 
 ## 状态说明

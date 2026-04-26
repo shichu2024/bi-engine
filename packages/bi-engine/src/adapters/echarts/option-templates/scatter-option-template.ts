@@ -1,44 +1,37 @@
-// ============================================================================
-// option-templates/scatter-option-template.ts — 散点图标准化模板
-// ============================================================================
-
 import type { EChartsOption } from '../build-line-option';
+import type { ThemeTokens } from '../../../theme/theme-tokens';
+import { DEFAULT_THEME_TOKENS } from '../../../theme/theme-tokens';
 import { getBaseOption, getCartesianAxisDefaults } from './base-option';
 
-/**
- * 返回散点图的标准化 Option 模板。
- *
- * 继承全局基础配置，补充散点图特有默认值：
- * - 默认符号大小（symbolSize: 10）
- * - 双轴均为数值轴
- */
-export function getScatterOptionTemplate(): EChartsOption {
+export function getScatterOptionTemplate(theme?: ThemeTokens): EChartsOption {
+  const t = theme ?? DEFAULT_THEME_TOKENS;
+
   return {
-    ...getBaseOption(),
+    ...getBaseOption(theme),
 
     tooltip: {
-      ...getBaseOption().tooltip,
+      ...getBaseOption(theme).tooltip,
       trigger: 'item',
     },
 
     legend: {
-      ...getBaseOption().legend,
+      ...getBaseOption(theme).legend,
     },
 
     xAxis: {
-      ...getCartesianAxisDefaults().xAxis,
+      ...getCartesianAxisDefaults(theme).xAxis,
       type: 'value',
       splitLine: {
         show: true,
         lineStyle: {
-          color: '#f0f0f0',
+          color: t.border.splitLineColor,
           type: 'dashed',
         },
       },
     },
 
     yAxis: {
-      ...getCartesianAxisDefaults().yAxis,
+      ...getCartesianAxisDefaults(theme).yAxis,
       type: 'value',
     },
 
@@ -49,7 +42,7 @@ export function getScatterOptionTemplate(): EChartsOption {
         focus: 'series',
         itemStyle: {
           borderWidth: 2,
-          borderColor: '#fff',
+          borderColor: t.background.chart,
         },
       },
     }],

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useThemeStore } from '@/stores';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,6 +31,7 @@ export function SplitPane({
   const [ratio, setRatio] = useState(defaultRatio);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isDark = useThemeStore((s) => s.mode) === 'dark';
 
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
@@ -88,7 +90,7 @@ export function SplitPane({
   const handleStyle: React.CSSProperties = {
     width: HANDLE_WIDTH,
     cursor: 'col-resize',
-    backgroundColor: isDragging ? '#1890ff' : '#e0e0e0',
+    backgroundColor: isDragging ? '#1890ff' : (isDark ? '#444' : '#e0e0e0'),
     transition: isDragging ? 'none' : 'background-color 0.2s ease',
     flexShrink: 0,
   };

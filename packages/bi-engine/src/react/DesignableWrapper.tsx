@@ -4,6 +4,7 @@
 
 import { useRenderMode, RenderMode } from '../platform/render-mode';
 import { useSelection } from '../design/selection-context';
+import { useChartTheme } from '../theme/chart-theme-context';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -36,6 +37,7 @@ export function DesignableWrapper({
 }: DesignableWrapperProps): React.ReactNode {
   const mode = useRenderMode();
   const { selectedId, select } = useSelection();
+  const { tokens: t } = useChartTheme();
   const isSelected = selectedId === componentId;
 
   // RUNTIME：零开销，直接渲染 children
@@ -53,7 +55,7 @@ export function DesignableWrapper({
   const wrapperStyle: React.CSSProperties = {
     position: 'relative',
     ...(isSelected ? {
-      outline: '2px solid #1890ff',
+      outline: `2px solid ${t.border.selectedColor}`,
       outlineOffset: '-2px',
     } : {}),
     ...style,
@@ -68,7 +70,7 @@ export function DesignableWrapper({
       data-render-mode={mode}
     >
       {children}
-      {isSelected && <DesignOverlay componentId={componentId} />}
+      {isSelected && <DesignOverlay componentId={componentId} color={t.border.selectedColor} />}
     </div>
   );
 }
@@ -77,7 +79,7 @@ export function DesignableWrapper({
 // DesignOverlay — 拖拽手柄与操作按钮占位
 // ---------------------------------------------------------------------------
 
-function DesignOverlay({ componentId }: { componentId: string }) {
+function DesignOverlay({ componentId, color }: { componentId: string; color: string }) {
   return (
     <div
       style={{
@@ -95,7 +97,7 @@ function DesignOverlay({ componentId }: { componentId: string }) {
             position: 'absolute',
             width: 8,
             height: 8,
-            background: '#1890ff',
+            background: color,
             pointerEvents: 'auto',
             ...(pos.includes('t') ? { top: -4 } : { bottom: -4 }),
             ...(pos.includes('l') ? { left: -4 } : { right: -4 }),

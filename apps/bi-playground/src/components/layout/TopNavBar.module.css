@@ -11,8 +11,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
-  background: var(--ant-color-bg-container, #fff);
+  border-bottom: 1px solid var(--pg-color-border-secondary);
+  background: var(--pg-color-bg-container);
 }
 
 .leftSection {

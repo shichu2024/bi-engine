@@ -101,6 +101,14 @@ export function ChartThemeProvider({
         ...DEFAULT_THEME_TOKENS.border,
         ...tokensOverride?.border,
       },
+      semantic: {
+        ...DEFAULT_THEME_TOKENS.semantic,
+        ...tokensOverride?.semantic,
+      },
+      table: {
+        ...DEFAULT_THEME_TOKENS.table,
+        ...tokensOverride?.table,
+      },
     };
 
     const palette = paletteOverride ?? DEFAULT_PALETTE;

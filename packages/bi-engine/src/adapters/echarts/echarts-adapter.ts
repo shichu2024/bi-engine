@@ -5,6 +5,7 @@
 import type { RefObject } from 'react';
 import type { ChartAdapter, ChartAdapterHandle } from '../adapter-registry';
 import type { ChartSemanticModel } from '../../core/chart-semantic-model';
+import type { ThemeTokens } from '../../theme/theme-tokens';
 import { buildEChartsOption } from './index';
 import type { EChartsOption } from './build-line-option';
 
@@ -22,8 +23,8 @@ export class EChartsAdapter implements ChartAdapter<ChartSemanticModel, EChartsO
   readonly name = 'echarts';
   readonly version = '1.0.0';
 
-  adapt(model: ChartSemanticModel): EChartsOption {
-    return buildEChartsOption(model);
+  adapt(model: ChartSemanticModel, theme?: ThemeTokens): EChartsOption {
+    return buildEChartsOption(model, theme);
   }
 
   mount(

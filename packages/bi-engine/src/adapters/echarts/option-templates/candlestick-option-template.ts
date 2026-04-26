@@ -1,23 +1,13 @@
-// ============================================================================
-// option-templates/candlestick-option-template.ts — 蜡烛图标准化模板
-// ============================================================================
-
 import type { EChartsOption } from '../build-line-option';
 import { getBaseOption, getCartesianAxisDefaults } from './base-option';
+import type { ThemeTokens } from '../../../theme/theme-tokens';
 
-/**
- * 返回蜡烛图（K 线图）的标准化 Option 模板。
- *
- * 继承全局基础配置，补充蜡烛图特有默认值：
- * - 红涨绿跌配色
- * - K 线柱体样式
- */
-export function getCandlestickOptionTemplate(): EChartsOption {
+export function getCandlestickOptionTemplate(_theme?: ThemeTokens): EChartsOption {
   return {
-    ...getBaseOption(),
+    ...getBaseOption(_theme),
 
     tooltip: {
-      ...getBaseOption().tooltip,
+      ...getBaseOption(_theme).tooltip,
       trigger: 'axis',
       axisPointer: {
         type: 'cross',
@@ -25,16 +15,16 @@ export function getCandlestickOptionTemplate(): EChartsOption {
     },
 
     legend: {
-      ...getBaseOption().legend,
+      ...getBaseOption(_theme).legend,
     },
 
     xAxis: {
-      ...getCartesianAxisDefaults().xAxis,
+      ...getCartesianAxisDefaults(_theme).xAxis,
       type: 'category',
     },
 
     yAxis: {
-      ...getCartesianAxisDefaults().yAxis,
+      ...getCartesianAxisDefaults(_theme).yAxis,
       type: 'value',
       scale: true,
     },

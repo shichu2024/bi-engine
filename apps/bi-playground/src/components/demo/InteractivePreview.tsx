@@ -1,5 +1,6 @@
 import type { BIEngineComponent } from 'bi-engine';
-import { BIEngine } from 'bi-engine';
+import { BIEngine, ChartThemeProvider, DARK_THEME_TOKENS } from 'bi-engine';
+import { useThemeStore } from '@/stores';
 import styles from './SceneDetail.module.css';
 import type { ReactNode } from 'react';
 
@@ -21,15 +22,20 @@ export function InteractivePreview({
   component,
   toolbar,
 }: InteractivePreviewProps): React.ReactElement {
+  const mode = useThemeStore((s) => s.mode);
+  const isDark = mode === 'dark';
+
   return (
     <div
       className={styles.previewContainer}
       data-testid="interactive-preview"
     >
       {toolbar && <div style={{ marginBottom: 8 }}>{toolbar}</div>}
-      <BIEngine
-        schema={component}
-      />
+      <ChartThemeProvider tokens={isDark ? DARK_THEME_TOKENS : undefined}>
+        <BIEngine
+          schema={component}
+        />
+      </ChartThemeProvider>
     </div>
   );
 }

@@ -3,37 +3,30 @@
 // ============================================================================
 
 import type { EChartsOption } from '../build-line-option';
+import type { ThemeTokens } from '../../../theme/theme-tokens';
 import { getBaseOption, getCartesianAxisDefaults } from './base-option';
 
-/**
- * 返回折线图/面积图的标准化 Option 模板。
- *
- * 继承全局基础配置，补充折线图特有默认值：
- * - 线条默认不平滑（smooth: false）
- * - 空数据断点连接（connectNulls: true）
- * - 标记点默认样式
- */
-export function getLineOptionTemplate(): EChartsOption {
+export function getLineOptionTemplate(theme?: ThemeTokens): EChartsOption {
   return {
-    ...getBaseOption(),
+    ...getBaseOption(theme),
 
     tooltip: {
-      ...getBaseOption().tooltip,
+      ...getBaseOption(theme).tooltip,
       trigger: 'axis',
     },
 
     legend: {
-      ...getBaseOption().legend,
+      ...getBaseOption(theme).legend,
     },
 
     xAxis: {
-      ...getCartesianAxisDefaults().xAxis,
+      ...getCartesianAxisDefaults(theme).xAxis,
       type: 'category',
       boundaryGap: false,
     },
 
     yAxis: {
-      ...getCartesianAxisDefaults().yAxis,
+      ...getCartesianAxisDefaults(theme).yAxis,
       type: 'value',
     },
 

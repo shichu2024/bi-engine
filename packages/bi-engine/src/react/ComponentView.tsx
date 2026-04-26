@@ -8,6 +8,7 @@ import { getComponentHandler } from '../platform/component-registry';
 import { defaultPipelineEngine } from '../pipeline/pipeline-engine';
 import { useRenderMode, RenderMode } from '../platform/render-mode';
 import { DEFAULT_THEME_TOKENS } from '../theme/theme-tokens';
+import { useChartTheme } from '../theme/chart-theme-context';
 import type { ComponentError, RenderContext } from '../platform/types';
 import { DesignableWrapper } from './DesignableWrapper';
 
@@ -44,6 +45,7 @@ export function ComponentView({
   onSelect,
 }: ComponentViewProps): React.ReactNode {
   const mode = useRenderMode();
+  const chartTheme = useChartTheme();
 
   // 1. 获取处理器
   const handler = useMemo(
@@ -85,13 +87,13 @@ export function ComponentView({
 
   // 5. 错误解围
   if (firstError !== null) {
-    return <ErrorFallback code={firstError.code} message={firstError.message} />;
+    return <ErrorFallback code={firstError.code} message={firstError.message} theme={chartTheme.tokens} />;
   }
 
   // 6. 构建渲染上下文
   const renderContext: RenderContext = {
     mode,
-    theme: DEFAULT_THEME_TOKENS,
+    theme: chartTheme.tokens,
     componentId: component.id,
     className,
     style,
@@ -121,11 +123,11 @@ export function ComponentView({
 // ErrorFallback
 // ---------------------------------------------------------------------------
 
-function ErrorFallback({ code, message }: { code: string; message: string }) {
+function ErrorFallback({ code, message, theme }: { code: string; message: string; theme: import('../theme/theme-tokens').ThemeTokens }) {
   return (
-    <div style={{ padding: 16, border: '1px solid #ff4d4f', borderRadius: 4 }}>
-      <div style={{ fontWeight: 'bold', color: '#ff4d4f' }}>{code}</div>
-      <div style={{ marginTop: 4, color: '#666' }}>{message}</div>
+    <div style={{ padding: 16, border: `1px solid ${theme.semantic.error}`, borderRadius: theme.border.radius }}>
+      <div style={{ fontWeight: 'bold', color: theme.semantic.error }}>{code}</div>
+      <div style={{ marginTop: 4, color: theme.font.secondaryColor }}>{message}</div>
     </div>
   );
 }

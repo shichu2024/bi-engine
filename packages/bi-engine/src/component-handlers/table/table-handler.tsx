@@ -173,6 +173,7 @@ const tableRenderer: ComponentRenderer<TableComponent, TableSemanticModel> = {
         title={model.title}
         className={context.className}
         style={context.style}
+        theme={context.theme}
         declaredMerges={mergeRows.map((m) => ({
           startRowIndex: m.startRowIndex,
           rowSpan: m.rowSpan,

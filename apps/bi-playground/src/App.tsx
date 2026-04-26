@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ConfigProvider, theme as antdTheme } from 'antd';
 import TopNavBar from '@/components/layout/TopNavBar';
@@ -37,6 +37,11 @@ export function App(): React.ReactElement {
     onSave: handleSave,
     onRender: handleRender,
   });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = mode;
+    document.body.style.backgroundColor = isDark ? '#141414' : '#f5f5f5';
+  }, [mode, isDark]);
 
   const antdAlgorithm = useMemo(
     () => (isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm),

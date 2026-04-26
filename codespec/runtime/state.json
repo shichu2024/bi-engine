@@ -1,29 +1,29 @@
 {
-  "active_feature": "FEAT-010-原生React表格组件",
-  "active_phase": "done",
+  "active_feature": "FEAT-011-深色与浅色主题支持",
+  "active_phase": "implementing",
   "active_dispatch": {
-    "role": "pm",
-    "story": "",
-    "task": ""
+    "role": "dev",
+    "story": "ST-002",
+    "task": "Phase-1"
   },
   "resume": {
-    "mode": "idle",
-    "next_role": "pm",
-    "next_action": "FEAT-010 已完成。等待用户新需求。"
+    "mode": "active",
+    "next_role": "dev",
+    "next_action": "按架构设计 Phase 1-4 实施，Phase 1 先扩展 ThemeTokens"
   },
   "latest_validation": {
-    "story": "FEAT-010",
-    "task": "all",
-    "status": "DONE",
-    "decision": "pass",
-    "root_cause_type": "none",
+    "story": "",
+    "task": "",
+    "status": "",
+    "decision": "",
+    "root_cause_type": "",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "原生React表格组件实现完成。460个测试全部通过，构建成功。支持基础表格、排序、筛选、列管理、合并单元格、自定义渲染、Playground演示。",
-    "report_ref": "codespec/specs/FEAT-010-原生React表格组件/validation-report.md",
-    "updated_at": "2026-04-26T10:30:00Z"
+    "summary": "",
+    "report_ref": "",
+    "updated_at": ""
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-26T10:30:00Z"
+  "last_updated": "2026-04-26T13:00:00Z"
 }

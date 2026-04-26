@@ -7,8 +7,8 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: var(--ant-color-bg-container, #ffffff);
-  border-right: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  background-color: var(--pg-color-bg-container);
+  border-right: 1px solid var(--pg-color-border-secondary);
   transition: width 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -37,7 +37,7 @@
   justify-content: center;
   height: 40px;
   margin: 12px 0;
-  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
+  color: var(--pg-color-text-tertiary);
   font-size: 20px;
 }
 
@@ -72,7 +72,7 @@
 
 .dragHandle:hover,
 .dragHandleActive {
-  background-color: var(--ant-color-primary, #1677ff);
+  background-color: var(--pg-color-primary);
 }
 
 /* -- Selection highlight ------------------------------------------------- */
@@ -89,15 +89,15 @@
 }
 
 .treeItem:hover {
-  background-color: var(--ant-control-item-bg-hover, rgba(0,0,0,0.04));
+  background-color: var(--pg-control-item-bg-hover);
 }
 
 .treeItemSelected {
-  background-color: var(--ant-color-primary-bg, #e6f4ff);
+  background-color: var(--pg-color-primary-bg);
 }
 
 .treeItemSelected:hover {
-  background-color: var(--ant-color-primary-bg-hover, #bae0ff);
+  background-color: var(--pg-color-primary-bg-hover);
 }
 
 /* -- Category header ----------------------------------------------------- */
@@ -111,12 +111,12 @@
   user-select: none;
   font-weight: 500;
   font-size: 13px;
-  color: var(--ant-color-text-secondary, rgba(0,0,0,0.65));
-  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  color: var(--pg-color-text-secondary);
+  border-bottom: 1px solid var(--pg-color-border-secondary);
 }
 
 .categoryHeader:hover {
-  background-color: var(--ant-control-item-bg-hover, rgba(0,0,0,0.04));
+  background-color: var(--pg-control-item-bg-hover);
 }
 
 .categoryArrow {
@@ -124,7 +124,7 @@
   align-items: center;
   transition: transform 0.2s ease;
   font-size: 12px;
-  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
+  color: var(--pg-color-text-tertiary);
 }
 
 .categoryArrowExpanded {
@@ -142,7 +142,7 @@
 .itemName {
   font-size: 13px;
   font-weight: 500;
-  color: var(--ant-color-text, rgba(0,0,0,0.88));
+  color: var(--pg-color-text);
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -151,7 +151,7 @@
 
 .itemDescription {
   font-size: 12px;
-  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
+  color: var(--pg-color-text-tertiary);
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -173,6 +173,6 @@
 .emptyState {
   padding: 24px 16px;
   text-align: center;
-  color: var(--ant-color-text-tertiary, rgba(0,0,0,0.45));
+  color: var(--pg-color-text-tertiary);
   font-size: 13px;
 }

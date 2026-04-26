@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { initTestModeFromUrl } from './test-mode';
 import { registerBuiltinHandlers } from 'bi-engine';
+import './theme.css';
 
 // 注册所有内置组件处理器（chart/table/text/markdown）
 registerBuiltinHandlers();

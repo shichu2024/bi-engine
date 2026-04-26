@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getFixtureById } from 'bi-engine/testing';
+import { getUnifiedFixtureById } from 'bi-engine/testing';
 import { DslEditor } from '@/components/editor/DslEditor';
 import { LivePreview } from '@/components/editor/LivePreview';
 import { SplitPane } from '@/components/editor/SplitPane';
@@ -21,7 +21,7 @@ export function EditorPage(): React.ReactElement {
 
   useEffect(() => {
     const fixtureId = componentId ?? '';
-    const fixture = getFixtureById(fixtureId);
+    const fixture = getUnifiedFixtureById(fixtureId);
 
     if (fixture) {
       initDsl(JSON.stringify(fixture.component, null, 2));

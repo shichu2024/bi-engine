@@ -5,5 +5,5 @@
 .editorPage {
   height: calc(100vh - 48px);
   overflow: hidden;
-  background-color: var(--ant-color-bg-container, #ffffff);
+  background-color: var(--pg-color-bg-container);
 }
