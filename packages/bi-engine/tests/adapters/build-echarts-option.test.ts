@@ -171,9 +171,9 @@ describe('buildEChartsOption', () => {
       const model = makeLineModel();
       const option = buildEChartsOption(model);
 
-      // 标准化模板提供 title（show: true），因为 model 有 title
+      // 标题由外部 ComponentHeader 渲染，ECharts 内部 title 保持 show: false
       expect(option).toHaveProperty('title');
-      expect((option.title as Record<string, unknown>).show).toBe(true);
+      expect((option.title as Record<string, unknown>).show).toBe(false);
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('xAxis');
       expect(option).toHaveProperty('yAxis');
@@ -186,7 +186,7 @@ describe('buildEChartsOption', () => {
       const option = buildEChartsOption(model);
 
       expect(option).toHaveProperty('title');
-      expect((option.title as Record<string, unknown>).show).toBe(true);
+      expect((option.title as Record<string, unknown>).show).toBe(false);
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('xAxis');
       expect(option).toHaveProperty('yAxis');
@@ -199,7 +199,7 @@ describe('buildEChartsOption', () => {
       const option = buildEChartsOption(model);
 
       expect(option).toHaveProperty('title');
-      expect((option.title as Record<string, unknown>).show).toBe(true);
+      expect((option.title as Record<string, unknown>).show).toBe(false);
       expect(option).toHaveProperty('series');
       expect(option).toHaveProperty('tooltip');
       expect(option).toHaveProperty('legend');

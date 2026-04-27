@@ -77,45 +77,58 @@ export function getRingOptionTemplate(
   const pieTemplate = getPieOptionTemplate(theme);
   const series = pieTemplate.series as Record<string, unknown>[];
 
-  const graphicItems: Record<string, unknown>[] = [];
+  // 使用 series.label + rich 富文本实现中心文本，天然居中于饼图圆心
+  const hasCenterText = centerTitle !== undefined || centerSubtitle !== undefined;
 
-  if (centerTitle !== undefined) {
-    graphicItems.push({
-      type: 'text',
-      left: '40%',
-      top: '44%',
-      style: {
-        text: centerTitle,
-        fontSize: 20,
-        fontWeight: 700,
-        fill: t.font.color,
-        fontFamily: t.font.family,
-        textAlign: 'center',
-      },
-    });
-  }
-
-  if (centerSubtitle !== undefined) {
-    graphicItems.push({
-      type: 'text',
-      left: '40%',
-      top: '54%',
-      style: {
-        text: centerSubtitle,
-        fontSize: t.font.size,
-        fill: t.font.tertiaryColor,
-        fontFamily: t.font.family,
-        textAlign: 'center',
-      },
-    });
+  // 构建 formatter
+  let formatter = '';
+  if (hasCenterText) {
+    const parts: string[] = [];
+    if (centerTitle !== undefined) {
+      parts.push(`{title|${centerTitle}}`);
+    }
+    if (centerSubtitle !== undefined) {
+      parts.push(`{value|${centerSubtitle}}`);
+    }
+    formatter = parts.join('\n');
   }
 
   return {
     ...pieTemplate,
-    ...(graphicItems.length > 0 ? { graphic: { elements: graphicItems } } : {}),
     series: series.map((s) => ({
       ...s,
       radius: ['50%', '75%'],
+      ...(hasCenterText
+        ? {
+            label: {
+              show: true,
+              position: 'center',
+              formatter,
+              rich: {
+                title: {
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: t.font.color,
+                  fontFamily: t.font.family,
+                  lineHeight: 24,
+                  align: 'center',
+                },
+                value: {
+                  fontSize: t.font.size,
+                  color: t.font.tertiaryColor,
+                  fontFamily: t.font.family,
+                  lineHeight: 30,
+                  align: 'center',
+                },
+              },
+            },
+            emphasis: {
+              label: {
+                show: false,
+              },
+            },
+          }
+        : {}),
     })),
   };
 }

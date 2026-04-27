@@ -1010,7 +1010,7 @@ export function TableView({
       <table style={st.table}>
         <colgroup>
           {visibleLeafCols.map((col) => (
-            <col key={`col-${col.key}`} style={col.width ? { width: typeof col.width === 'number' ? `${col.width}px` : col.width } : undefined} />
+            <col key={`col-${col.key}`} style={{ minWidth: 50, ...(col.width ? { width: typeof col.width === 'number' ? `${col.width}px` : col.width } : {}) }} />
           ))}
         </colgroup>
         <thead>
@@ -1045,14 +1045,17 @@ export function TableView({
                     }
 
                     return (
-                      <td
+                      <CellWithTooltip
                         key={col.key}
+                        colKey={col.key}
                         colSpan={merge && merge.colSpan > 1 ? merge.colSpan : undefined}
                         rowSpan={merge && merge.rowSpan > 1 ? merge.rowSpan : undefined}
-                        style={{ ...st.td, ...(colIdx < visibleColCount - 1 ? st.tdRight : {}) }}
-                      >
-                        {cellContent}
-                      </td>
+                        isLastCol={colIdx >= visibleColCount - 1}
+                        cellStyle={st.td}
+                        rightStyle={st.tdRight}
+                        cellContent={cellContent}
+                        onTooltip={setTooltipInfo}
+                      />
                     );
                   })}
                 </tr>
@@ -1206,6 +1209,61 @@ export function TableView({
     }
     return leafCount;
   }
+}
+
+// ---------------------------------------------------------------------------
+// CellWithTooltip — body cell with overflow tooltip
+// ---------------------------------------------------------------------------
+
+function CellWithTooltip({
+  colKey,
+  colSpan,
+  rowSpan,
+  isLastCol,
+  cellStyle,
+  rightStyle,
+  cellContent,
+  onTooltip,
+}: {
+  colKey: string;
+  colSpan?: number;
+  rowSpan?: number;
+  isLastCol: boolean;
+  cellStyle: React.CSSProperties;
+  rightStyle: React.CSSProperties;
+  cellContent: ReactNode;
+  onTooltip: (info: { text: string; rect: DOMRect } | null) => void;
+}) {
+  const tdRef = useRef<HTMLTableCellElement>(null);
+  const spanRef = useRef<HTMLSpanElement>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    const span = spanRef.current;
+    if (span && span.scrollWidth > span.clientWidth) {
+      const rect = tdRef.current!.getBoundingClientRect();
+      onTooltip({ text: span.textContent ?? '', rect });
+    }
+  }, [onTooltip]);
+
+  const handleMouseLeave = useCallback(() => {
+    onTooltip(null);
+  }, [onTooltip]);
+
+  return (
+    <td
+      key={colKey}
+      ref={tdRef}
+      colSpan={colSpan}
+      rowSpan={rowSpan}
+      style={{ ...cellStyle, ...(!isLastCol ? rightStyle : {}) }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <span ref={spanRef} style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {cellContent}
+      </span>
+    </td>
+  );
 }
 
 // ---------------------------------------------------------------------------

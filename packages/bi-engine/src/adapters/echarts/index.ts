@@ -97,10 +97,7 @@ export function buildEChartsOption(
   // 获取数据驱动的构建结果
   const dataOption = buildBaseOption(model);
 
-  // 注入图表标题（来自语义模型）
-  if (model.title !== undefined && model.title !== '') {
-    (dataOption as Record<string, unknown>).title = { show: true, text: model.title };
-  }
+  // 标题由外部 ComponentHeader 渲染，ECharts 内部不显示标题
 
   // 深度合并：模板 + 数据构建器
   const mergedBase = deepMergeOption(template, dataOption, 'merge');

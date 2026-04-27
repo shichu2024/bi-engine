@@ -168,18 +168,35 @@ describe('getRingOptionTemplate', () => {
     expect(legend.right).toBe('10%');
   });
 
-  it('supports center title text', () => {
+  it('supports center title text via series label + rich', () => {
     const option = getRingOptionTemplate('1,234', '总计');
-    const graphic = option.graphic as Record<string, unknown>;
-    const elements = graphic.elements as Record<string, unknown>[];
-    expect(elements.length).toBe(2);
-    expect((elements[0].style as Record<string, unknown>).text).toBe('1,234');
-    expect((elements[1].style as Record<string, unknown>).text).toBe('总计');
+    // 不再使用 graphic
+    expect(option.graphic).toBeUndefined();
+
+    const series = option.series as Record<string, unknown>[];
+    const label = series[0].label as Record<string, unknown>;
+    expect(label.show).toBe(true);
+    expect(label.position).toBe('center');
+    expect(label.formatter).toContain('{title|1,234}');
+    expect(label.formatter).toContain('{value|总计}');
+
+    // rich 样式
+    const rich = label.rich as Record<string, Record<string, unknown>>;
+    expect(rich.title).toBeDefined();
+    expect(rich.title.fontSize).toBe(20);
+    expect(rich.title.fontWeight).toBe(700);
+    expect(rich.value).toBeDefined();
   });
 
   it('omits center text when no params provided', () => {
     const option = getRingOptionTemplate();
     expect(option.graphic).toBeUndefined();
+
+    const series = option.series as Record<string, unknown>[];
+    // 无参数时不注入中心 label，保持饼图模板默认的外部 label
+    const label = series[0].label as Record<string, unknown>;
+    expect(label.position).not.toBe('center');
+    expect(label.show).not.toBe(true);
   });
 });
 

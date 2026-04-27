@@ -103,6 +103,8 @@ export interface RenderContext {
   style?: React.CSSProperties;
   /** 组件变更回调，renderer 可通过此回调上报 schema 变更（如文本编辑、图表切换） */
   onChange?: (newSchema: BIEngineComponent) => void;
+  /** 由外部 toolbar 负责渲染标题时设为 true，renderer 内部不再渲染标题 */
+  hideTitle?: boolean;
 }
 
 // ---------------------------------------------------------------------------

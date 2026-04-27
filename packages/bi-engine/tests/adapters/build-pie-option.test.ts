@@ -168,7 +168,7 @@ describe('buildPieOption', () => {
     expect(series[0].center).toEqual(['40%', '50%']);
   });
 
-  it('环形图带 centerText/subCenterText 时生成 graphic 中心文本', () => {
+  it('环形图带 centerText/subCenterText 时生成 series.label 中心文本', () => {
     const model = makePieModel({
       series: [
         {
@@ -184,26 +184,32 @@ describe('buildPieOption', () => {
 
     const option = buildPieOption(model);
 
-    const graphic = option.graphic as Record<string, unknown>[];
-    expect(graphic).toBeDefined();
-    expect(graphic.length).toBe(2);
+    // 不再使用 graphic
+    expect(option.graphic).toBeUndefined();
 
-    // 主文本
-    const titleStyle = (graphic[0].style as Record<string, unknown>);
-    expect(titleStyle.text).toBe('Total');
+    const series = option.series as Array<Record<string, unknown>>;
+    const label = series[0].label as Record<string, unknown>;
+    expect(label).toBeDefined();
+    expect(label.show).toBe(true);
+    expect(label.position).toBe('center');
 
-    // 副文本
-    const subtitleStyle = (graphic[1].style as Record<string, unknown>);
-    expect(subtitleStyle.text).toBe('$100K');
+    // formatter 包含主/副文本
+    expect(label.formatter).toContain('{title|Total}');
+    expect(label.formatter).toContain('{value|$100K}');
 
-    // graphic 定位
-    expect(graphic[0].left).toBe('40%');
-    expect(graphic[0].top).toBe('46%');
-    expect(graphic[1].left).toBe('40%');
-    expect(graphic[1].top).toBe('54%');
+    // rich 样式
+    const rich = label.rich as Record<string, Record<string, unknown>>;
+    expect(rich.title.fontSize).toBe(20);
+    expect(rich.title.fontWeight).toBe(700);
+    expect(rich.value).toBeDefined();
+
+    // 数据切片 label 控制：第一个显示，其余隐藏
+    const data = series[0].data as Array<Record<string, unknown>>;
+    expect((data[0].label as Record<string, unknown>).show).toBe(true);
+    expect((data[1].label as Record<string, unknown>).show).toBe(false);
   });
 
-  it('环形图无 centerText 时不生成 graphic', () => {
+  it('环形图无 centerText 时不注入中心 label', () => {
     const model = makePieModel({
       series: [
         { type: 'pie', name: 'Ring', subType: 'ring', encode: { name: 'month', value: 'sales' } } as PieSeries,
@@ -212,5 +218,8 @@ describe('buildPieOption', () => {
 
     const option = buildPieOption(model);
     expect(option.graphic).toBeUndefined();
+
+    const series = option.series as Array<Record<string, unknown>>;
+    expect(series[0].label).toBeUndefined();
   });
 });

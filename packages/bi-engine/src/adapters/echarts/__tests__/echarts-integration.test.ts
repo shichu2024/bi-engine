@@ -217,34 +217,40 @@ describe('buildEChartsOption integration', () => {
 
     const option = buildEChartsOption(model);
 
-    // graphic 为标准数组格式
-    const graphic = option.graphic as Record<string, unknown>[];
-    expect(graphic).toBeDefined();
-    expect(graphic.length).toBe(2);
+    // 不再使用 graphic 方案
+    expect(option.graphic).toBeUndefined();
 
-    // 中心主文本来自 model centerText
-    const titleElement = graphic[0];
-    const titleStyle = titleElement.style as Record<string, unknown>;
-    expect(titleStyle.text).toBe('Total');
-
-    // 中心副文本来自 model subCenterText
-    const subtitleElement = graphic[1];
-    const subtitleStyle = subtitleElement.style as Record<string, unknown>;
-    expect(subtitleStyle.text).toBe('$100K');
-
-    // 环形半径
+    // 使用 series.label + rich 富文本方案
     const series = option.series as Record<string, unknown>[];
     expect(series[0].radius).toEqual(['50%', '75%']);
-
-    // series center 与 graphic 定位
     expect(series[0].center).toEqual(['40%', '50%']);
-    expect(titleElement.left).toBe('40%');
-    expect(titleElement.top).toBe('46%');
-    expect(subtitleElement.left).toBe('40%');
-    expect(subtitleElement.top).toBe('54%');
+
+    const label = series[0].label as Record<string, unknown>;
+    expect(label.show).toBe(true);
+    expect(label.position).toBe('center');
+
+    // formatter 包含主/副文本
+    expect(label.formatter).toContain('{title|Total}');
+    expect(label.formatter).toContain('{value|$100K}');
+
+    // rich 样式定义
+    const rich = label.rich as Record<string, Record<string, unknown>>;
+    expect(rich.title).toBeDefined();
+    expect(rich.title.fontSize).toBe(20);
+    expect(rich.title.fontWeight).toBe(700);
+    expect(rich.title.align).toBe('center');
+    expect(rich.value).toBeDefined();
+    expect(rich.value.align).toBe('center');
+
+    // 数据切片 label 控制：第一个显示，其余隐藏
+    const data = series[0].data as Array<Record<string, unknown>>;
+    const firstItemLabel = data[0].label as Record<string, unknown>;
+    expect(firstItemLabel.show).toBe(true);
+    const secondItemLabel = data[1].label as Record<string, unknown>;
+    expect(secondItemLabel.show).toBe(false);
   });
 
-  it('ring chart without centerText has no graphic', () => {
+  it('ring chart without centerText has no center label', () => {
     const model = createModel({
       seriesKind: 'pie',
       series: [{
@@ -261,6 +267,10 @@ describe('buildEChartsOption integration', () => {
 
     const option = buildEChartsOption(model);
     expect(option.graphic).toBeUndefined();
+
+    // 无 centerText 时，builder 不注入中心 label
+    const series = option.series as Record<string, unknown>[];
+    expect(series[0].label).toBeUndefined();
   });
 
   it('ring chart legend is on right with 10% distance', () => {

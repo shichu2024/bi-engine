@@ -111,6 +111,8 @@ export function ComponentView({
   }
 
   // 6. 构建渲染上下文
+  // 当处于图表切换上下文（有 originalChartSchema）时，由 toolbar 统一渲染 title
+  const hasSwitchToolbar = component.type !== 'chart' && originalChartSchema;
   const renderContext: RenderContext = {
     mode,
     theme: chartTheme.tokens,
@@ -118,6 +120,7 @@ export function ComponentView({
     className,
     style,
     onChange,
+    hideTitle: !!hasSwitchToolbar,
   };
 
   // 7. 渲染

@@ -184,7 +184,7 @@ const tableRenderer: ComponentRenderer<TableComponent, TableSemanticModel> = {
       <TableView
         dataSource={data}
         columns={tableColumns}
-        title={model.title}
+        title={context.hideTitle ? undefined : model.title}
         className={context.className}
         style={context.style}
         theme={context.theme}
