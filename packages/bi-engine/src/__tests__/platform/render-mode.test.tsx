@@ -7,7 +7,9 @@ import React from 'react';
 import {
   RenderModeProvider,
   useRenderMode,
-  useIsDesignMode,
+  useIsEditMode,
+  useCanSwitchChart,
+  useCanEditText,
 } from '../../platform/render-mode';
 import { RenderMode } from '../../platform/types';
 
@@ -16,66 +18,154 @@ import { RenderMode } from '../../platform/types';
 // ---------------------------------------------------------------------------
 
 describe('useRenderMode', () => {
-  it('returns RUNTIME by default (no provider)', () => {
+  it('returns VIEW by default (no provider)', () => {
     const { result } = renderHook(() => useRenderMode());
 
-    expect(result.current).toBe(RenderMode.RUNTIME);
+    expect(result.current).toBe(RenderMode.VIEW);
   });
 });
 
 describe('RenderModeProvider', () => {
-  it('injects DESIGN mode to children', () => {
+  it('injects CHAT mode to children', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <RenderModeProvider mode={RenderMode.DESIGN}>
+      <RenderModeProvider mode={RenderMode.CHAT}>
         {children}
       </RenderModeProvider>
     );
 
     const { result } = renderHook(() => useRenderMode(), { wrapper });
 
-    expect(result.current).toBe(RenderMode.DESIGN);
+    expect(result.current).toBe(RenderMode.CHAT);
   });
 
-  it('injects RUNTIME mode to children', () => {
+  it('injects EDIT mode to children', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <RenderModeProvider mode={RenderMode.RUNTIME}>
+      <RenderModeProvider mode={RenderMode.EDIT}>
         {children}
       </RenderModeProvider>
     );
 
     const { result } = renderHook(() => useRenderMode(), { wrapper });
 
-    expect(result.current).toBe(RenderMode.RUNTIME);
+    expect(result.current).toBe(RenderMode.EDIT);
+  });
+
+  it('injects VIEW mode to children', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.VIEW}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useRenderMode(), { wrapper });
+
+    expect(result.current).toBe(RenderMode.VIEW);
   });
 });
 
-describe('useIsDesignMode', () => {
-  it('returns false when mode is RUNTIME', () => {
+describe('useIsEditMode', () => {
+  it('returns false when mode is VIEW', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <RenderModeProvider mode={RenderMode.RUNTIME}>
+      <RenderModeProvider mode={RenderMode.VIEW}>
         {children}
       </RenderModeProvider>
     );
 
-    const { result } = renderHook(() => useIsDesignMode(), { wrapper });
+    const { result } = renderHook(() => useIsEditMode(), { wrapper });
 
     expect(result.current).toBe(false);
   });
 
-  it('returns true when mode is DESIGN', () => {
+  it('returns true when mode is EDIT', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <RenderModeProvider mode={RenderMode.DESIGN}>
+      <RenderModeProvider mode={RenderMode.EDIT}>
         {children}
       </RenderModeProvider>
     );
 
-    const { result } = renderHook(() => useIsDesignMode(), { wrapper });
+    const { result } = renderHook(() => useIsEditMode(), { wrapper });
 
     expect(result.current).toBe(true);
   });
 
-  it('returns false when no provider is present (defaults to RUNTIME)', () => {
-    const { result } = renderHook(() => useIsDesignMode());
+  it('returns false when no provider is present (defaults to VIEW)', () => {
+    const { result } = renderHook(() => useIsEditMode());
+
+    expect(result.current).toBe(false);
+  });
+});
+
+describe('useCanSwitchChart', () => {
+  it('returns true for CHAT mode', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.CHAT}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useCanSwitchChart(), { wrapper });
+
+    expect(result.current).toBe(true);
+  });
+
+  it('returns true for EDIT mode', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.EDIT}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useCanSwitchChart(), { wrapper });
+
+    expect(result.current).toBe(true);
+  });
+
+  it('returns false for VIEW mode', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.VIEW}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useCanSwitchChart(), { wrapper });
+
+    expect(result.current).toBe(false);
+  });
+});
+
+describe('useCanEditText', () => {
+  it('returns false for CHAT mode', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.CHAT}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useCanEditText(), { wrapper });
+
+    expect(result.current).toBe(false);
+  });
+
+  it('returns true for EDIT mode', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.EDIT}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useCanEditText(), { wrapper });
+
+    expect(result.current).toBe(true);
+  });
+
+  it('returns false for VIEW mode', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <RenderModeProvider mode={RenderMode.VIEW}>
+        {children}
+      </RenderModeProvider>
+    );
+
+    const { result } = renderHook(() => useCanEditText(), { wrapper });
 
     expect(result.current).toBe(false);
   });

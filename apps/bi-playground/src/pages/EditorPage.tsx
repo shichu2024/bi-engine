@@ -1,10 +1,15 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Switch, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { Segmented, Tag, Tooltip } from 'antd';
 import { getUnifiedFixtureById } from 'bi-engine/testing';
-import type { BIEngineComponent } from 'bi-engine';
-import { BIEngine, ChartThemeProvider, DARK_THEME_TOKENS } from 'bi-engine';
+import type { BIEngineComponent, BITheme } from 'bi-engine';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type PlaygroundMode = 'chat' | 'edit' | 'view';
+import { BIEngine } from 'bi-engine';
 import { EditorLeftPanel } from '@/components/editor/EditorLeftPanel';
 import type { ChangeEvent } from '@/components/editor/EditorLeftPanel';
 import { SplitPane } from '@/components/editor/SplitPane';
@@ -15,7 +20,29 @@ import styles from './EditorPage.module.css';
 // Types
 // ---------------------------------------------------------------------------
 
-type DesignMode = 'runtime' | 'design';
+interface EditorPreviewProps {
+  readonly mode: PlaygroundMode;
+  readonly setMode: (mode: PlaygroundMode) => void;
+  readonly addEvent: (source: string, summary: string) => void;
+  readonly localSchema: BIEngineComponent | null;
+  readonly setLocalSchema: (schema: BIEngineComponent | null) => void;
+}
+
+// ---------------------------------------------------------------------------
+// Mode config
+// ---------------------------------------------------------------------------
+
+const MODE_OPTIONS = [
+  { label: 'Chat', value: 'chat' as PlaygroundMode },
+  { label: 'Edit', value: 'edit' as PlaygroundMode },
+  { label: 'View', value: 'view' as PlaygroundMode },
+];
+
+const MODE_TAG_CONFIG: Record<PlaygroundMode, { color: string; text: string }> = {
+  chat: { color: 'purple', text: 'Chat' },
+  edit: { color: 'blue', text: 'Edit' },
+  view: { color: 'green', text: 'View' },
+};
 
 // ---------------------------------------------------------------------------
 // Component
@@ -30,7 +57,7 @@ export function EditorPage(): React.ReactElement {
   const initDsl = useEditorStore((s) => s.initDsl);
 
   // 局部状态：仅在此编辑页面内生效
-  const [mode, setMode] = useState<DesignMode>('runtime');
+  const [mode, setMode] = useState<PlaygroundMode>('view');
   const [events, setEvents] = useState<ChangeEvent[]>([]);
   const [localSchema, setLocalSchema] = useState<BIEngineComponent | null>(null);
 
@@ -49,10 +76,6 @@ export function EditorPage(): React.ReactElement {
     };
   }, [componentId, sceneId, initDsl]);
 
-  const toggleMode = useCallback(() => {
-    setMode((prev) => prev === 'runtime' ? 'design' : 'runtime');
-  }, []);
-
   const addEvent = useCallback((source: string, summary: string) => {
     setEvents((prev) => [
       ...prev,
@@ -69,7 +92,7 @@ export function EditorPage(): React.ReactElement {
         right={
           <EditorPreview
             mode={mode}
-            toggleMode={toggleMode}
+            setMode={setMode}
             addEvent={addEvent}
             localSchema={localSchema}
             setLocalSchema={setLocalSchema}
@@ -84,23 +107,15 @@ export function EditorPage(): React.ReactElement {
 // EditorPreview
 // ---------------------------------------------------------------------------
 
-interface EditorPreviewProps {
-  readonly mode: DesignMode;
-  readonly toggleMode: () => void;
-  readonly addEvent: (source: string, summary: string) => void;
-  readonly localSchema: BIEngineComponent | null;
-  readonly setLocalSchema: (schema: BIEngineComponent | null) => void;
-}
-
 function EditorPreview({
   mode,
-  toggleMode,
+  setMode,
   addEvent,
   localSchema,
   setLocalSchema,
 }: EditorPreviewProps): React.ReactElement {
   const themeMode = useThemeStore((s) => s.mode);
-  const isDark = themeMode === 'dark';
+  const theme: BITheme = themeMode === 'dark' ? 'dark' : 'light';
   const locale = useLocaleStore((s) => s.locale);
   const dsl = useEditorStore((s) => s.dsl);
 
@@ -134,9 +149,11 @@ function EditorPreview({
     setLocalSchema(null);
   }, [dsl, setLocalSchema]);
 
+  const tagConfig = MODE_TAG_CONFIG[mode];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Toolbar with mode switch */}
+      {/* Toolbar with mode selector */}
       <div style={{
         flexShrink: 0,
         display: 'flex',
@@ -148,19 +165,16 @@ function EditorPreview({
         gap: 8,
       }}>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Tooltip title={mode === 'design' ? '当前：设计态（可编辑文本）' : '当前：运行态（只读预览）'}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <EyeOutlined style={{ fontSize: 12, color: mode === 'runtime' ? '#1890ff' : '#999' }} />
-              <Switch
-                size="small"
-                checked={mode === 'design'}
-                onChange={toggleMode}
-              />
-              <EditOutlined style={{ fontSize: 12, color: mode === 'design' ? '#1890ff' : '#999' }} />
-            </div>
+          <Tooltip title={`当前模式：${tagConfig.text}`}>
+            <Segmented
+              size="small"
+              options={MODE_OPTIONS}
+              value={mode}
+              onChange={(val) => setMode(val as PlaygroundMode)}
+            />
           </Tooltip>
-          <Tag color={mode === 'design' ? 'blue' : 'green'} style={{ fontSize: 11, margin: 0 }}>
-            {mode === 'design' ? '设计态' : '运行态'}
+          <Tag color={tagConfig.color} style={{ fontSize: 11, margin: 0 }}>
+            {tagConfig.text}
           </Tag>
         </div>
       </div>
@@ -168,14 +182,13 @@ function EditorPreview({
       {/* Preview area */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 16 }}>
         {activeComponent && activeComponent.type ? (
-          <ChartThemeProvider tokens={isDark ? DARK_THEME_TOKENS : undefined}>
-            <BIEngine
-              schema={activeComponent}
-              mode={mode}
-              locale={locale}
-              onChange={handleChange}
-            />
-          </ChartThemeProvider>
+          <BIEngine
+            schema={activeComponent}
+            mode={mode}
+            theme={theme}
+            locale={locale}
+            onChange={handleChange}
+          />
         ) : (
           <div style={{ color: '#999', textAlign: 'center', paddingTop: 48 }}>
             在左侧编辑器中输入 DSL JSON 以预览

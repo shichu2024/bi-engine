@@ -41,7 +41,9 @@ export {
 export {
   RenderModeProvider,
   useRenderMode,
-  useIsDesignMode,
+  useIsEditMode,
+  useCanSwitchChart,
+  useCanEditText,
   type RenderModeProviderProps,
 } from './render-mode';
 

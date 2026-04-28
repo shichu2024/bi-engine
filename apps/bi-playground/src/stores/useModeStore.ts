@@ -4,7 +4,7 @@ import { create } from 'zustand';
 // Types
 // ---------------------------------------------------------------------------
 
-export type DesignMode = 'runtime' | 'design';
+export type BIMode = 'chat' | 'edit' | 'view';
 
 export interface ChangeEvent {
   id: string;
@@ -14,10 +14,9 @@ export interface ChangeEvent {
 }
 
 export interface ModeStore {
-  mode: DesignMode;
+  mode: BIMode;
   events: ChangeEvent[];
-  setMode: (mode: DesignMode) => void;
-  toggleMode: () => void;
+  setMode: (mode: BIMode) => void;
   addEvent: (source: string, summary: string) => void;
   clearEvents: () => void;
 }
@@ -29,13 +28,10 @@ export interface ModeStore {
 let eventCounter = 0;
 
 export const useModeStore = create<ModeStore>((set) => ({
-  mode: 'runtime',
+  mode: 'view',
   events: [],
 
   setMode: (mode) => set({ mode }),
-
-  toggleMode: () =>
-    set((state) => ({ mode: state.mode === 'runtime' ? 'design' : 'runtime' })),
 
   addEvent: (source, summary) => {
     eventCounter += 1;

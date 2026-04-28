@@ -23,10 +23,9 @@ export interface DesignableWrapperProps {
 // ---------------------------------------------------------------------------
 
 /**
- * 设计态包装器。
+ * 编辑态包装器。
  *
- * - RUNTIME：不添加额外 DOM 层，直接渲染 children。
- * - DESIGN：包裹一层 div，添加 data 属性、选中边框、拖拽手柄占位。
+ * 仅在 EDIT 模式下包裹一层 div，添加 data 属性、选中边框、拖拽手柄占位。
  */
 export function DesignableWrapper({
   children,
@@ -40,8 +39,8 @@ export function DesignableWrapper({
   const { tokens: t } = useChartTheme();
   const isSelected = selectedId === componentId;
 
-  // RUNTIME：零开销，直接渲染 children
-  if (mode === RenderMode.RUNTIME) {
+  // 非 EDIT 模式：零开销，直接渲染 children
+  if (mode !== RenderMode.EDIT) {
     return <>{children}</>;
   }
 

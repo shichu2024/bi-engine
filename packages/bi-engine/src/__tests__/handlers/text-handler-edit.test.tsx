@@ -15,10 +15,10 @@ import { textWithTitle } from '../../testing/fixtures/text-with-title';
 import type { BIEngineComponent } from '../../schema/bi-engine-models';
 
 // ---------------------------------------------------------------------------
-// Wrapper helper
+// Wrapper helpers
 // ---------------------------------------------------------------------------
 
-function DesignWrapper({
+function EditWrapper({
   component,
   onChange,
 }: {
@@ -28,7 +28,7 @@ function DesignWrapper({
   return (
     <ChartThemeProvider>
       <SelectionProvider>
-        <RenderModeProvider mode={RenderMode.DESIGN}>
+        <RenderModeProvider mode={RenderMode.EDIT}>
           <ComponentView component={component} onChange={onChange} />
         </RenderModeProvider>
       </SelectionProvider>
@@ -36,7 +36,7 @@ function DesignWrapper({
   );
 }
 
-function RuntimeWrapper({
+function ViewWrapper({
   component,
   onChange,
 }: {
@@ -46,7 +46,25 @@ function RuntimeWrapper({
   return (
     <ChartThemeProvider>
       <SelectionProvider>
-        <RenderModeProvider mode={RenderMode.RUNTIME}>
+        <RenderModeProvider mode={RenderMode.VIEW}>
+          <ComponentView component={component} onChange={onChange} />
+        </RenderModeProvider>
+      </SelectionProvider>
+    </ChartThemeProvider>
+  );
+}
+
+function ChatWrapper({
+  component,
+  onChange,
+}: {
+  component: BIEngineComponent;
+  onChange?: (newSchema: BIEngineComponent) => void;
+}): React.ReactElement {
+  return (
+    <ChartThemeProvider>
+      <SelectionProvider>
+        <RenderModeProvider mode={RenderMode.CHAT}>
           <ComponentView component={component} onChange={onChange} />
         </RenderModeProvider>
       </SelectionProvider>
@@ -58,7 +76,7 @@ function RuntimeWrapper({
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('text-handler design mode editing', () => {
+describe('text-handler edit mode editing', () => {
   beforeEach(() => {
     ComponentRegistry.getInstance().clear();
     registerBuiltinHandlers();
@@ -68,10 +86,10 @@ describe('text-handler design mode editing', () => {
     ComponentRegistry.getInstance().clear();
   });
 
-  it('renders contentEditable elements in design mode with onChange', () => {
+  it('renders contentEditable elements in edit mode with onChange', () => {
     const handleChange = vi.fn();
     const { container } = render(
-      <DesignWrapper component={textWithTitle} onChange={handleChange} />,
+      <EditWrapper component={textWithTitle} onChange={handleChange} />,
     );
 
     const editables = container.querySelectorAll('[contenteditable]');
@@ -83,7 +101,7 @@ describe('text-handler design mode editing', () => {
   it('calls onChange when content is edited and blurred', async () => {
     const handleChange = vi.fn();
     const { container } = render(
-      <DesignWrapper component={textBasic} onChange={handleChange} />,
+      <EditWrapper component={textBasic} onChange={handleChange} />,
     );
 
     const contentEditable = container.querySelector('[data-field="content"]') as HTMLElement;
@@ -104,7 +122,7 @@ describe('text-handler design mode editing', () => {
   it('calls onChange when title is edited and blurred', async () => {
     const handleChange = vi.fn();
     const { container } = render(
-      <DesignWrapper component={textWithTitle} onChange={handleChange} />,
+      <EditWrapper component={textWithTitle} onChange={handleChange} />,
     );
 
     const titleEditable = container.querySelector('[data-field="title"]') as HTMLElement;
@@ -124,7 +142,7 @@ describe('text-handler design mode editing', () => {
   it('does not call onChange when content unchanged on blur', async () => {
     const handleChange = vi.fn();
     const { container } = render(
-      <DesignWrapper component={textBasic} onChange={handleChange} />,
+      <EditWrapper component={textBasic} onChange={handleChange} />,
     );
 
     const contentEditable = container.querySelector('[data-field="content"]') as HTMLElement;
@@ -136,10 +154,22 @@ describe('text-handler design mode editing', () => {
     });
   });
 
-  it('renders read-only in runtime mode even with onChange', () => {
+  it('renders read-only in view mode even with onChange', () => {
     const handleChange = vi.fn();
     const { container } = render(
-      <RuntimeWrapper component={textBasic} onChange={handleChange} />,
+      <ViewWrapper component={textBasic} onChange={handleChange} />,
+    );
+
+    const editables = container.querySelectorAll('[contenteditable]');
+    expect(editables.length).toBe(0);
+
+    expect(container.textContent).toContain(textBasic.dataProperties.content);
+  });
+
+  it('renders read-only in chat mode even with onChange', () => {
+    const handleChange = vi.fn();
+    const { container } = render(
+      <ChatWrapper component={textBasic} onChange={handleChange} />,
     );
 
     const editables = container.querySelectorAll('[contenteditable]');

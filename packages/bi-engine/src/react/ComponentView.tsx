@@ -6,7 +6,8 @@ import { useMemo, useEffect } from 'react';
 import type { BIEngineComponent, ChartComponent } from '../schema/bi-engine-models';
 import { getComponentHandler } from '../platform/component-registry';
 import { defaultPipelineEngine } from '../pipeline/pipeline-engine';
-import { useRenderMode, RenderMode } from '../platform/render-mode';
+import { useRenderMode, useCanSwitchChart } from '../platform/render-mode';
+import { RenderMode } from '../platform/types';
 import { DEFAULT_THEME_TOKENS } from '../theme/theme-tokens';
 import { useChartTheme } from '../theme/chart-theme-context';
 import type { ComponentError, RenderContext } from '../platform/types';
@@ -65,6 +66,7 @@ export function ComponentView({
   onChange,
 }: ComponentViewProps): React.ReactNode {
   const mode = useRenderMode();
+  const canSwitchChart = useCanSwitchChart();
   const chartTheme = useChartTheme();
 
   // 1. 获取处理器
@@ -111,8 +113,8 @@ export function ComponentView({
   }
 
   // 6. 构建渲染上下文
-  // 当处于图表切换上下文（有 originalChartSchema）时，由 toolbar 统一渲染 title
-  const hasSwitchToolbar = component.type !== 'chart' && originalChartSchema;
+  const isChart = component.type === 'chart';
+  const isSwitchedTable = component.type !== 'chart' && !!originalChartSchema;
   const renderContext: RenderContext = {
     mode,
     theme: chartTheme.tokens,
@@ -120,13 +122,13 @@ export function ComponentView({
     className,
     style,
     onChange,
-    hideTitle: !!hasSwitchToolbar,
+    hideTitle: isChart || isSwitchedTable,
   };
 
   // 7. 渲染
   const rendered = handler!.renderer.render(pipelineResult!.model.data!, renderContext);
 
-  // 8. 图表切换 toolbar（需要原始 chart schema 以支持 table → chart 切回）
+  // 8. 图表头部：标题（所有模式）+ 切换按钮（chat/edit 模式）
   const chartSource = component.type === 'chart'
     ? (component as ChartComponent)
     : originalChartSchema;
@@ -134,15 +136,37 @@ export function ComponentView({
     ? (pipelineResult!.model.data as ChartSemanticModel)
     : null;
   const title = chartSource?.dataProperties?.title;
-  const switchToolbar = chartSource
-    ? buildSwitchToolbar(chartSource, chartModel, onChartTypeChange, onChange, chartTheme.tokens, component.type, title)
+  const switchToolbar = canSwitchChart && chartSource
+    ? buildSwitchToolbar(chartSource, chartModel, onChartTypeChange, onChange, chartTheme.tokens, component.type)
     : null;
 
-  // 9. 组合渲染结果
-  const content = switchToolbar
+  const chartHeader = (isChart || isSwitchedTable) && (title || switchToolbar)
     ? (
-      <div style={{ width: '100%', minHeight: 300, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px' }}>
+        {title ? (
+          <span style={{
+            fontSize: chartTheme.tokens.font.titleSize,
+            fontWeight: 600,
+            color: chartTheme.tokens.font.color,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            marginRight: 12,
+          }}>
+            {title}
+          </span>
+        ) : <span />}
         {switchToolbar}
+      </div>
+    )
+    : null;
+
+  // 9. 图表类型组件始终用统一容器，保证不同模式下高度一致
+  const isChartLike = component.type === 'chart' || component.type === 'table';
+  const content = isChartLike
+    ? (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+        {chartHeader}
         <div style={{ flex: 1, minHeight: 0 }}>
           {rendered}
         </div>
@@ -150,8 +174,8 @@ export function ComponentView({
     )
     : rendered;
 
-  // 10. 设计态包装
-  if (mode === RenderMode.DESIGN) {
+  // 10. 编辑模式包装（原 DesignableWrapper）
+  if (mode === RenderMode.EDIT) {
     return (
       <DesignableWrapper
         componentId={component.id}
@@ -178,7 +202,6 @@ function buildSwitchToolbar(
   onChange: ((newSchema: BIEngineComponent) => void) | undefined,
   theme: import('../theme/theme-tokens').ThemeTokens,
   currentViewType: string,
-  title?: string,
 ): React.ReactNode {
   if (!onChartTypeChange && !onChange) return null;
 
@@ -186,7 +209,6 @@ function buildSwitchToolbar(
   const series = chartSchema.dataProperties.series ?? [];
   let seriesKind: string;
   if (currentViewType === 'table') {
-    // 当前是 table 视图：从原始 chart schema 推导类型
     const first = series[0];
     seriesKind = first?.type ?? 'bar';
   } else if (chartModel) {
@@ -214,7 +236,6 @@ function buildSwitchToolbar(
       currentType={currentType}
       switchableTypes={switchable}
       onSwitch={handleSwitch}
-      title={title}
       theme={theme}
     />
   );

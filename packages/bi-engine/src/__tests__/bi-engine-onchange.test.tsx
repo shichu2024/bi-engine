@@ -26,12 +26,12 @@ describe('BIEngine onChange integration', () => {
   });
 
   describe('text editing triggers onChange', () => {
-    it('fires onChange when text content is edited in design mode', async () => {
+    it('fires onChange when text content is edited in edit mode', async () => {
       const handleChange = vi.fn();
       const { container } = render(
         <BIEngine
           schema={textBasic}
-          mode="design"
+          mode="edit"
           onChange={handleChange}
         />,
       );
@@ -50,16 +50,45 @@ describe('BIEngine onChange integration', () => {
       expect(newSchema.type).toBe('text');
       expect(newSchema.dataProperties.content).toBe('新的文本内容');
     });
+
+    it('does not render editable in chat mode', () => {
+      const handleChange = vi.fn();
+      const { container } = render(
+        <BIEngine
+          schema={textBasic}
+          mode="chat"
+          onChange={handleChange}
+        />,
+      );
+
+      const editables = container.querySelectorAll('[contenteditable]');
+      expect(editables.length).toBe(0);
+    });
+
+    it('does not render editable in view mode', () => {
+      const handleChange = vi.fn();
+      const { container } = render(
+        <BIEngine
+          schema={textBasic}
+          mode="view"
+          onChange={handleChange}
+        />,
+      );
+
+      const editables = container.querySelectorAll('[contenteditable]');
+      expect(editables.length).toBe(0);
+    });
   });
 
   describe('chart switch triggers onChange', () => {
-    it('fires onChange when chart type is switched', () => {
+    it('fires onChange when chart type is switched in edit mode', () => {
       const handleChange = vi.fn();
       const handleChartTypeChange = vi.fn();
 
       const { container } = render(
         <BIEngine
           schema={lineSingleFixture}
+          mode="edit"
           onChange={handleChange}
           onChartTypeChange={handleChartTypeChange}
         />,
@@ -82,20 +111,83 @@ describe('BIEngine onChange integration', () => {
         expect(onChangeSchema.type).toBe('chart');
       }
     });
+
+    it('fires onChange when chart type is switched in chat mode', () => {
+      const handleChange = vi.fn();
+      const handleChartTypeChange = vi.fn();
+
+      const { container } = render(
+        <BIEngine
+          schema={lineSingleFixture}
+          mode="chat"
+          onChange={handleChange}
+          onChartTypeChange={handleChartTypeChange}
+        />,
+      );
+
+      const buttons = container.querySelectorAll('button');
+      expect(buttons.length).toBeGreaterThan(0);
+
+      const switchButton = Array.from(buttons).find(
+        (btn) => btn.textContent && btn.textContent !== 'line',
+      );
+
+      if (switchButton) {
+        fireEvent.click(switchButton);
+
+        expect(handleChartTypeChange).toHaveBeenCalledTimes(1);
+        expect(handleChange).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it('does not show chart switch toolbar in view mode', () => {
+      const handleChange = vi.fn();
+      const handleChartTypeChange = vi.fn();
+
+      const { container } = render(
+        <BIEngine
+          schema={lineSingleFixture}
+          mode="view"
+          onChange={handleChange}
+          onChartTypeChange={handleChartTypeChange}
+        />,
+      );
+
+      const buttons = container.querySelectorAll('button');
+      expect(buttons.length).toBe(0);
+    });
   });
 
   describe('non-controlled mode without onChange', () => {
-    it('works without onChange in runtime mode', () => {
+    it('works without onChange in view mode', () => {
       const { container } = render(
-        <BIEngine schema={textBasic} mode="runtime" />,
+        <BIEngine schema={textBasic} mode="view" />,
       );
 
       expect(container.textContent).toContain(textBasic.dataProperties.content);
     });
 
-    it('works without onChange in design mode (read-only fallback)', () => {
+    it('works without onChange in edit mode (read-only fallback)', () => {
       const { container } = render(
-        <BIEngine schema={textBasic} mode="design" />,
+        <BIEngine schema={textBasic} mode="edit" />,
+      );
+
+      expect(container.textContent).toContain(textBasic.dataProperties.content);
+    });
+  });
+
+  describe('theme API', () => {
+    it('accepts theme="dark"', () => {
+      const { container } = render(
+        <BIEngine schema={textBasic} mode="view" theme="dark" />,
+      );
+
+      expect(container.textContent).toContain(textBasic.dataProperties.content);
+    });
+
+    it('accepts theme="light"', () => {
+      const { container } = render(
+        <BIEngine schema={textBasic} mode="view" theme="light" />,
       );
 
       expect(container.textContent).toContain(textBasic.dataProperties.content);

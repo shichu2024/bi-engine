@@ -107,7 +107,7 @@ export type {
 
 // ---- BIEngine 统一公共入口 ----
 export { BIEngine } from './react/BIEngine';
-export type { BIEngineProps } from './react/BIEngine';
+export type { BIEngineProps, BIMode, BITheme } from './react/BIEngine';
 
 export { ChartStateView } from './react/ChartStateView';
 export type { ChartStateViewProps, ChartState } from './react/ChartStateView';
@@ -192,7 +192,9 @@ export {
 export {
   RenderModeProvider,
   useRenderMode,
-  useIsDesignMode,
+  useIsEditMode,
+  useCanSwitchChart,
+  useCanEditText,
   type RenderModeProviderProps,
 } from './platform/render-mode';
 

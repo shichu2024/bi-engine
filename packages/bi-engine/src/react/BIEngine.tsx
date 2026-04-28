@@ -4,10 +4,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { BIEngineComponent, ChartComponent } from '../schema/bi-engine-models';
-import type { ThemeTokens } from '../theme/theme-tokens';
 import { ComponentView } from './ComponentView';
-import { RenderModeProvider, RenderMode } from '../platform/render-mode';
+import { RenderModeProvider } from '../platform/render-mode';
+import { RenderMode } from '../platform/types';
 import { ChartThemeProvider } from '../theme/chart-theme-context';
+import { DEFAULT_THEME_TOKENS, DARK_THEME_TOKENS } from '../theme/theme-tokens';
 import type { ComponentError } from '../platform/types';
 import { ComponentRegistry } from '../platform/component-registry';
 import { chartHandler } from '../component-handlers/chart';
@@ -19,8 +20,7 @@ import { LocaleProvider, resolveLocale } from '../locale';
 import { SelectionProvider } from '../design/selection-context';
 
 // ---------------------------------------------------------------------------
-// 懒注册：首次渲染前确保 handler 已注册，避免消费方忘记调用
-// registerBuiltinHandlers 或模块实例不一致导致注册丢失。
+// 懒注册
 // ---------------------------------------------------------------------------
 
 let lazyRegistered = false;
@@ -40,13 +40,28 @@ function ensureHandlersRegistered(): void {
 // Props
 // ---------------------------------------------------------------------------
 
+/** 渲染模式类型 */
+export type BIMode = 'chat' | 'edit' | 'view';
+
+/** 主题类型 */
+export type BITheme = 'dark' | 'light';
+
 export interface BIEngineProps {
   /** BI 标准 DSL，描述待渲染的组件 */
   schema: BIEngineComponent;
-  /** 渲染模式：'runtime'（默认）或 'design' */
-  mode?: 'runtime' | 'design';
-  /** 主题覆盖：传入 Partial<ThemeTokens> 覆盖默认主题 */
-  theme?: Partial<ThemeTokens>;
+  /**
+   * 渲染模式：
+   * - 'chat': 智能对话 — 图表可切换，文本只读
+   * - 'edit': 编辑 — 图表可切换，文本可编辑
+   * - 'view': 只读查看 — 图表不可切换，文本只读
+   * @default 'view'
+   */
+  mode?: BIMode;
+  /**
+   * 主题：'dark' 或 'light'
+   * @default 'light'
+   */
+  theme?: BITheme;
   /** 自定义 CSS 类名 */
   className?: string;
   /** 自定义内联样式 */
@@ -75,8 +90,8 @@ export interface BIEngineProps {
  */
 export function BIEngine({
   schema,
-  mode = 'runtime',
-  theme,
+  mode = 'view',
+  theme = 'light',
   className,
   style,
   onError,
@@ -87,7 +102,8 @@ export function BIEngine({
 }: BIEngineProps): React.ReactElement {
   ensureHandlersRegistered();
 
-  const renderMode = mode === 'design' ? RenderMode.DESIGN : RenderMode.RUNTIME;
+  const renderMode = mode === 'chat' ? RenderMode.CHAT : mode === 'edit' ? RenderMode.EDIT : RenderMode.VIEW;
+  const themeTokens = theme === 'dark' ? DARK_THEME_TOKENS : DEFAULT_THEME_TOKENS;
 
   // 非受控模式：内部维护 schema 状态
   const [internalSchema, setInternalSchema] = useState<BIEngineComponent>(schema);
@@ -157,13 +173,9 @@ export function BIEngine({
     <LocaleProvider locale={resolvedLocale}>
       <RenderModeProvider mode={renderMode}>
         <SelectionProvider>
-          {theme !== undefined ? (
-            <ChartThemeProvider tokens={theme}>
-              {inner}
-            </ChartThemeProvider>
-          ) : (
-            inner
-          )}
+          <ChartThemeProvider tokens={themeTokens}>
+            {inner}
+          </ChartThemeProvider>
         </SelectionProvider>
       </RenderModeProvider>
     </LocaleProvider>

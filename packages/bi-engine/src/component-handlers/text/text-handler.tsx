@@ -16,7 +16,7 @@ import type {
   ResolvedData,
   RenderContext,
 } from '../../platform/types';
-import { RenderMode } from '../../platform/types';
+import { useCanEditText } from '../../platform/render-mode';
 import type { TextComponent } from '../../schema/bi-engine-models';
 
 // ---------------------------------------------------------------------------
@@ -114,9 +114,9 @@ const textModelBuilder: ComponentModelBuilder<TextComponent, TextSemanticModel> 
 
 const textRenderer: ComponentRenderer<TextComponent, TextSemanticModel> = {
   render(model: TextSemanticModel, context: RenderContext): React.ReactNode {
-    if (context.mode === RenderMode.DESIGN && context.onChange) {
+    if (context.onChange) {
       return (
-        <DesignTextRenderer model={model} context={context} />
+        <EditableTextRenderer model={model} context={context} />
       );
     }
 
@@ -135,15 +135,32 @@ const textRenderer: ComponentRenderer<TextComponent, TextSemanticModel> = {
 };
 
 // ---------------------------------------------------------------------------
-// DesignTextRenderer — 设计态：contentEditable 直接编辑 title 和 content
+// EditableTextRenderer — edit 模式：contentEditable 直接编辑 title 和 content
 // ---------------------------------------------------------------------------
 
-interface DesignTextRendererProps {
+interface EditableTextRendererProps {
   model: TextSemanticModel;
   context: RenderContext;
 }
 
-function DesignTextRenderer({ model, context }: DesignTextRendererProps): React.ReactElement {
+function EditableTextRenderer({ model, context }: EditableTextRendererProps): React.ReactElement {
+  // 通过 hook 判断是否可编辑：仅 edit 模式允许
+  const canEdit = useCanEditText();
+
+  if (!canEdit) {
+    // chat/view 模式：只读渲染
+    return (
+      <div
+        className={context.className}
+        style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', ...context.style }}
+      >
+        {model.title !== undefined && (
+          <div style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>{model.title}</div>
+        )}
+        <div>{model.content}</div>
+      </div>
+    );
+  }
   const titleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -192,8 +209,6 @@ function DesignTextRenderer({ model, context }: DesignTextRendererProps): React.
       style={{
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
-        borderLeft: `2px solid ${context.theme.border?.selectedColor ?? '#1890ff'}33`,
-        paddingLeft: 8,
         ...context.style,
         height: undefined,
       }}
@@ -211,15 +226,7 @@ function DesignTextRenderer({ model, context }: DesignTextRendererProps): React.
             fontSize: 16,
             marginBottom: 8,
             outline: 'none',
-            borderRadius: 2,
-            transition: 'background-color 0.15s',
             cursor: 'text',
-          }}
-          onFocus={(e) => {
-            (e.target as HTMLElement).style.backgroundColor = 'rgba(24,144,255,0.06)';
-          }}
-          onBlurCapture={(e) => {
-            (e.target as HTMLElement).style.backgroundColor = '';
           }}
         >
           {model.title}
@@ -234,15 +241,7 @@ function DesignTextRenderer({ model, context }: DesignTextRendererProps): React.
         data-field="content"
         style={{
           outline: 'none',
-          borderRadius: 2,
-          transition: 'background-color 0.15s',
           cursor: 'text',
-        }}
-        onFocus={(e) => {
-          (e.target as HTMLElement).style.backgroundColor = 'rgba(24,144,255,0.06)';
-        }}
-        onBlurCapture={(e) => {
-          (e.target as HTMLElement).style.backgroundColor = '';
         }}
       >
         {model.content}
