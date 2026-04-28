@@ -12,6 +12,7 @@ import { TableView } from '../../component-handlers/table/TableView';
 import type { TableColumn } from '../../component-handlers/table/types';
 import { tableMerge } from '../../testing/fixtures/table-merge';
 import { tableEnumRender } from '../../testing/fixtures/table-enum-render';
+import { DEFAULT_THEME_TOKENS } from '../../theme/theme-tokens';
 
 describe('TableView', () => {
   it('renders table with data', () => {
@@ -374,5 +375,218 @@ describe('TableView — data pipeline (filter → sort → paginate)', () => {
       if (cells.length >= 2) scores.push(cells[1].textContent ?? '');
     });
     expect(scores).toEqual(['78', '85', '92', '95']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Column reorder tests
+// ---------------------------------------------------------------------------
+
+describe('TableView — column manager reorder', () => {
+  it('shows up/down reorder buttons in column manager modal', () => {
+    const columns: TableColumn[] = [
+      { key: 'a', title: 'A' },
+      { key: 'b', title: 'B' },
+      { key: 'c', title: 'C' },
+    ];
+    const data = [{ a: '1', b: '2', c: '3' }];
+
+    const { container } = render(
+      <TableView dataSource={data} columns={columns} showColumnManager={true} />,
+    );
+
+    // Open modal
+    const gearSpans = container.querySelectorAll('thead span');
+    const gearSpan = Array.from(gearSpans).find((span) => span.querySelector('svg path[d*="12 15.5"]'));
+    fireEvent.click(gearSpan!);
+
+    // Check ↑ and ↓ buttons exist
+    const allButtons = container.querySelectorAll('button');
+    const upBtn = Array.from(allButtons).find((btn) => btn.textContent === '↑');
+    const downBtn = Array.from(allButtons).find((btn) => btn.textContent === '↓');
+    expect(upBtn).toBeTruthy();
+    expect(downBtn).toBeTruthy();
+  });
+
+  it('reorder buttons are disabled when no item selected', () => {
+    const columns: TableColumn[] = [
+      { key: 'a', title: 'A' },
+      { key: 'b', title: 'B' },
+    ];
+    const data = [{ a: '1', b: '2' }];
+
+    const { container } = render(
+      <TableView dataSource={data} columns={columns} showColumnManager={true} />,
+    );
+
+    // Open modal
+    const gearSpans = container.querySelectorAll('thead span');
+    const gearSpan = Array.from(gearSpans).find((span) => span.querySelector('svg path[d*="12 15.5"]'));
+    fireEvent.click(gearSpan!);
+
+    const allButtons = container.querySelectorAll('button');
+    const upBtn = Array.from(allButtons).find((btn) => btn.textContent === '↑')!;
+    const downBtn = Array.from(allButtons).find((btn) => btn.textContent === '↓')!;
+
+    expect(upBtn.disabled).toBe(true);
+    expect(downBtn.disabled).toBe(true);
+  });
+
+  it('moves selected column up when clicking up button', () => {
+    const columns: TableColumn[] = [
+      { key: 'a', title: 'A' },
+      { key: 'b', title: 'B' },
+      { key: 'c', title: 'C' },
+    ];
+    const data = [{ a: '1', b: '2', c: '3' }];
+
+    const { container } = render(
+      <TableView dataSource={data} columns={columns} showColumnManager={true} />,
+    );
+
+    // Open modal by clicking gear icon
+    const gearSpans = container.querySelectorAll('thead span');
+    const gearSpan = Array.from(gearSpans).find((span) => span.querySelector('svg path[d*="12 15.5"]'));
+    fireEvent.click(gearSpan!);
+
+    // Find all <li> elements with checkboxes (these are panel items)
+    const allLi = container.querySelectorAll('li');
+    // With all 3 columns in the right panel, left panel is empty.
+    // So the 3 <li> items are the right panel items: A, B, C
+    const itemsWithCheckboxes = Array.from(allLi).filter((li) => li.querySelector('input[type="checkbox"]'));
+    expect(itemsWithCheckboxes.length).toBe(3);
+
+    // Select 'C' (3rd item, index 2)
+    fireEvent.click(itemsWithCheckboxes[2]);
+
+    // Click up button
+    const allButtons = container.querySelectorAll('button');
+    const upBtn = Array.from(allButtons).find((btn) => btn.textContent === '↑')!;
+    fireEvent.click(upBtn);
+
+    // Click confirm
+    const confirmBtn = Array.from(allButtons).find((btn) => btn.textContent === '确认')!;
+    fireEvent.click(confirmBtn);
+
+    // Verify column order: A, C, B
+    const headerCells = container.querySelectorAll('thead tr th');
+    const headerTexts = Array.from(headerCells).map((th) => th.textContent?.trim()).filter(Boolean);
+    const columnHeaders = headerTexts.filter((t) => ['A', 'B', 'C'].includes(t!));
+    expect(columnHeaders).toEqual(['A', 'C', 'B']);
+  });
+
+  it('moves selected column down when clicking down button', () => {
+    const columns: TableColumn[] = [
+      { key: 'a', title: 'A' },
+      { key: 'b', title: 'B' },
+      { key: 'c', title: 'C' },
+    ];
+    const data = [{ a: '1', b: '2', c: '3' }];
+
+    const { container } = render(
+      <TableView dataSource={data} columns={columns} showColumnManager={true} />,
+    );
+
+    // Open modal by clicking gear icon
+    const gearSpans = container.querySelectorAll('thead span');
+    const gearSpan = Array.from(gearSpans).find((span) => span.querySelector('svg path[d*="12 15.5"]'));
+    fireEvent.click(gearSpan!);
+
+    // Find all <li> items with checkboxes
+    const allLi = container.querySelectorAll('li');
+    const itemsWithCheckboxes = Array.from(allLi).filter((li) => li.querySelector('input[type="checkbox"]'));
+
+    // Select 'A' (1st item, index 0)
+    fireEvent.click(itemsWithCheckboxes[0]);
+
+    // Click down button
+    const allButtons = container.querySelectorAll('button');
+    const downBtn = Array.from(allButtons).find((btn) => btn.textContent === '↓')!;
+    fireEvent.click(downBtn);
+
+    // Click confirm
+    const confirmBtn = Array.from(allButtons).find((btn) => btn.textContent === '确认')!;
+    fireEvent.click(confirmBtn);
+
+    // Verify column order: B, A, C
+    const headerCells = container.querySelectorAll('thead tr th');
+    const headerTexts = Array.from(headerCells).map((th) => th.textContent?.trim()).filter(Boolean);
+    const columnHeaders = headerTexts.filter((t) => ['A', 'B', 'C'].includes(t!));
+    expect(columnHeaders).toEqual(['B', 'A', 'C']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Custom column render tests
+// ---------------------------------------------------------------------------
+
+describe('TableView — custom column render via TableColumn.render', () => {
+  it('uses custom render function for column cells', () => {
+    const columns: TableColumn[] = [
+      { key: 'name', title: '姓名' },
+      {
+        key: 'status',
+        title: '状态',
+        render: (value) => {
+          const v = String(value ?? '');
+          const color = v === 'active' ? '#52c41a' : '#ff4d4f';
+          return React.createElement('span', { style: { color }, 'data-testid': 'custom-render' }, v);
+        },
+      },
+    ];
+    const data = [
+      { name: 'Alice', status: 'active' },
+      { name: 'Bob', status: 'inactive' },
+    ];
+
+    const { container } = render(
+      <TableView dataSource={data} columns={columns} />,
+    );
+
+    const rows = container.querySelectorAll('tbody tr');
+    expect(rows.length).toBe(2);
+
+    // First row: custom render output should be nested inside CellWithTooltip's wrapper span
+    const firstStatus = rows[0].querySelectorAll('td')[1];
+    expect(firstStatus?.textContent).toBe('active');
+    const firstCustom = firstStatus?.querySelector('[data-testid="custom-render"]');
+    expect(firstCustom?.getAttribute('style')).toContain('82, 196, 26');
+
+    // Second row
+    const secondStatus = rows[1].querySelectorAll('td')[1];
+    expect(secondStatus?.textContent).toBe('inactive');
+    const secondCustom = secondStatus?.querySelector('[data-testid="custom-render"]');
+    expect(secondCustom?.getAttribute('style')).toContain('255, 77, 79');
+  });
+
+  it('custom render receives row data and index', () => {
+    const receivedArgs: Array<{ value: unknown; row: Record<string, unknown>; index: number }> = [];
+
+    const columns: TableColumn[] = [
+      { key: 'name', title: '姓名' },
+      {
+        key: 'score',
+        title: '成绩',
+        render: (value, row, index) => {
+          receivedArgs.push({ value, row, index });
+          return String(value);
+        },
+      },
+    ];
+    const data = [
+      { name: 'Alice', score: 85 },
+      { name: 'Bob', score: 92 },
+    ];
+
+    const { container } = render(
+      <TableView dataSource={data} columns={columns} />,
+    );
+
+    expect(receivedArgs.length).toBe(2);
+    expect(receivedArgs[0].value).toBe(85);
+    expect(receivedArgs[0].row.name).toBe('Alice');
+    expect(receivedArgs[0].index).toBe(0);
+    expect(receivedArgs[1].value).toBe(92);
+    expect(receivedArgs[1].index).toBe(1);
   });
 });

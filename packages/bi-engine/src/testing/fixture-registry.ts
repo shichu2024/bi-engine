@@ -1,4 +1,4 @@
-import type { ChartComponent, TableComponent, TextComponent, BIEngineComponent } from '../schema/bi-engine-models';
+import type { ChartComponent, TableComponent, TextComponent, CompositeTable, BIEngineComponent } from '../schema/bi-engine-models';
 
 import { lineSingleFixture } from './fixtures/line-single';
 import { lineMultiFixture } from './fixtures/line-multi';
@@ -26,8 +26,14 @@ import { tableMerge } from './fixtures/table-merge';
 import { tableEnumRender } from './fixtures/table-enum-render';
 import { tableFullFeatured } from './fixtures/table-full-featured';
 import { tableSortFilter } from './fixtures/table-sort-filter';
+import { tableMergeColumnsValue } from './fixtures/table-merge-columns-value';
+import { tableMergeColumnsHeader } from './fixtures/table-merge-columns-header';
+import { compositeTableBasic } from './fixtures/composite-table-basic';
+import { compositeTableWithMerge } from './fixtures/composite-table-merge';
 import { textBasic } from './fixtures/text-basic';
 import { textWithTitle } from './fixtures/text-with-title';
+import { tableColumnReorder } from './fixtures/table-column-reorder';
+import { tableCustomRender } from './fixtures/table-custom-render';
 
 // ---------------------------------------------------------------------------
 // 测试夹具条目类型
@@ -212,7 +218,7 @@ export function getFixturesByKind(kind: 'line' | 'bar' | 'pie' | 'scatter' | 'ra
 // ---------------------------------------------------------------------------
 
 /** 组件种类 */
-export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table' | 'text';
+export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table' | 'text' | 'compositeTable';
 
 /** 统一夹具条目 */
 export interface UnifiedFixtureEntry {
@@ -227,6 +233,13 @@ export interface TableFixtureEntry {
   readonly id: string;
   readonly description: string;
   readonly component: TableComponent;
+}
+
+/** 组合表格夹具条目 */
+export interface CompositeTableFixtureEntry {
+  readonly id: string;
+  readonly description: string;
+  readonly component: CompositeTable;
 }
 
 /** 文本夹具条目 */
@@ -272,6 +285,26 @@ export const TABLE_FIXTURE_REGISTRY: readonly TableFixtureEntry[] = [
     description: '全功能演示：员工信息表（分页、排序、筛选、列管理）',
     component: tableFullFeatured,
   },
+  {
+    id: 'table-merge-columns-value',
+    description: '列合并-值合并：多列合并为一个单元格（isMergeValue=true）',
+    component: tableMergeColumnsValue,
+  },
+  {
+    id: 'table-merge-columns-header',
+    description: '列合并-表头合并：仅合并表头，表体分列（isMergeValue=false）',
+    component: tableMergeColumnsHeader,
+  },
+  {
+    id: 'table-column-reorder',
+    description: '列管理器排序：拖动调整已选列顺序（↑↓）',
+    component: tableColumnReorder,
+  },
+  {
+    id: 'table-custom-render',
+    description: '自定义渲染：状态标签、进度百分比、超链接',
+    component: tableCustomRender,
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -288,6 +321,23 @@ export const TEXT_FIXTURE_REGISTRY: readonly TextFixtureEntry[] = [
     id: 'text-with-title',
     description: '带标题文本：标题 + 内容',
     component: textWithTitle,
+  },
+] as const;
+
+// ---------------------------------------------------------------------------
+// 组合表格夹具注册表
+// ---------------------------------------------------------------------------
+
+export const COMPOSITE_TABLE_FIXTURE_REGISTRY: readonly CompositeTableFixtureEntry[] = [
+  {
+    id: 'composite-table-basic',
+    description: '组合表格：2 个子表格（销售部 + 技术部）无缝拼接',
+    component: compositeTableBasic,
+  },
+  {
+    id: 'composite-table-merge',
+    description: '组合表格 + 列合并：值合并（联系地址）+ 表头合并（文科）',
+    component: compositeTableWithMerge,
   },
 ] as const;
 
@@ -309,6 +359,12 @@ export const UNIFIED_FIXTURE_REGISTRY: readonly UnifiedFixtureEntry[] = [
     id: f.id,
     description: f.description,
     componentKind: 'text' as ComponentKind,
+    component: f.component as BIEngineComponent,
+  })),
+  ...COMPOSITE_TABLE_FIXTURE_REGISTRY.map((f) => ({
+    id: f.id,
+    description: f.description,
+    componentKind: 'compositeTable' as ComponentKind,
     component: f.component as BIEngineComponent,
   })),
 ];

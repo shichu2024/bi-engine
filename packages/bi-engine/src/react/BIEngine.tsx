@@ -9,7 +9,7 @@ import { RenderModeProvider } from '../platform/render-mode';
 import { RenderMode } from '../platform/types';
 import { ChartThemeProvider } from '../theme/chart-theme-context';
 import { DEFAULT_THEME_TOKENS, DARK_THEME_TOKENS } from '../theme/theme-tokens';
-import type { ComponentError } from '../platform/types';
+import type { ComponentError, ColumnRenderer } from '../platform/types';
 import { ComponentRegistry } from '../platform/component-registry';
 import { chartHandler } from '../component-handlers/chart';
 import { textHandler } from '../component-handlers/text';
@@ -76,6 +76,8 @@ export interface BIEngineProps {
   onChange?: (newSchema: BIEngineComponent) => void;
   /** 国际化：传入语言标识或自定义词条对象，默认 zh-CN */
   locale?: LocaleInput;
+  /** 自定义列渲染函数映射（表格类型组件使用）：列 key → 渲染函数 */
+  columnRenderers?: Record<string, ColumnRenderer>;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,6 +101,7 @@ export function BIEngine({
   onChartTypeChange,
   onChange,
   locale,
+  columnRenderers,
 }: BIEngineProps): React.ReactElement {
   ensureHandlersRegistered();
 
@@ -166,6 +169,7 @@ export function BIEngine({
       onChartTypeChange={handleChartTypeChange}
       onChange={handleChange}
       originalChartSchema={chartSchemaRef.current}
+      columnRenderers={columnRenderers}
     />
   );
 

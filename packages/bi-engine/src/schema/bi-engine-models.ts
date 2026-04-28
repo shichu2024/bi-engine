@@ -103,10 +103,12 @@ export interface CompositeTableDataProperty extends DataProperty {
 
 /** 列合并配置 */
 export interface MergeColumnInfo {
-  /** 合并后的展示标题 */
+  /** 合并后的展示标题（必填），将作为合并后表头的显示文本 */
   title: string;
-  /** 被合并的列键名列表 */
+  /** 被合并的列键名列表（必填），确保与列配置一致 */
   columns: string[];
+  /** 是否值合并（可选，默认值为true）— true 时合并表头和表体值；false 时仅合并表头 */
+  isMergeValue?: boolean;
 }
 
 /** 行合并配置 */

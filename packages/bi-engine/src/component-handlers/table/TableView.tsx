@@ -18,6 +18,7 @@ import type {
   PaginationState,
   PaginationConfig,
   MergeMap,
+  MergeColumnInfoView,
 } from './types';
 import type { ThemeTokens } from '../../theme/theme-tokens';
 import { DEFAULT_THEME_TOKENS } from '../../theme/theme-tokens';
@@ -364,6 +365,200 @@ function filterVisibleColumns(columns: TableColumn[], visibleKeys: Set<string>):
     }
   }
   return result;
+}
+
+/**
+ * Reorder leaf-level columns to match visibleKeys order.
+ * Parent columns with children maintain their relative structure.
+ */
+function reorderColumnsByKeys(columns: TableColumn[], keyOrder: string[]): TableColumn[] {
+  const keyIndex = new Map<string, number>();
+  for (let i = 0; i < keyOrder.length; i++) {
+    keyIndex.set(keyOrder[i], i);
+  }
+  return columns.map((col) => {
+    if (col.children && col.children.length > 0) {
+      return { ...col, children: reorderColumnsByKeys(col.children, keyOrder) };
+    }
+    return col;
+  }).sort((a, b) => {
+    const ai = keyIndex.get(a.key) ?? Number.MAX_SAFE_INTEGER;
+    const bi = keyIndex.get(b.key) ?? Number.MAX_SAFE_INTEGER;
+    return ai - bi;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// MergeColumns — 将 mergeColumns 配置转换为嵌套表头结构
+// ---------------------------------------------------------------------------
+
+/** 解析后的合并列信息 */
+interface ResolvedMergeColumn {
+  title: string;
+  columns: string[];
+  isMergeValue: boolean;
+  /** 被合并列在原始 columns 中的索引集合 */
+  columnIndices: Set<number>;
+}
+
+/**
+ * 将原始 columns + mergeColumns 配置转换为带有嵌套表头的列树。
+ * 同时返回解析后的合并信息，供表体渲染时使用。
+ *
+ * 策略：
+ * - 值合并 (isMergeValue=true): 生成一个虚拟合并列，无 children，带 __mergeColSpan 标记
+ * - 表头合并 (isMergeValue=false): 生成一个父级列，带 children
+ */
+function resolveMergeColumns(
+  originalColumns: TableColumn[],
+  mergeColumnsConfig?: MergeColumnInfoView[],
+): {
+  /** 带嵌套结构的列树（用于表头渲染） */
+  mergedColumns: TableColumn[];
+  /** 解析后的合并规则（用于表体渲染） */
+  resolvedMerges: ResolvedMergeColumn[];
+  /** 值合并的键集合 — 在表体中需要合并值的列 */
+  valueMergeKeys: Set<string>;
+} {
+  if (!mergeColumnsConfig || mergeColumnsConfig.length === 0) {
+    return {
+      mergedColumns: originalColumns,
+      resolvedMerges: [],
+      valueMergeKeys: new Set(),
+    };
+  }
+
+  // 跟踪哪些列已被合并规则占用
+  const occupiedIndices = new Set<number>();
+  const resolvedMerges: ResolvedMergeColumn[] = [];
+  const valueMergeKeys = new Set<string>();
+
+  for (const mc of mergeColumnsConfig) {
+    const indices: number[] = [];
+    for (const colKey of mc.columns) {
+      const idx = originalColumns.findIndex((c) => c.key === colKey);
+      if (idx !== -1 && !occupiedIndices.has(idx)) {
+        indices.push(idx);
+        occupiedIndices.add(idx);
+      }
+    }
+    if (indices.length > 1) {
+      const isMergeValue = mc.isMergeValue !== false;
+      resolvedMerges.push({
+        title: mc.title,
+        columns: mc.columns,
+        isMergeValue,
+        columnIndices: new Set(indices),
+      });
+      if (isMergeValue) {
+        for (const colKey of mc.columns) {
+          valueMergeKeys.add(colKey);
+        }
+      }
+    }
+  }
+
+  // 构建列树
+  const mergedColumns: TableColumn[] = [];
+  let i = 0;
+  while (i < originalColumns.length) {
+    if (occupiedIndices.has(i)) {
+      // 找到包含此索引的合并规则
+      const mergeRule = resolvedMerges.find((r) => r.columnIndices.has(i));
+      if (mergeRule) {
+        if (mergeRule.isMergeValue) {
+          // 值合并：生成一个虚拟列，通过 __mergeColSpan 标记表头跨列数
+          mergedColumns.push({
+            key: `__merge_${mergeRule.title}`,
+            title: mergeRule.title,
+            width: mergeRule.columns.length * 100,
+            // @ts-expect-error — 内部标记，用于 fillHeaderRow 中设置 colSpan
+            __mergeColSpan: mergeRule.columns.length,
+            __isValueMerge: true,
+          });
+        } else {
+          // 表头合并：生成父级列，带 children
+          const children: TableColumn[] = [];
+          for (const idx of Array.from(mergeRule.columnIndices).sort((a, b) => a - b)) {
+            children.push(originalColumns[idx]);
+          }
+          mergedColumns.push({
+            key: `__merge_${mergeRule.title}`,
+            title: mergeRule.title,
+            children,
+          });
+        }
+        // 跳过已处理的列
+        const maxIdx = Math.max(...mergeRule.columnIndices);
+        while (i <= maxIdx) i++;
+        continue;
+      }
+    }
+    mergedColumns.push(originalColumns[i]);
+    i++;
+  }
+
+  return { mergedColumns, resolvedMerges, valueMergeKeys };
+}
+
+/**
+ * 为值合并场景构建虚拟的 leaf columns。
+ * 值合并的虚拟列（__merge_*）已经是 leaf，直接返回。
+ * 同时过滤掉已被值合并占用的原始列。
+ */
+function buildValueMergeLeafColumns(
+  allLeavesFromMerged: TableColumn[],
+  resolvedMerges: ResolvedMergeColumn[],
+): TableColumn[] {
+  if (resolvedMerges.length === 0) return allLeavesFromMerged;
+
+  const valueMergedKeys = new Set<string>();
+  for (const rm of resolvedMerges) {
+    if (rm.isMergeValue) {
+      for (const k of rm.columns) {
+        valueMergedKeys.add(k);
+      }
+    }
+  }
+
+  if (valueMergedKeys.size === 0) return allLeavesFromMerged;
+
+  const result: TableColumn[] = [];
+  for (const col of allLeavesFromMerged) {
+    // 值合并的虚拟列（__merge_*）保留
+    if (col.key.startsWith('__merge_')) {
+      result.push(col);
+    } else if (valueMergedKeys.has(col.key)) {
+      // 被值合并的原始列跳过（已被虚拟列替代）
+      continue;
+    } else {
+      result.push(col);
+    }
+  }
+  return result;
+}
+
+/**
+ * 渲染值合并单元格内容：将多列的非空值以换行分隔合并展示。
+ */
+function renderMergedCellValue(
+  row: Record<string, unknown>,
+  mergeColumns: string[],
+): ReactNode {
+  const values: string[] = [];
+  for (const colKey of mergeColumns) {
+    const val = row[colKey];
+    if (val !== null && val !== undefined && val !== '') {
+      values.push(String(val));
+    }
+  }
+  if (values.length === 0) return '';
+  if (values.length === 1) return values[0];
+  return (
+    <span style={{ whiteSpace: 'pre-line' }}>
+      {values.join('\n')}
+    </span>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -731,6 +926,32 @@ function ColumnManagerModal({
     setRightSelected(new Set());
   }, [rightKeys]);
 
+  const moveUp = useCallback(() => {
+    if (rightSelected.size !== 1) return;
+    const key = [...rightSelected][0];
+    setRightKeys((prev) => {
+      const idx = prev.indexOf(key);
+      if (idx <= 0) return prev;
+      const next = [...prev];
+      next[idx] = next[idx - 1];
+      next[idx - 1] = key;
+      return next;
+    });
+  }, [rightSelected]);
+
+  const moveDown = useCallback(() => {
+    if (rightSelected.size !== 1) return;
+    const key = [...rightSelected][0];
+    setRightKeys((prev) => {
+      const idx = prev.indexOf(key);
+      if (idx < 0 || idx >= prev.length - 1) return prev;
+      const next = [...prev];
+      next[idx] = next[idx + 1];
+      next[idx + 1] = key;
+      return next;
+    });
+  }, [rightSelected]);
+
   const handleApply = useCallback(() => {
     if (rightKeys.length > 0) {
       onApply(rightKeys);
@@ -799,6 +1020,29 @@ function ColumnManagerModal({
               {rightKeys.length === 0 && <li style={{ padding: 12, color: theme.font.tertiaryColor, fontSize: 13, textAlign: 'center' }}>{locale.table.columnManager.emptySelected}</li>}
             </ul>
           </div>
+          {(() => {
+            const canReorder = rightSelected.size === 1;
+            const selectedKey = canReorder ? [...rightSelected][0] : '';
+            const selectedIdx = canReorder ? rightKeys.indexOf(selectedKey) : -1;
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
+                <button
+                  style={{ ...st.modalBtn, opacity: canReorder && selectedIdx > 0 ? 1 : 0.4 }}
+                  onClick={moveUp}
+                  disabled={!canReorder || selectedIdx <= 0}
+                >
+                  ↑
+                </button>
+                <button
+                  style={{ ...st.modalBtn, opacity: canReorder && selectedIdx < rightKeys.length - 1 ? 1 : 0.4 }}
+                  onClick={moveDown}
+                  disabled={!canReorder || selectedIdx >= rightKeys.length - 1}
+                >
+                  ↓
+                </button>
+              </div>
+            );
+          })()}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
           <button style={st.modalDefaultBtn} onClick={onClose}>{locale.table.columnManager.cancel}</button>
@@ -909,6 +1153,9 @@ export interface TableViewProps {
   declaredMerges?: Array<{ startRowIndex: number; rowSpan: number; columnKey: string }>;
   showColumnManager?: boolean;
   pagination?: PaginationConfig | boolean;
+  mergeColumns?: MergeColumnInfoView[];
+  disableInteractions?: boolean;
+  isSubTable?: boolean;
 }
 
 export function TableView({
@@ -922,38 +1169,62 @@ export function TableView({
   declaredMerges,
   showColumnManager = false,
   pagination: paginationProp,
+  mergeColumns,
+  disableInteractions = false,
+  isSubTable = false,
 }: TableViewProps): React.ReactElement {
   const [hoverRow, setHoverRow] = useState<number | null>(null);
   const [activeFilterKey, setActiveFilterKey] = useState<string | null>(null);
   const st = useMemo(() => createStyles(theme ?? DEFAULT_THEME_TOKENS), [theme]);
   const locale = useLocale();
 
-  // Leaf columns
-  const leafColumns = useMemo(() => collectLeafColumns(columns), [columns]);
+  // Resolve merge columns → build nested header tree
+  const { mergedColumns, resolvedMerges, valueMergeKeys } = useMemo(
+    () => resolveMergeColumns(columns, mergeColumns),
+    [columns, mergeColumns],
+  );
+
+  // Leaf columns from merged structure
+  const allLeafColumns = useMemo(() => collectLeafColumns(mergedColumns), [mergedColumns]);
+
+  // For value-merge: build a reduced leaf set where merged group occupies one slot
+  const effectiveLeafColumns = useMemo(
+    () => buildValueMergeLeafColumns(allLeafColumns, resolvedMerges),
+    [allLeafColumns, resolvedMerges],
+  );
 
   // Column manager
-  const { visibleKeys, managerOpen, openManager, closeManager, applyColumns } = useColumnManager(leafColumns);
+  const { visibleKeys, managerOpen, openManager, closeManager, applyColumns } = useColumnManager(effectiveLeafColumns);
 
   // Visible columns
   const visibleLeafCols = useMemo(
-    () => leafColumns.filter((c) => visibleKeys.includes(c.key)),
-    [leafColumns, visibleKeys],
+    () => {
+      const keySet = new Set(visibleKeys);
+      return visibleKeys
+        .map((k) => effectiveLeafColumns.find((c) => c.key === k))
+        .filter((c): c is TableColumn => c !== undefined && keySet.has(c.key));
+    },
+    [effectiveLeafColumns, visibleKeys],
   );
   const visibleColCount = visibleLeafCols.length;
 
-  // Visible header tree
+  // Visible header tree (from merged columns), reordered to match visibleKeys
   const visibleHeaderColumns = useMemo(
-    () => filterVisibleColumns(columns, new Set(visibleKeys)),
-    [columns, visibleKeys],
+    () => reorderColumnsByKeys(filterVisibleColumns(mergedColumns, new Set(visibleKeys)), visibleKeys),
+    [mergedColumns, visibleKeys],
   );
   const visibleHeaderMaxDepth = useMemo(() => getMaxDepth(visibleHeaderColumns), [visibleHeaderColumns]);
 
   // Data pipeline: filter → sort → paginate
-  const { filteredData, filterState, setFilter } = useTableFilter(dataSource);
-  const { sortedData, sortState, handleSort } = useTableSort(filteredData);
+  const shouldFilter = !disableInteractions;
+  const shouldSort = !disableInteractions;
+  const { filteredData, filterState, setFilter } = useTableFilter(shouldFilter ? dataSource : []);
+  const { sortedData, sortState, handleSort } = useTableSort(shouldSort ? filteredData : []);
+
+  const processedData = disableInteractions ? dataSource : sortedData;
 
   // Pagination
-  const enablePagination = paginationProp !== undefined && paginationProp !== false;
+  const enablePagination = !disableInteractions && paginationProp !== undefined && paginationProp !== false;
   const {
     pagination,
     totalPages,
@@ -961,11 +1232,11 @@ export function TableView({
     changePage,
     changePageSize,
     pageSizeOpts,
-  } = useTablePagination(sortedData.length, enablePagination ? (paginationProp === true ? undefined : paginationProp) : undefined);
+  } = useTablePagination(processedData.length, enablePagination ? (paginationProp === true ? undefined : paginationProp) : undefined);
 
   const finalData = enablePagination
-    ? sortedData.slice(paginatedRange[0], paginatedRange[1])
-    : sortedData;
+    ? processedData.slice(paginatedRange[0], paginatedRange[1])
+    : processedData;
 
   // Merge map
   const mergeMap = useMemo(
@@ -977,7 +1248,7 @@ export function TableView({
     [finalData, visibleLeafCols, declaredMerges, visibleKeys],
   );
 
-  const hasGear = showColumnManager && leafColumns.length > 1;
+  const hasGear = !disableInteractions && showColumnManager && effectiveLeafColumns.length > 1;
 
   // Tooltip state
   const [tooltipInfo, setTooltipInfo] = useState<{ text: string; rect: DOMRect } | null>(null);
@@ -997,8 +1268,12 @@ export function TableView({
     const cells: ReactNode[] = [];
     fillHeaderRow(
       visibleHeaderColumns, level, 0, cells, visibleHeaderMaxDepth,
-      sortState, handleSort, filterState, setFilter,
-      activeFilterKey, setActiveFilterKey,
+      disableInteractions ? { columnKey: '', direction: 'default' } : sortState,
+      disableInteractions ? () => {} : handleSort,
+      disableInteractions ? {} : filterState,
+      disableInteractions ? () => {} : setFilter,
+      disableInteractions ? null : activeFilterKey,
+      disableInteractions ? () => {} : setActiveFilterKey,
     );
     headerRows.push(<tr key={`header-row-${level}`}>{cells}</tr>);
   }
@@ -1036,19 +1311,33 @@ export function TableView({
                     const merge = mergeMap[mergeKey];
                     if (merge && merge.hidden) return null;
 
-                    const value = row[col.key];
+                    // Check if this column is the first of a value-merge group
+                    const isValueMergeSlot = col.key.startsWith('__merge_');
+                    const valueMergeRule = isValueMergeSlot
+                      ? resolvedMerges.find((r) => r.isMergeValue && col.key === `__merge_${r.title}`)
+                      : null;
+
                     let cellContent: ReactNode;
-                    if (col.render) {
-                      cellContent = col.render(value, row, rowIdx, col);
+                    let cellColSpan: number | undefined = merge && merge.colSpan > 1 ? merge.colSpan : undefined;
+
+                    if (valueMergeRule) {
+                      // Value merge: render merged cell spanning the group width
+                      cellContent = renderMergedCellValue(row, valueMergeRule.columns);
+                      cellColSpan = cellColSpan ?? valueMergeRule.columns.length;
                     } else {
-                      cellContent = formatCellValue(value);
+                      const value = row[col.key];
+                      if (col.render) {
+                        cellContent = col.render(value, row, rowIdx, col);
+                      } else {
+                        cellContent = formatCellValue(value);
+                      }
                     }
 
                     return (
                       <CellWithTooltip
                         key={col.key}
                         colKey={col.key}
-                        colSpan={merge && merge.colSpan > 1 ? merge.colSpan : undefined}
+                        colSpan={cellColSpan}
                         rowSpan={merge && merge.rowSpan > 1 ? merge.rowSpan : undefined}
                         isLastCol={colIdx >= visibleColCount - 1}
                         cellStyle={st.td}
@@ -1082,7 +1371,7 @@ export function TableView({
       {/* Column manager modal */}
       {managerOpen && (
         <ColumnManagerModal
-          allLeafColumns={leafColumns}
+          allLeafColumns={effectiveLeafColumns}
           visibleKeys={visibleKeys}
           onClose={closeManager}
           onApply={applyColumns}
@@ -1125,10 +1414,12 @@ export function TableView({
       const hasChildren = col.children && col.children.length > 0;
 
       if (currentLevel === targetLevel) {
-        const span = hasChildren ? countLeaves(col) : 1;
+        const hasMergeColSpan = (col as Record<string, unknown>).__mergeColSpan as number | undefined;
+        const span = hasChildren ? countLeaves(col) : (hasMergeColSpan ?? 1);
         const depth = hasChildren ? 1 : (maxDepth - currentLevel);
         const isLeaf = !hasChildren;
         const isLastCol = isLeaf && i === cols.length - 1 && targetLevel === 0;
+        const isValueMergeHeader = !!hasMergeColSpan;
 
         if (isLeaf) {
           const isSorted = ss.columnKey === col.key;
@@ -1166,10 +1457,10 @@ export function TableView({
               key={`th-${col.key}`}
               col={col}
               sortIcon={sortIconEl}
-              sortable={!!col.sortable}
+              sortable={!!col.sortable && !isValueMergeHeader}
               onSort={onSort}
               hasFilter={!!hasFilter}
-              filterable={!!col.filterable}
+              filterable={!!col.filterable && !isValueMergeHeader}
               activeFilterKey={activeFKey}
               onSetActiveFilterKey={setActiveFKey}
               filterValue={fs[col.key] ?? ''}
@@ -1186,6 +1477,7 @@ export function TableView({
               gearIconStyle={st.gearIcon}
               resizeHandleStyle={st.resizeHandle}
               theme={theme ?? DEFAULT_THEME_TOKENS}
+              mergeColSpan={hasMergeColSpan}
             />,
           );
         } else {
@@ -1293,6 +1585,7 @@ function LeafHeaderCell({
   gearIconStyle,
   resizeHandleStyle,
   theme,
+  mergeColSpan,
 }: {
   col: TableColumn;
   sortIcon: ReactNode;
@@ -1316,6 +1609,7 @@ function LeafHeaderCell({
   gearIconStyle: React.CSSProperties;
   resizeHandleStyle: React.CSSProperties;
   theme: ThemeTokens;
+  mergeColSpan?: number;
 }) {
   const thRef = useRef<HTMLTableCellElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -1377,6 +1671,7 @@ function LeafHeaderCell({
   return (
     <th
       ref={thRef}
+      colSpan={mergeColSpan}
       style={{
         ...thStyle,
         ...(thRightStyle ?? {}),

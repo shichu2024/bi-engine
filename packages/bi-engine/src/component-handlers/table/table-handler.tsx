@@ -19,6 +19,7 @@ import type {
   TableComponent,
   Column,
   MergeRowConfig,
+  MergeColumnInfo,
 } from '../../schema/bi-engine-models';
 import { TableView } from './TableView';
 import type { TableColumn } from './types';
@@ -35,6 +36,7 @@ export interface TableSemanticModel {
   data: Record<string, unknown>[];
   mergeRows: MergeRowConfig[];
   hasMerge: boolean;
+  mergeColumns: MergeColumnInfo[];
   showColumnManager?: boolean;
   pagination?: boolean;
 }
@@ -73,6 +75,7 @@ const tableNormalizer: ComponentNormalizer<TableComponent> = {
           data: dp.data ?? [],
           mergeRows: dp.mergeRows ?? [],
           hasMerge: dp.hasMerge ?? false,
+          mergeColumns: dp.mergeColumns ?? [],
         },
       },
     };
@@ -115,6 +118,7 @@ const tableModelBuilder: ComponentModelBuilder<TableComponent, TableSemanticMode
         data: (normalized.properties.data as Record<string, unknown>[]) ?? [],
         mergeRows: (normalized.properties.mergeRows as MergeRowConfig[]) ?? [],
         hasMerge: (normalized.properties.hasMerge as boolean) ?? false,
+        mergeColumns: (normalized.properties.mergeColumns as MergeColumnInfo[]) ?? [],
         showColumnManager: component.basicProperties?.showColumnManager as boolean | undefined,
         pagination: component.basicProperties?.pagination as boolean | undefined,
       },
@@ -167,18 +171,34 @@ function TableEmptyFallback({ className, style }: { className?: string; style?: 
 }
 
 // ---------------------------------------------------------------------------
+// 自定义渲染函数注入
+// ---------------------------------------------------------------------------
+
+function applyCustomRenderers(
+  columns: TableColumn[],
+  renderers?: Record<string, (value: unknown, row: Record<string, unknown>, rowIndex: number) => React.ReactNode>,
+): TableColumn[] {
+  if (!renderers || Object.keys(renderers).length === 0) return columns;
+  return columns.map((col) => {
+    const fn = renderers[col.key];
+    if (!fn) return col;
+    return { ...col, render: fn };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Renderer — 使用 TableView 组件
 // ---------------------------------------------------------------------------
 
 const tableRenderer: ComponentRenderer<TableComponent, TableSemanticModel> = {
   render(model: TableSemanticModel, context: RenderContext): React.ReactNode {
-    const { columns, data, mergeRows } = model;
+    const { columns, data, mergeRows, mergeColumns } = model;
 
     if (columns.length === 0) {
       return <TableEmptyFallback className={context.className} style={context.style} />;
     }
 
-    const tableColumns = dslToTableColumns(columns);
+    const tableColumns = applyCustomRenderers(dslToTableColumns(columns), context.columnRenderers);
 
     return (
       <TableView
@@ -190,6 +210,11 @@ const tableRenderer: ComponentRenderer<TableComponent, TableSemanticModel> = {
         theme={context.theme}
         showColumnManager={model.showColumnManager}
         pagination={model.pagination}
+        mergeColumns={mergeColumns.map((mc) => ({
+          title: mc.title,
+          columns: mc.columns,
+          isMergeValue: mc.isMergeValue,
+        }))}
         declaredMerges={mergeRows.map((m) => ({
           startRowIndex: m.startRowIndex,
           rowSpan: m.rowSpan,

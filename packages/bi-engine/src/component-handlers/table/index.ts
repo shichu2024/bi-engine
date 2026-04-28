@@ -1,7 +1,6 @@
 export { tableHandler } from './table-handler';
 export type { TableSemanticModel } from './table-handler';
 export { TableView } from './TableView';
-export type { TableViewProps } from './TableView';
 export { useTableSort } from './useTableSort';
 export type { UseTableSortResult } from './useTableSort';
 export { useTableFilter } from './useTableFilter';
@@ -15,4 +14,6 @@ export type {
   PaginationConfig,
   CellMerge,
   MergeMap,
+  MergeColumnInfoView,
+  TableViewProps,
 } from './types';

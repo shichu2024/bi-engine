@@ -1,5 +1,5 @@
 {
-  "active_feature": "FEAT-019-模式系统重构与主题简化",
+  "active_feature": "FEAT-020-组合表格与列合并",
   "active_phase": "done",
   "active_dispatch": {
     "role": "",
@@ -12,18 +12,18 @@
     "next_action": ""
   },
   "latest_validation": {
-    "story": "ST-001,ST-002,ST-003,ST-004,ST-005,ST-006,ST-007",
-    "task": "T-001,T-002,T-003,T-004,T-005,T-006,T-007,T-008",
+    "story": "ST-001,ST-002,ST-003,ST-004",
+    "task": "T-001,T-002,T-003,T-004,T-005,T-006",
     "status": "DONE",
     "decision": "pass",
-    "root_cause_type": "",
+    "root_cause_type": "none",
     "reroute_to": "",
     "reroute_action": "",
-    "summary": "575 测试全部通过，7 个 stories 全部通过验证",
-    "report_ref": "codespec/specs/FEAT-019-模式系统重构与主题简化/validation-report.md",
-    "updated_at": "2026-04-27T21:00:00Z"
+    "summary": "590 测试全部通过，4 个 stories 全部通过验证",
+    "report_ref": "codespec/specs/FEAT-020-组合表格与列合并/validation-report.md",
+    "updated_at": "2026-04-28T12:30:00Z"
   },
   "blocked": [],
   "planned_features": [],
-  "last_updated": "2026-04-27T21:00:00Z"
+  "last_updated": "2026-04-28T12:30:00Z"
 }

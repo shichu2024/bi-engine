@@ -82,6 +82,12 @@ export interface TableViewProps {
   showColumnManager?: boolean;
   /** 分页配置，不传则不分页 */
   pagination?: PaginationConfig | boolean;
+  /** 列合并配置 */
+  mergeColumns?: MergeColumnInfoView[];
+  /** 是否禁用所有交互（排序/过滤/列管理/分页） */
+  disableInteractions?: boolean;
+  /** 是否为子表格（组合表格中的子表），不显示标题 */
+  isSubTable?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,3 +106,13 @@ export interface CellMerge {
 
 /** 合并单元格映射：`rowIndex:colIndex` → CellMerge */
 export type MergeMap = Record<string, CellMerge>;
+
+/** 列合并配置（视图层） */
+export interface MergeColumnInfoView {
+  /** 合并后的展示标题 */
+  title: string;
+  /** 被合并的列键名列表 */
+  columns: string[];
+  /** 是否值合并（默认 true） */
+  isMergeValue?: boolean;
+}

@@ -2,6 +2,7 @@
 // platform/types.ts — 统一组件渲染平台核心类型定义
 // ============================================================================
 
+import type { ReactNode } from 'react';
 import type { BIEngineComponent } from '../schema/bi-engine-models';
 import type { ThemeTokens } from '../theme/theme-tokens';
 
@@ -99,6 +100,9 @@ export interface ComponentEventHandlers {
   onSelect?: (componentId: string) => void;
 }
 
+/** 自定义列渲染函数类型 */
+export type ColumnRenderer = (value: unknown, row: Record<string, unknown>, rowIndex: number) => ReactNode;
+
 /** 渲染上下文，传递给 Renderer */
 export interface RenderContext {
   mode: RenderMode;
@@ -112,6 +116,8 @@ export interface RenderContext {
   onChange?: (newSchema: BIEngineComponent) => void;
   /** 由外部 toolbar 负责渲染标题时设为 true，renderer 内部不再渲染标题 */
   hideTitle?: boolean;
+  /** 自定义列渲染函数映射（表格类型组件使用） */
+  columnRenderers?: Record<string, ColumnRenderer>;
 }
 
 // ---------------------------------------------------------------------------

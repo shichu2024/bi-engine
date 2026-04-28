@@ -175,6 +175,7 @@ export {
   type ResolvedData,
   type ComponentEventHandlers,
   type RenderContext,
+  type ColumnRenderer,
   type ComponentValidator,
   type ComponentNormalizer,
   type ComponentResolver,

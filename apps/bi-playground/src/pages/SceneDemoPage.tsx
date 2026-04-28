@@ -8,7 +8,7 @@ import { SceneDetail } from '@/components/demo/SceneDetail';
 // 常量
 // ---------------------------------------------------------------------------
 
-const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge', 'table', 'text']);
+const VALID_KINDS = new Set(['line', 'bar', 'pie', 'scatter', 'radar', 'candlestick', 'gauge', 'table', 'compositeTable', 'text']);
 const DEFAULT_KIND = 'line';
 
 // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ export function SceneDemoPage(): React.ReactElement {
   }, [kind, navigate]);
 
   const fixtures = useMemo(
-    () => getUnifiedFixturesByKind(activeKind as 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table'),
+    () => getUnifiedFixturesByKind(activeKind as 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table' | 'compositeTable' | 'text'),
     [activeKind],
   );
 

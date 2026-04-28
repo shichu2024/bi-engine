@@ -10,7 +10,7 @@ import { useRenderMode, useCanSwitchChart } from '../platform/render-mode';
 import { RenderMode } from '../platform/types';
 import { DEFAULT_THEME_TOKENS } from '../theme/theme-tokens';
 import { useChartTheme } from '../theme/chart-theme-context';
-import type { ComponentError, RenderContext } from '../platform/types';
+import type { ComponentError, RenderContext, ColumnRenderer } from '../platform/types';
 import { DesignableWrapper } from './DesignableWrapper';
 import {
   getSwitchableTypes,
@@ -42,6 +42,8 @@ export interface ComponentViewProps {
   originalChartSchema?: ChartComponent;
   /** 组件变更回调（文本编辑、图表切换等统一出口） */
   onChange?: (newSchema: BIEngineComponent) => void;
+  /** 自定义列渲染函数映射（表格类型组件使用） */
+  columnRenderers?: Record<string, ColumnRenderer>;
 }
 
 // ---------------------------------------------------------------------------
@@ -64,6 +66,7 @@ export function ComponentView({
   onChartTypeChange,
   originalChartSchema,
   onChange,
+  columnRenderers,
 }: ComponentViewProps): React.ReactNode {
   const mode = useRenderMode();
   const canSwitchChart = useCanSwitchChart();
@@ -123,6 +126,7 @@ export function ComponentView({
     style,
     onChange,
     hideTitle: isChart || isSwitchedTable,
+    columnRenderers,
   };
 
   // 7. 渲染

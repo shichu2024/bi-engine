@@ -13,6 +13,7 @@ const CATEGORIES: readonly { kind: string; label: string }[] = [
   { kind: 'candlestick', label: '蜡烛图' },
   { kind: 'gauge', label: '仪表盘' },
   { kind: 'table', label: '表格' },
+  { kind: 'compositeTable', label: '组合表格' },
   { kind: 'text', label: '文本' },
 ];
 
