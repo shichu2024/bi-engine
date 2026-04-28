@@ -1,4 +1,4 @@
-import type { ChartComponent, TableComponent, TextComponent, CompositeTable, BIEngineComponent } from '../schema/bi-engine-models';
+import type { ChartComponent, TableComponent, TextComponent, CompositeTable, MarkdownComponent, BIEngineComponent } from '../schema/bi-engine-models';
 
 import { lineSingleFixture } from './fixtures/line-single';
 import { lineMultiFixture } from './fixtures/line-multi';
@@ -34,6 +34,7 @@ import { textBasic } from './fixtures/text-basic';
 import { textWithTitle } from './fixtures/text-with-title';
 import { tableColumnReorder } from './fixtures/table-column-reorder';
 import { tableCustomRender } from './fixtures/table-custom-render';
+import { markdownBasic } from './fixtures/markdown-basic';
 
 // ---------------------------------------------------------------------------
 // 测试夹具条目类型
@@ -218,7 +219,7 @@ export function getFixturesByKind(kind: 'line' | 'bar' | 'pie' | 'scatter' | 'ra
 // ---------------------------------------------------------------------------
 
 /** 组件种类 */
-export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table' | 'text' | 'compositeTable';
+export type ComponentKind = 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'candlestick' | 'gauge' | 'table' | 'text' | 'compositeTable' | 'markdown';
 
 /** 统一夹具条目 */
 export interface UnifiedFixtureEntry {
@@ -247,6 +248,13 @@ export interface TextFixtureEntry {
   readonly id: string;
   readonly description: string;
   readonly component: TextComponent;
+}
+
+/** Markdown 夹具条目 */
+export interface MarkdownFixtureEntry {
+  readonly id: string;
+  readonly description: string;
+  readonly component: MarkdownComponent;
 }
 
 export const TABLE_FIXTURE_REGISTRY: readonly TableFixtureEntry[] = [
@@ -325,6 +333,18 @@ export const TEXT_FIXTURE_REGISTRY: readonly TextFixtureEntry[] = [
 ] as const;
 
 // ---------------------------------------------------------------------------
+// Markdown 夹具注册表
+// ---------------------------------------------------------------------------
+
+export const MARKDOWN_FIXTURE_REGISTRY: readonly MarkdownFixtureEntry[] = [
+  {
+    id: 'markdown-basic',
+    description: '基础 Markdown：标题、加粗、斜体、列表、引用、代码、链接',
+    component: markdownBasic,
+  },
+] as const;
+
+// ---------------------------------------------------------------------------
 // 组合表格夹具注册表
 // ---------------------------------------------------------------------------
 
@@ -365,6 +385,12 @@ export const UNIFIED_FIXTURE_REGISTRY: readonly UnifiedFixtureEntry[] = [
     id: f.id,
     description: f.description,
     componentKind: 'compositeTable' as ComponentKind,
+    component: f.component as BIEngineComponent,
+  })),
+  ...MARKDOWN_FIXTURE_REGISTRY.map((f) => ({
+    id: f.id,
+    description: f.description,
+    componentKind: 'markdown' as ComponentKind,
     component: f.component as BIEngineComponent,
   })),
 ];

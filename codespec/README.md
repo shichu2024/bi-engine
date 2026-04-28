@@ -4,8 +4,8 @@
 
 - 项目：bi-engine2
 - 负责人：
-- 当前激活的功能：FEAT-020-组合表格与列合并
-- 最后更新时间：2026-04-28T10:00:00Z
+- 当前激活的功能：FEAT-021-Markdown通用组件
+- 最后更新时间：2026-04-28T15:00:00Z
 
 ## 术语
 
@@ -45,6 +45,7 @@
 | FEAT-017 | 文本编辑onChange与设计态切换 | done | P0 | specs/FEAT-017-文本编辑onChange与设计态切换/ |
 | FEAT-019 | 模式系统重构与主题简化 | done | P0 | specs/FEAT-019-模式系统重构与主题简化/ |
 | FEAT-020 | 组合表格与基础表格列合并 | done | P0 | specs/FEAT-020-组合表格与列合并/ |
+| FEAT-021 | Markdown通用组件 | done | P0 | specs/FEAT-021-Markdown通用组件/ |
 
 ## Feature 依赖关系
 

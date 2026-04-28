@@ -15,6 +15,7 @@ const CATEGORIES: readonly { kind: string; label: string }[] = [
   { kind: 'table', label: '表格' },
   { kind: 'compositeTable', label: '组合表格' },
   { kind: 'text', label: '文本' },
+  { kind: 'markdown', label: 'Markdown' },
 ];
 
 // ---------------------------------------------------------------------------

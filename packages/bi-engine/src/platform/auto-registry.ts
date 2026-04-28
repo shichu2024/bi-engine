@@ -7,13 +7,13 @@ import { chartHandler } from '../component-handlers/chart';
 import { textHandler } from '../component-handlers/text';
 import { tableHandler } from '../component-handlers/table';
 import { compositeTableHandler } from '../component-handlers/composite-table';
+import { markdownHandler } from '../component-handlers/markdown';
 import { createUnsupportedHandler } from '../component-handlers/unsupported-handler';
 
 /**
  * 注册所有内置组件处理器。
  *
- * chart / text / table / compositeTable — 完整实现
- * markdown — 占位处理器，返回 UNSUPPORTED_COMPONENT_TYPE
+ * chart / text / table / compositeTable / markdown — 完整实现
  */
 export function registerBuiltinHandlers(): void {
   const registry = ComponentRegistry.getInstance();
@@ -22,5 +22,5 @@ export function registerBuiltinHandlers(): void {
   registry.registerOrReplace('text', textHandler);
   registry.registerOrReplace('table', tableHandler);
   registry.registerOrReplace('compositeTable', compositeTableHandler);
-  registry.registerOrReplace('markdown', createUnsupportedHandler('markdown'));
+  registry.registerOrReplace('markdown', markdownHandler);
 }

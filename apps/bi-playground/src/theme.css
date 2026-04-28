@@ -69,3 +69,12 @@ html[data-theme="dark"] {
   --pg-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.36);
   --pg-box-shadow-secondary: 0 6px 16px 0 rgba(0, 0, 0, 0.32);
 }
+
+/* 禁用编辑态组件的 focus 蓝色边框（contentEditable / textarea） */
+[contenteditable]:focus,
+.bi-md__editor:focus,
+textarea[class*="bi-"]:focus {
+  outline: none;
+  border-color: #d9d9d9;
+  box-shadow: none;
+}

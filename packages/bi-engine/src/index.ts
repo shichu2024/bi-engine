@@ -263,6 +263,14 @@ export type {
 export { ChartSwitchToolbar } from './component-handlers/chart/ChartSwitchToolbar';
 export type { ChartSwitchToolbarProps } from './component-handlers/chart/ChartSwitchToolbar';
 
+// ---- Markdown 组件 ----
+export { markdownHandler } from './component-handlers/markdown';
+export type { MarkdownSemanticModel } from './component-handlers/markdown';
+export { MarkdownRenderer } from './component-handlers/markdown/markdown-renderer';
+export type { MarkdownRendererProps } from './component-handlers/markdown/markdown-renderer';
+export { parseMarkdown, parseInline } from './component-handlers/markdown/markdown-parser';
+export type { BlockNode, InlineNode } from './component-handlers/markdown/markdown-parser';
+
 // ---- 国际化 ----
 export {
   LocaleProvider,

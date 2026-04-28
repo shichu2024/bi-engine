@@ -43,8 +43,9 @@ export {
   TABLE_FIXTURE_REGISTRY,
   TEXT_FIXTURE_REGISTRY,
   COMPOSITE_TABLE_FIXTURE_REGISTRY,
+  MARKDOWN_FIXTURE_REGISTRY,
   UNIFIED_FIXTURE_REGISTRY,
   getUnifiedFixturesByKind,
   getUnifiedFixtureById,
 } from './fixture-registry';
-export type { FixtureEntry, TableFixtureEntry, TextFixtureEntry, CompositeTableFixtureEntry, UnifiedFixtureEntry, ComponentKind } from './fixture-registry';
+export type { FixtureEntry, TableFixtureEntry, TextFixtureEntry, CompositeTableFixtureEntry, MarkdownFixtureEntry, UnifiedFixtureEntry, ComponentKind } from './fixture-registry';
